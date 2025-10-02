@@ -1,4 +1,12 @@
 services:
+  backend:
+    container_name: backend
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
   frontend:
     container_name: frontend
     build: ./frontend
@@ -9,11 +17,3 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-  backend:
-    container_name: backend
-    build: ./backend
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app
-    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
