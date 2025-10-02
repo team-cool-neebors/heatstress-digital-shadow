@@ -1,33 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import DeckGL from "@deck.gl/react";
+import Map from "react-map-gl/maplibre";
+import { GeoJsonLayer } from "@deck.gl/layers";
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const INITIAL_VIEW_STATE = {
+    longitude: 5.1214, // roughly center of NL
+    latitude: 52.0907,
+    zoom: 12,
+    pitch: 60,
+    bearing: -20,
+  };
+
+  const buildingsUrl = "https://api.3dbag.nl/collections/pand/items/NL.IMBAG.Pand.1655100000500568";
+
+const layers = [
+  new GeoJsonLayer({
+    id: "buildings",
+    data: buildingsUrl,
+    extruded: true,
+    getFillColor: [200, 200, 200],
+    getElevation: (f) => f.properties.height || 10,
+  }),
+];
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
+  <Map
+    mapLib={import("maplibre-gl")}
+    mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+  />
+</DeckGL>
     </>
   )
 }
