@@ -6,6 +6,10 @@ A React + TypeScript frontend using Vite, deck.gl for mapping, and Jest for unit
 
 ## Quick start
 
+```bash
+docker compose up -d
+```
+
 ### Install
 
 ```bash
