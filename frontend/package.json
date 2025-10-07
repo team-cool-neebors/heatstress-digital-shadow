@@ -24,7 +24,11 @@
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.4",
     "@babel/plugin-transform-modules-commonjs": "^7.27.1",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
     "@eslint/js": "^9.36.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -32,7 +36,7 @@
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.3",
-    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^30.2.0",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
@@ -41,7 +45,6 @@
     "jest-canvas-mock": "^2.5.2",
     "jest-environment-jsdom": "^30.2.0",
     "jsdom": "^27.0.0",
-    "ts-jest": "^29.4.4",
     "ts-node": "^10.9.2",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.44.0",

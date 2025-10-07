@@ -6,6 +6,10 @@ COPY package*.json ./
 
 RUN npm install
 
+ENV NODE_ENV=development
+
+RUN npm ci --include=dev
+
 COPY . ./
 
 EXPOSE 5173
