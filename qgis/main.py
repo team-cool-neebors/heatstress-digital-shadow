@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
-import subprocess, json
+from commands import RasterCalculatorCommand, QGISCommand
+import os
 
 app = FastAPI()
 
@@ -7,8 +8,8 @@ app = FastAPI()
 def ping():
     return {"status": "ok", "message": "QGIS container is alive"}
 
-@app.post("/run")
-def run_qgis_algorithm(alg: str, params: dict):
+@app.get("/run")
+def run_qgis_algorithm():
     """
     Example:
     POST /run
@@ -22,14 +23,18 @@ def run_qgis_algorithm(alg: str, params: dict):
     }
     """
     try:
-        cmd = ["qgis_process", "run", alg, "--json"]
-        for k, v in params.items():
-            cmd.append(f"--{k}={v}")
-
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode != 0:
-            raise HTTPException(status_code=500, detail=result.stderr)
-
-        return json.loads(result.stdout)
-    except Exception as e:
+        command = RasterCalculatorCommand()
+        params = {
+            "EXPRESSION": '"middelburg-section@1" * 10',
+            "LAYERS": "/app/data/middelburg-section.tif",
+            "OUTPUT": "/app/data/out.tif"
+        }
+        
+        result = command.execute(params)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
+    except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
