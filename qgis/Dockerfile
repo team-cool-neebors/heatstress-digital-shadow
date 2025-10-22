@@ -1,0 +1,15 @@
+FROM qgis/qgis:latest
+
+RUN apt-get update && apt-get install -y python3-pip
+RUN pip3 install --no-cache-dir --break-system-packages fastapi uvicorn
+
+WORKDIR /app
+
+ENV QT_QPA_PLATFORM=offscreen
+ENV QGIS_PREFIX_PATH=/usr
+ENV PYTHONPATH=/usr/share/qgis/python
+ENV LD_LIBRARY_PATH=/usr/lib/qgis
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
