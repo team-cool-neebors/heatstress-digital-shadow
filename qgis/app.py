@@ -1,6 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from commands import RasterCalculatorCommand, QGISCommand
+from objects import TreePoint
 import os
+from preflight import init_qgis
+qgs = init_qgis() 
+import processing
 
 app = FastAPI()
 
@@ -10,28 +14,17 @@ def ping():
 
 @app.get("/run")
 def run_qgis_algorithm():
-    """
-    Example:
-    POST /run
-    {
-      "alg": "qgis:rastercalculator",
-      "params": {
-          "EXPRESSION": "A@1 + B@1",
-          "LAYERS": "A=/data/a.tif;B=/data/b.tif",
-          "OUTPUT": "/data/out.tif"
-      }
-    }
-    """
     try:
-        command = RasterCalculatorCommand()
-        params = {
-            "EXPRESSION": '"middelburg-section@1" * 10',
-            "LAYERS": "/app/data/middelburg-section.tif",
-            "OUTPUT": "/app/data/out.tif"
+        result = processing.run("qgis:rastercalculator", {
+            'EXPRESSION': '"middelburg-section@1" * 10',
+            'LAYERS': ['/app/data/middelburg-section.tif'],
+            'OUTPUT': '/app/data/out.tif'
+        })
+            
+        return {
+            "status": "success",
+            "result": result
         }
-        
-        result = command.execute(params)
-        return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
     except RuntimeError as e:

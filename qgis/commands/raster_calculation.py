@@ -4,6 +4,10 @@ from .base import QGISCommand
 class RasterCalculatorCommand(QGISCommand):
     """
     QGIS Raster Calculator command implementation.
+    Parameters example:
+    "EXPRESSION": '"a@1" * 10',
+    "LAYERS": "/app/data/a.tif",
+    "OUTPUT": "/app/data/out.tif"
     """
     
     @property
