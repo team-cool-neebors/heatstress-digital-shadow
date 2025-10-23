@@ -6,7 +6,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
-    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+
   frontend:
     container_name: frontend
     build: ./frontend
@@ -17,3 +17,21 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+
+  qgis:
+    container_name: qgis
+    build: ./qgis
+    ports:
+      - "9000:8000"
+    volumes:
+      - ./qgis:/app
+      - data_volume:/data
+    environment:
+      - QT_QPA_PLATFORM=offscreen
+      - QGIS_PREFIX_PATH=/usr
+      - PYTHONPATH=/usr/share/qgis/python
+      - LD_LIBRARY_PATH=/usr/lib/qgis
+      - DATA_PATH=/data
+
+volumes:
+  data_volume:
