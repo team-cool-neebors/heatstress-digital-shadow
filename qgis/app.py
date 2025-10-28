@@ -89,22 +89,14 @@ def burn_point_to_raster():
 
         # Rasterize the point into the layer (it's inplace)
         processing.run(
-            "gdal:rasterize",
+            "gdal:rasterize_over",
             {
                 "INPUT": buffer_layer_path,
+                "INPUT_RASTER": input_raster,
                 "FIELD": "value",
-                "USE_Z": False,
-                "UNITS": 1,
-                "WIDTH": None,
-                "HEIGHT": None,
-                "EXTENT": None,
-                "NODATA": None,
-                "OPTIONS": "",
-                "DATA_TYPE": 5,               # Float32
-                "INIT": None,
-                "INVERT": False,
+                "ADD": False,
                 "EXTRA": "",
-                "OUTPUT": input_raster,
+                "OPTIONS": "",
             },
             feedback=QgsProcessingFeedback(),
         )
