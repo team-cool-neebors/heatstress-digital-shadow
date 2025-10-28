@@ -1,12 +1,21 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from commands import RasterCalculatorCommand, QGISCommand
+from typing import List 
 from objects import TreePoint
+from pydantic import BaseModel
 import os
 from preflight import init_qgis
 qgs = init_qgis() 
 import processing
 
 app = FastAPI()
+
+class Point(BaseModel):
+    x: float
+    y: float
+
+class BurnRequest(BaseModel):
+    points: List[Point] 
 
 @app.get("/ping")
 def ping():
@@ -32,8 +41,8 @@ def run_qgis_algorithm():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-@app.get("/burn-point-to-raster")
-def burn_point_to_raster():
+@app.post("/burn-points")
+def burn_point_to_raster(req: BurnRequest):
     """
     Create a point, buffer it, and burn it into a raster layer.
     Uses hardcoded test data.
@@ -48,8 +57,6 @@ def burn_point_to_raster():
         )
         from qgis.PyQt.QtCore import QVariant
         
-        x = 31942.8
-        y = 391691.2
         height = 25.5
         buffer_distance = 3
         crs = "EPSG:28992"
@@ -63,13 +70,13 @@ def burn_point_to_raster():
         pr.addAttributes([QgsField("value", QVariant.Double)]) # Add Fields
         vl.updateFields() # Tell the vector layer to fetch changes from the provider
 
-        # Add point feature
-        point = QgsGeometry.fromPointXY(QgsPointXY(x, y)) # Shape
-        feat = QgsFeature() # Shape + Attribute
-        feat.setGeometry(point)
-        feat.setAttributes([height])
-        pr.addFeature(feat) # Add the feature to the provider
-        vl.updateExtents() # Recalculate bounding box of all features
+        # --- Add all points ---
+        for pt in req.points:
+            feat = QgsFeature() # Shape + Attribute
+            feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(pt.x, pt.y)))
+            feat.setAttributes([height])
+            pr.addFeature(feat)
+        vl.updateExtents()
 
         # Buffer for the point (in order to have actual dimensions)
         buffer_layer_path = os.path.join(tempfile.gettempdir(), "buffered_point.gpkg") 
@@ -82,7 +89,7 @@ def burn_point_to_raster():
                 "END_CAP_STYLE": 0,
                 "JOIN_STYLE": 0,
                 "MITER_LIMIT": 2,
-                "DISSOLVE": False,
+                "DISSOLVE": True,  # Merge overlapping buffers
                 "OUTPUT": buffer_layer_path,
             },
         )
@@ -100,6 +107,15 @@ def burn_point_to_raster():
             },
             feedback=QgsProcessingFeedback(),
         )
+
+        return {
+            "status": "success",
+            "message": f"Burned {len(req.points)} point(s) into raster.",
+            "params": {
+                "points": [p.dict() for p in req.points]
+            },
+            "output": input_raster,
+        }
                     
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
