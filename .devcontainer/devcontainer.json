@@ -1,0 +1,9 @@
+{
+  "name": "QGIS Development",
+  "image": "heatstress-digital-shadow-qgis:latest",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  }
+}
