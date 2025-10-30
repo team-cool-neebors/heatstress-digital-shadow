@@ -11,7 +11,7 @@ from src.api.models import Point
 def load_raster_layer(path: str, layer: str) -> QgsRasterLayer:
     return QgsRasterLayer(path, layer)
 
-def burn_points_to_raster(raster, points: List[Point], crs="EPSG:28992", height=15, buffer_distance = 3) -> str:
+def burn_points_to_raster(raster: str, points: List[Point], crs="EPSG:28992", height=15, buffer_distance = 3) -> str:
     import processing
 
     # Creating a vector layer

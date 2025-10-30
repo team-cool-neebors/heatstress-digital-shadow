@@ -3,7 +3,7 @@ import json
 
 from src.api.requests import BurnRequest
 from src.services.raster_service import burn_points_to_raster, rasterize_vector_layer, clip_raster_by_extent, load_raster_layer
-from src.services.pet_service import calculate_wet_bulb_temp, load_zonal_layer, calculate_zonal_part_pet_sun, calculate_zonal_part_pet_shadow
+from src.services.pet_service import calculate_wet_bulb_temp, load_zonal_layer, calculate_zonal_part_pet_sun, calculate_zonal_part_pet_shadow, calculate_total_pet_sun, calculate_total_pet_shadow
 from src.configs.preflight import init_qgis
 qgs = init_qgis() 
 app = FastAPI()
@@ -42,20 +42,25 @@ def burn_point_to_raster(req: BurnRequest):
 def get_uhi_zone():
     try:
         uhi = "/app/data/uhi/uhi-air-temp-u-1.2 copy.geojson"
-        output = "/app/data/uhi/raster_pet_sun.tif"
+        output = "/app/data/uhi/raster_pet_shadow.tif"
         referenceRaster = "/app/data/bbox-dsm.tif"
+        referenceRaster = load_raster_layer(referenceRaster, "bbox-dm")
         vector = load_zonal_layer(uhi)
         obj = calculate_wet_bulb_temp(vector, "air_mean")
-        obj = calculate_zonal_part_pet_sun(obj, "air_mean", "t_w", "geschaalde_u_1.2_corr")
-        obj = calculate_zonal_part_pet_shadow(obj, "air_mean", "t_w", "geschaalde_u_1.2_corr")
-        result = rasterize_vector_layer(obj, "pet_sun_partial", output)
-        referenceRaster = load_raster_layer(referenceRaster, "bbox-dm")
-        clip_raster_by_extent(result, referenceRaster, "/app/data/uhi/raster-bbox.tif")
         
+        obj = calculate_zonal_part_pet_sun(obj, "air_mean", "t_w", "geschaalde_u_1.2_corr")
+        result = rasterize_vector_layer(obj, "pet_sun_partial", output)
+        clip_raster_by_extent(result, referenceRaster, "/app/data/uhi/sun-bbox.tif")
+        
+        obj = calculate_zonal_part_pet_shadow(vector, "air_mean", "t_w", "geschaalde_u_1.2_corr")
+        result = rasterize_vector_layer(obj, "pet_shadow_partial", output)
+        clip_raster_by_extent(result, referenceRaster, "/app/data/uhi/shadow-bbox.tif")
+
+        calculate_total_pet_sun("/app/data/uhi/sun-bbox.tif", "/app/data/raster/br-reproject.tif", "/app/data/raster/svf-reproject.tif", "/app/data/uhi/sun-pet.tif")
+        calculate_total_pet_shadow("/app/data/uhi/shadow-bbox.tif", "/app/data/raster/svf-reproject.tif",  "/app/data/uhi/t_a.tif", "/app/data/uhi/shadow-pet.tif")
+
         return {
-            "status": "success",
-            "response": json.dumps(result, default=lambda o: o.__dict__),
-            "output": output,
+            "status": "success"
         }
                     
     except ValueError as e:

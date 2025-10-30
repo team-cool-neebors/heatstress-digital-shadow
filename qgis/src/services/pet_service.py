@@ -1,8 +1,9 @@
 import math
 from qgis.core import (
-    QgsVectorLayer, QgsField
+    QgsVectorLayer, QgsField, QgsRasterLayer, QgsProcessingFeedback
 )
 from qgis.PyQt.QtCore import QVariant
+import os
 
 def load_zonal_layer(path: str) -> QgsVectorLayer:
     return QgsVectorLayer(path, "zonal_layer", "ogr")
@@ -117,5 +118,125 @@ def calculate_zonal_part_pet_shadow(
     zonal_layer.commitChanges()
     return zonal_layer
     
+def calculate_total_pet_sun(
+    partial_pet_layer: str|QgsRasterLayer, 
+    br_layer_path: str|QgsRasterLayer, 
+    svf_layer_path: str|QgsRasterLayer, 
+    output_path: str
+) -> QgsRasterLayer:
+    """
+    Calculates the total sun pet over the entire given partial pet layer.
     
+    :param str|QgsRasterLayer partial_pet_layer_path: The path of the partial sun pet raster
+    :param str|QgsRasterLayer br_layer_path: The path of the bowen ratio map
+    :param str|QgsRasterLayer svf_layer_path: The path of the sky-view factor map
+    :param str output_path: Path to save the output raster (e.g., '/tmp/total_pet.tif').
+    """
+    import processing
     
+    feedback = QgsProcessingFeedback()
+
+    partial_pet_obj, partial_pet_path = convert_raster_layer_to_qgs_and_path(partial_pet_layer)
+    br_obj, br_path = convert_raster_layer_to_qgs_and_path(br_layer_path)
+    svf_obj, svf_path = convert_raster_layer_to_qgs_and_path(svf_layer_path)
+    
+    for layer in [partial_pet_obj, br_obj, svf_obj]:
+        if not layer.isValid():
+            raise Exception(f"Raster layer is invalid: {layer.name()}")
+
+    # Use string paths in parameters
+    params = {
+        'INPUT_A': partial_pet_path,
+        'BAND_A': 1,
+        'INPUT_B': br_path,
+        'BAND_B': 1,
+        'INPUT_C': svf_path,
+        'BAND_C': 1,
+        'FORMULA': 'A + 0.546 * B + 1.94 * C',
+        'NO_DATA': None,
+        'EXTENT_OPT': 0,  # 0 = intersect
+        'PROJWIN': partial_pet_obj.extent(),
+        'RTYPE': 5,  # Float32
+        'OUTPUT': output_path
+    }
+
+    result = processing.run("gdal:rastercalculator", params, feedback=feedback)
+
+    total_pet_layer = QgsRasterLayer(result['OUTPUT'], os.path.basename(output_path))
+
+    if not total_pet_layer.isValid():
+        raise Exception("Failed to create total PET raster")
+
+    return total_pet_layer
+
+def calculate_total_pet_shadow(
+    partial_pet_layer: str|QgsRasterLayer, 
+    svf_layer_path: str|QgsRasterLayer,
+    t_a_layer_path: str|QgsRasterLayer,
+    output_path: str,
+    q_diff = 0.2,
+) -> QgsRasterLayer:
+    """
+    Calculates the total sun pet over the entire given partial pet layer.
+    
+    :param str|QgsRasterLayer partial_pet_layer_path: The path of the partial sun pet raster
+    :param str|QgsRasterLayer svf_layer_path: The path of the sky-view factor map
+    :param str|QgsRasterLayer t_a_layer_path: The path of the air temperature map
+    :param str output_path: Path to save the output raster
+    :param float q_diff: The "diffuse straling" from the standard
+    """
+    import processing
+    
+    feedback = QgsProcessingFeedback()
+    boltzmann_const = 5.670374419 * (10 ** (-8))
+
+    partial_pet_obj, partial_pet_path = convert_raster_layer_to_qgs_and_path(partial_pet_layer)
+    svf_obj, svf_path = convert_raster_layer_to_qgs_and_path(svf_layer_path)
+    ta_obj, ta_path = convert_raster_layer_to_qgs_and_path(t_a_layer_path)
+    
+    for layer in [partial_pet_obj, svf_obj, ta_obj]:
+        if not layer.isValid():
+            raise Exception(f"Raster layer is invalid: {layer.name()}")
+
+    # Use string paths in parameters
+    params = {
+        'INPUT_A': partial_pet_path,
+        'BAND_A': 1,
+        'INPUT_B': svf_path,
+        'BAND_B': 1,
+        'INPUT_C': ta_path,
+        'BAND_C': 1,
+        'FORMULA': f'A + 0.015 * B * {q_diff} + 0.0060 * (1 - B) * {boltzmann_const} * ((C + 273.15) ** 4)',
+        'NO_DATA': None,
+        'EXTENT_OPT': 0,  # 0 = intersect
+        'PROJWIN': partial_pet_obj.extent(),
+        'RTYPE': 5,  # Float32
+        'OUTPUT': output_path
+    }
+
+    result = processing.run("gdal:rastercalculator", params, feedback=feedback)
+
+    total_pet_layer = QgsRasterLayer(result['OUTPUT'], os.path.basename(output_path))
+
+    if not total_pet_layer.isValid():
+        raise Exception("Failed to create total PET raster")
+
+    return total_pet_layer
+
+def convert_raster_layer_to_qgs_and_path(layer: str|QgsRasterLayer) -> tuple[QgsRasterLayer, str]:
+    """
+    Convert layer input to both object and path.
+    
+    :param layer: a file path string or QgsRasterLayer object
+    """
+    if isinstance(layer, str):
+        layer_obj = QgsRasterLayer(layer, os.path.basename(layer))
+        layer_path = layer
+    else:
+        layer_obj = layer
+        layer_path = layer.source()
+    
+    if not layer_obj.isValid():
+        raise Exception(f"Raster layer is invalid: {layer_obj.name()}")
+    
+    return layer_obj, layer_path
