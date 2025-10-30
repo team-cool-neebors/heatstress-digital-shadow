@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 import json
 
 from src.api.requests import BurnRequest
-from src.services.raster_service import burn_points_to_raster
+from src.services.raster_service import burn_points_to_raster, rasterize_vector_layer
 from src.services.pet_service import calculate_wet_bulb_temp, load_zonal_layer, calculate_zonal_part_pet_sun, calculate_zonal_part_pet_shadow
 from src.configs.preflight import init_qgis
 qgs = init_qgis() 
@@ -42,15 +42,17 @@ def burn_point_to_raster(req: BurnRequest):
 def get_uhi_zone():
     try:
         uhi = "/app/data/uhi/uhi-air-temp-u-1.2 copy.geojson"
+        output = "/app/data/uhi/raster_pet_sun.tif"
         vector = load_zonal_layer(uhi)
         obj = calculate_wet_bulb_temp(vector, "air_mean")
         obj = calculate_zonal_part_pet_sun(obj, "air_mean", "t_w", "geschaalde_u_1.2_corr")
         obj = calculate_zonal_part_pet_shadow(obj, "air_mean", "t_w", "geschaalde_u_1.2_corr")
+        result = rasterize_vector_layer(obj, "pet_sun_partial", output)
         
         return {
             "status": "success",
-            "response": json.dumps(obj, default=lambda o: o.__dict__),
-            "output": uhi,
+            "response": json.dumps(result, default=lambda o: o.__dict__),
+            "output": output,
         }
                     
     except ValueError as e:

@@ -1,7 +1,7 @@
 import os
 import tempfile
 from qgis.core import (
-    QgsVectorLayer, QgsFeature, QgsGeometry, QgsPointXY,
+    QgsVectorLayer, QgsRasterLayer, QgsFeature, QgsGeometry, QgsPointXY,
     QgsField, QgsProcessingFeedback
 )
 from qgis.PyQt.QtCore import QVariant
@@ -57,3 +57,48 @@ def burn_points_to_raster(raster, points: List[Point], crs="EPSG:28992", height=
     )
 
     return raster
+
+def rasterize_vector_layer(
+    vector_layer: QgsVectorLayer,
+    attribute_field: str,
+    output_path: str,
+    resolution: float = 1.0,
+    no_data_value: float = 0.0,
+) -> QgsRasterLayer:
+    """
+    Rasterizes a vector layer based on a specific attribute field using georeferenced units.
+
+    :param QgsVectorLayer vector_layer: Input vector layer to rasterize.
+    :param str attribute_field: The attribute field whose values will be burned into the raster.
+    :param str output_path: Path to the output raster (e.g., '/tmp/output.tif').
+    :param float resolution: The raster resolution in georeferenced units
+    :param float no_data_value: Value for pixels with no data.
+    :return: The rasterized layer as a QgsRasterLayer.
+    :rtype: QgsRasterLayer
+    """
+    import processing
+
+    feedback = QgsProcessingFeedback()
+
+    # Define raster extent and resolution in georeferenced units
+    params = {
+        'INPUT': vector_layer,
+        'FIELD': attribute_field,
+        'BURN': 1, #  Source trust me (ui qgis)
+        'USE_Z': False,
+        'UNITS': 1,  # 1 = Georeferenced units (map units)
+        'WIDTH': resolution,
+        'HEIGHT': resolution,
+        'EXTENT': vector_layer.extent(),
+        'NODATA': no_data_value,
+        'DATA_TYPE': 5,  # Float32
+        'OUTPUT': output_path
+    }
+
+    result = processing.run("gdal:rasterize", params, feedback=feedback)
+    raster_layer = QgsRasterLayer(result['OUTPUT'], os.path.basename(output_path))
+
+    if not raster_layer.isValid():
+        raise Exception(f"Rasterization failed — could not load output: {output_path}")
+
+    return raster_layer
