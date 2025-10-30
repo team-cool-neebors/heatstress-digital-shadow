@@ -1,9 +1,9 @@
+import os
 import math
+from qgis.PyQt.QtCore import QVariant
 from qgis.core import (
     QgsVectorLayer, QgsField, QgsRasterLayer, QgsProcessingFeedback
 )
-from qgis.PyQt.QtCore import QVariant
-import os
 
 def load_zonal_layer(path: str) -> QgsVectorLayer:
     return QgsVectorLayer(path, "zonal_layer", "ogr")
