@@ -43,7 +43,6 @@ VALUES
 ('Light-colored streets', 'It is recommended that reflective sidewalks only be used if the streets height-to-width ratio is no greater than 1.0, otherwise the radiation will be reflected back to the facades. For references, see footnote.', 1, 0, 1, 0, NULL, 1.9, NULL, NULL, NULL, NULL, '', 'grey'),
 ('White roofs', '0.1- 0.3 per 10% albedo enlargement', 1, 0, 1, 0, NULL, 0.9, NULL, NULL, NULL, NULL, '', 'grey');
 
-
 -- Cooling principles
 INSERT INTO cooling_principles (name)
 
@@ -51,5 +50,3 @@ VALUES ('Evaporation'),
        ('Shading'),
        ('Reflection'),
        ('Ventilation');
-
-

@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS measures (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
 -- Create cooling_principles table
 CREATE TABLE IF NOT EXISTS cooling_principles(
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -38,7 +37,6 @@ CREATE TABLE measures_cooling_principles (
     FOREIGN KEY (cooling_principle_id) REFERENCES cooling_principles(id) ON DELETE CASCADE
 );
 
-
 -- Create measures_location table
 CREATE TABLE IF NOT EXISTS measures_location (
     id INT PRIMARY KEY AUTO_INCREMENT UNIQUE,
@@ -49,8 +47,3 @@ CREATE TABLE IF NOT EXISTS measures_location (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (measures_id) REFERENCES measures(id) ON DELETE CASCADE
 );
-
-
-
-
-

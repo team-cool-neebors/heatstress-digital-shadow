@@ -32,5 +32,4 @@ VALUES (1, 1),
        (23, 3),
        (24, 3);
 
-
 -- insert with docker exec -i mysql mysql -u root -ppw db < ./db/seedchild.sql
