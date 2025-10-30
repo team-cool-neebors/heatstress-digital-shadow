@@ -10,7 +10,7 @@ VALUES (1, 1),
        (5, 1),
        (6, 1),
        (7, 1), 
-       (7, 2), --park
+       (7, 2),
        (8, 1),
        (9, 1),
        (10, 1),
@@ -19,7 +19,7 @@ VALUES (1, 1),
        (12, 1),
        (13, 1),
        (14, 1),
-       (15, 1), --polder
+       (15, 1),
        (16, 2),
        (17, 4),
        (18, 4),
@@ -33,4 +33,4 @@ VALUES (1, 1),
        (24, 3);
 
 
--- insert with docker exec -i mysql mysql -u root -ppw db < ./db/seed.sql
+-- insert with docker exec -i mysql mysql -u root -ppw db < ./db/seedchild.sql
