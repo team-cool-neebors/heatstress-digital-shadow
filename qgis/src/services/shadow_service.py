@@ -19,25 +19,21 @@ def generate_hillshade_maps(input_path, output_folder, lat, lon, start_dt, end_d
 
     input_tif = input_path
 
-    # 1. Configure QGIS path (adjust if your install is elsewhere)
     QgsApplication.setPrefixPath(
         r"C:\Program Files\QGIS 3.40.10\apps\qgis-ltr", True
     )
 
-    # 2. Start QGIS (headless)
     app = QgsApplication([], False)
     app.initQgis()
 
-    # 3. The processing hack! Add the QGIS plugins folder so Python can find "processing" (stupid)
-    # Thank you to that one person https://gis.stackexchange.com/questions/390628/run-qgis-script-without-going-through-qgis
     sys.path.append(
         r"C:\Program Files\QGIS 3.40.10\apps\qgis-ltr\python\plugins"
     )
 
-    from processing.core.Processing import Processing #import this to actually add the processing
-    Processing.initialize() # initializing it
-    import processing # actually importing it
-    from processing.algs.gdal.GdalAlgorithmProvider import GdalAlgorithmProvider # just so you can import this as well
+    from processing.core.Processing import Processing 
+    Processing.initialize() 
+    import processing
+    from processing.algs.gdal.GdalAlgorithmProvider import GdalAlgorithmProvider
 
 
     current_dt = start_dt
