@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # Data
-public/data/**/*.obj
+public/data/**/*.obj*
