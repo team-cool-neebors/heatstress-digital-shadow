@@ -1,6 +1,9 @@
 from fastapi import FastAPI, HTTPException
+import json
+
 from src.api.requests import BurnRequest
 from src.services.raster_service import burn_points_to_raster
+from src.services.pet_service import calculate_wet_bulb_temp, load_zonal_layer
 from src.configs.preflight import init_qgis
 qgs = init_qgis() 
 app = FastAPI()
@@ -25,6 +28,27 @@ def burn_point_to_raster(req: BurnRequest):
             "params": {
                 "points": [p.dict() for p in req.points]
             },
+            "output": input_raster,
+        }
+                    
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+    
+@app.get("/uhi-zone")
+def get_uhi_zone():
+    try:
+        input_raster = "/app/data/bbox-test.tif"
+        uhi = "/app/data/uhi/zonal-stats-uhi-test.geojson"
+        vector = load_zonal_layer(uhi)
+        obj = calculate_wet_bulb_temp(vector, "air-temp-uhi")
+
+        return {
+            "status": "success",
+            "response": json.dumps(obj, default=lambda o: o.__dict__),
             "output": input_raster,
         }
                     
