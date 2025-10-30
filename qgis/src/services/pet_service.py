@@ -49,7 +49,7 @@ def calculate_zonal_part_pet_sun(
     q_gl: float = 663.0,
 ) -> QgsVectorLayer:
     """
-    Adds a 'pet_sun_partial_ field to the given vector layer and calculates the PET sun temperature.
+    Adds a 'pet_sun_partial' field to the given vector layer and calculates the PET sun temperature.
     
     :param QgsVectorLayer zonal_layer: The zonal statistics layer on which the calculation would be performed
     :param str t_a: The field in the zonal layer that contains the air temperature (Ta)
@@ -80,4 +80,42 @@ def calculate_zonal_part_pet_sun(
     
     zonal_layer.commitChanges()
     return zonal_layer
+
+def calculate_zonal_part_pet_shadow(
+    zonal_layer: QgsVectorLayer,
+    t_a_field: str = "t_a",
+    t_w_field: str = "t_w",
+    u_field: str = "u",
+) -> QgsVectorLayer:
+    """
+    Adds a 'pet_shadow_partial' field to the given vector layer and calculates the PET shadow temperature.
+    
+    :param QgsVectorLayer zonal_layer: The zonal statistics layer on which the calculation would be performed
+    :param str t_a: The field in the zonal layer that contains the air temperature (Ta)
+    :param str t_w: The field in the zonal layer that contains the wet bulb temperature (Tw)
+    :param str u: The field in the zonal layer that contains the wind speed at 1.2 m height(U)
+    """
+    field_name = "pet_shadow_partial"
+    if field_name not in [field.name() for field in zonal_layer.fields()]:
+        zonal_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Double)])
+        zonal_layer.updateFields()
+    
+    zonal_layer.startEditing()
+    for feature in zonal_layer.getFeatures():
+        t_a = feature[t_a_field]
+        t_w = feature[t_w_field]
+        u = feature[u_field]
+        if t_a is None or t_w is None or u is None:
+            pet_shadow_partial = None
+        else:
+            pet_shadow_partial = (
+                -12.14 + 1.25 * t_a - 1.47 * math.log(u) + 0.060 * t_w   
+            )
+        feature[field_name] = pet_shadow_partial
+        zonal_layer.updateFeature(feature)
+    
+    zonal_layer.commitChanges()
+    return zonal_layer
+    
+    
     

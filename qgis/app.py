@@ -3,7 +3,7 @@ import json
 
 from src.api.requests import BurnRequest
 from src.services.raster_service import burn_points_to_raster
-from src.services.pet_service import calculate_wet_bulb_temp, load_zonal_layer, calculate_zonal_part_pet_sun
+from src.services.pet_service import calculate_wet_bulb_temp, load_zonal_layer, calculate_zonal_part_pet_sun, calculate_zonal_part_pet_shadow
 from src.configs.preflight import init_qgis
 qgs = init_qgis() 
 app = FastAPI()
@@ -45,6 +45,7 @@ def get_uhi_zone():
         vector = load_zonal_layer(uhi)
         obj = calculate_wet_bulb_temp(vector, "air_mean")
         obj = calculate_zonal_part_pet_sun(obj, "air_mean", "t_w", "geschaalde_u_1.2_corr")
+        obj = calculate_zonal_part_pet_shadow(obj, "air_mean", "t_w", "geschaalde_u_1.2_corr")
         
         return {
             "status": "success",
