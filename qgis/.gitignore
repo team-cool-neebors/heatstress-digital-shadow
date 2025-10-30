@@ -1,2 +1,6 @@
 __pycache__
-data
+data/*
+!data/.gitkeep      
+!data/shadow-maps/
+data/shadow-maps/*
+!data/shadow-maps/.gitkeep
