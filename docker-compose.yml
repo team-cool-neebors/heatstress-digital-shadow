@@ -1,4 +1,66 @@
 services:
+  db:
+    image: mysql:8.0.44
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: pw
+      MYSQL_DATABASE: db
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+
+  nginx:
+    image: "nginx"
+    volumes:
+     - ./server/conf/nginx-fcgi-sample.conf:/etc/nginx/nginx.conf
+    ports:
+     - "127.0.0.1:8010:80"
+    networks:
+     - qgis-server-net
+    restart: always
+    depends_on:
+     - qgis-server
+ 
+  qgis-server:
+    image: "qgis/qgis-server:stable"
+    environment:
+      # Do not run the embedded copy of nginx
+      SKIP_NGINX: "true"
+      # Improve rendering performance
+      QGIS_SERVER_PARALLEL_RENDERING: "true"
+      QGIS_SERVER_MAX_THREADS: 4
+      # Limit the maximum size returned by a GetMap
+      QGIS_SERVER_WMS_MAX_HEIGHT: 5000
+      QGIS_SERVER_WMS_MAX_WIDTH: 5000
+    networks:
+     - qgis-server-net
+    volumes:
+     # Data should be mount RO when working
+     # with GeoPackages and more than one QGIS container
+     - ./server/test/data:/io/data:ro
+     - ./plugins:/io/plugins
+     - ./fonts:/usr/share/fonts
+     - ./svg:/var/lib/qgis/.local/share/QGIS/QGIS3/profiles/default/svg
+     # - ./conf/pg_service.conf:/etc/postgresql-common/pg_service.conf:ro
+    restart: always
+  
+  qgis:
+    container_name: qgis
+    build: ./qgis
+    ports:
+      - "9000:8000"
+    volumes:
+      - ./qgis:/app
+      - data_volume:/data
+    environment:
+      - QT_QPA_PLATFORM=offscreen
+      - QGIS_PREFIX_PATH=/usr
+      - PYTHONPATH=/usr/share/qgis/python
+      - LD_LIBRARY_PATH=/usr/lib/qgis
+      - DATA_PATH=/data
+
   backend:
     container_name: backend
     build: ./backend
@@ -18,33 +80,8 @@ services:
     environment:
       - NODE_ENV=development
 
-  qgis:
-    container_name: qgis
-    build: ./qgis
-    ports:
-      - "9000:8000"
-    volumes:
-      - ./qgis:/app
-      - data_volume:/data
-    environment:
-      - QT_QPA_PLATFORM=offscreen
-      - QGIS_PREFIX_PATH=/usr
-      - PYTHONPATH=/usr/share/qgis/python
-      - LD_LIBRARY_PATH=/usr/lib/qgis
-      - DATA_PATH=/data
-  
-  db:
-    image: mysql:8.0.44
-    container_name: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: pw
-      MYSQL_DATABASE: db
-    ports:
-      - "3306:3306"
-    volumes:
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-      - ./db/seed.sql:/docker-entrypoint-initdb.d/seed.sql:ro
-
-
 volumes:
   data_volume:
+
+networks:
+  qgis-server-net:
