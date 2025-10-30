@@ -32,6 +32,19 @@ services:
       - PYTHONPATH=/usr/share/qgis/python
       - LD_LIBRARY_PATH=/usr/lib/qgis
       - DATA_PATH=/data
+  
+  db:
+    image: mysql:8.0.44
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: pw
+      MYSQL_DATABASE: db
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+
 
 volumes:
   data_volume:
