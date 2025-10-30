@@ -1,41 +1,14 @@
-r"""
-Run GDAL Hillshade from a standalone Python script using QGIS.
-AKA Running the shadow map generation script
-
-
-To increase  your chances of succeeding (or to even get it running) please run
-the file via the python.bat file in QGIS. If you have not altered it's default installation 
-directory your path should be C:\Program Files\QGIS 3.40.10\bin\python-qgis-ltr.bat.
-Therefore your entire command (via cmd or something) should be
-
-"C:\Program Files\QGIS 3.40.10\bin\python-qgis-ltr.bat" hillshade.py
-"""
 def generate_hillshade_maps(input_path, output_folder, lat, lon, start_dt, end_dt):
-    import sys
     from datetime import datetime, timedelta
     from src.utils.solar_position import get_solar_position
     from qgis.core import QgsApplication, QgsProcessingFeedback
     import os
-
-    input_tif = input_path
-
-    QgsApplication.setPrefixPath(
-        r"C:\Program Files\QGIS 3.40.10\apps\qgis-ltr", True
-    )
-
-    app = QgsApplication([], False)
-    app.initQgis()
-
-    sys.path.append(
-        r"C:\Program Files\QGIS 3.40.10\apps\qgis-ltr\python\plugins"
-    )
-
     from processing.core.Processing import Processing 
     Processing.initialize() 
     import processing
     from processing.algs.gdal.GdalAlgorithmProvider import GdalAlgorithmProvider
 
-
+    input_tif = input_path
     current_dt = start_dt
     while current_dt <= end_dt:
         az, alt = get_solar_position(lat, lon, "Middelburg", "Netherlands", "Europe/Amsterdam", current_dt)
@@ -54,7 +27,7 @@ def generate_hillshade_maps(input_path, output_folder, lat, lon, start_dt, end_d
             "OUTPUT": out_path,
         }
         feedback = QgsProcessingFeedback()
-        result = processing.run("gdal:hillshade", params, feedback=feedback)
+        processing.run("gdal:hillshade", params, feedback=feedback)
         print(f"Hillshade saved: {out_path}")
 
         current_dt += timedelta(hours=1)
