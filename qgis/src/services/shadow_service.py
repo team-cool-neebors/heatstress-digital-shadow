@@ -1,10 +1,9 @@
+from datetime import timedelta
+from src.utils.solar_position import get_solar_position
+from qgis.core import QgsApplication, QgsProcessingFeedback
+import os
+
 def generate_hillshade_maps(input_path, output_folder, lat, lon, start_dt, end_dt):
-    from datetime import datetime, timedelta
-    from src.utils.solar_position import get_solar_position
-    from qgis.core import QgsApplication, QgsProcessingFeedback
-    import os
-    from processing.core.Processing import Processing 
-    Processing.initialize() 
     import processing
     from processing.algs.gdal.GdalAlgorithmProvider import GdalAlgorithmProvider
 

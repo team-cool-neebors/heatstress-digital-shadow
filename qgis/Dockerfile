@@ -1,7 +1,9 @@
 FROM qgis/qgis:latest
 
+COPY requirements.txt .
+
 RUN apt-get update && apt-get install -y python3-pip
-RUN pip3 install --no-cache-dir --break-system-packages fastapi uvicorn astral
+RUN pip3 install --no-cache-dir --break-system-packages -r requirements.txt
 
 WORKDIR /app
 
