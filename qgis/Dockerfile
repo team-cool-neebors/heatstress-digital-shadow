@@ -1,7 +1,7 @@
 FROM qgis/qgis:latest
 
 RUN apt-get update && apt-get install -y python3-pip
-RUN pip3 install --no-cache-dir --break-system-packages fastapi uvicorn
+RUN pip3 install --no-cache-dir --break-system-packages fastapi uvicorn astral
 
 WORKDIR /app
 
