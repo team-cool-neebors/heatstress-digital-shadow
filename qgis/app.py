@@ -3,7 +3,7 @@ import json
 
 from src.api.requests import BurnRequest
 from src.services.raster_service import burn_points_to_raster
-from src.services.pet_service import calculate_wet_bulb_temp, load_zonal_layer
+from src.services.pet_service import calculate_wet_bulb_temp, load_zonal_layer, calculate_zonal_part_pet_sun
 from src.configs.preflight import init_qgis
 qgs = init_qgis() 
 app = FastAPI()
@@ -41,15 +41,15 @@ def burn_point_to_raster(req: BurnRequest):
 @app.get("/uhi-zone")
 def get_uhi_zone():
     try:
-        input_raster = "/app/data/bbox-test.tif"
-        uhi = "/app/data/uhi/zonal-stats-uhi-test.geojson"
+        uhi = "/app/data/uhi/uhi-air-temp-u-1.2 copy.geojson"
         vector = load_zonal_layer(uhi)
-        obj = calculate_wet_bulb_temp(vector, "air-temp-uhi")
-
+        obj = calculate_wet_bulb_temp(vector, "air_mean")
+        obj = calculate_zonal_part_pet_sun(obj, "air_mean", "t_w", "geschaalde_u_1.2_corr")
+        
         return {
             "status": "success",
             "response": json.dumps(obj, default=lambda o: o.__dict__),
-            "output": input_raster,
+            "output": uhi,
         }
                     
     except ValueError as e:
