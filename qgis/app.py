@@ -1,8 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-import json
-
-from src.api.requests import BurnRequest
+from src.api.requests import BurnRequest, ShadowMapRequest
+from src.services.shadow_service import generate_hillshade_maps
 from src.configs.preflight import init_qgis
 from src.services import (
     burn_points_to_raster,
@@ -91,3 +90,22 @@ def get_uhi_zone():
     return {
         "status": "success"
     }
+
+
+@app.post("/shadow-map")
+def create_hillshade(req: ShadowMapRequest):
+    try:
+        output_folder = "/app/data/shadow-maps"
+        lat = 51.498
+        lon = 3.613
+
+        generate_hillshade_maps(req.dem_path, output_folder, lat, lon, req.start_dt, req.end_dt)
+
+        return {
+            "status": "success",
+            "output_folder": output_folder,
+            "message": "Hillshade(s) generated successfully"
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating hillshade: {str(e)}")

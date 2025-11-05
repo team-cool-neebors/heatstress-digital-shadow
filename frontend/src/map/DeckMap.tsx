@@ -15,7 +15,7 @@ type Props = {
 
 export default function DeckMap({layers, initialViewState}: Props) {
   return (
-    <div style={{position: 'absolute', inset: 0}}>
+    <div onContextMenu={evt => evt.preventDefault()} style={{position: 'absolute', inset: 0}}>
       <DeckGL
         views={new MapView({id: 'main'})}
         controller={true}
