@@ -1,22 +1,17 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from src.api.requests import BurnRequest, ShadowMapRequest
-from src.services.shadow_service import generate_hillshade_maps
 from src.configs.preflight import init_qgis
 from src.services import (
-    burn_points_to_raster,
-    rasterize_vector_layer,
-    clip_raster_by_extent,
-    load_raster_layer,
-    calculate_wet_bulb_temp,
-    load_zonal_layer,
-    calculate_zonal_part_pet_sun,
-    calculate_zonal_part_pet_shadow,
-    calculate_total_pet_sun,
-    calculate_total_pet_shadow,
+    PETService,
+    ShadowService,
+    RasterService
 )
 qgs = init_qgis() 
 app = FastAPI()
+pet_service = PETService()
+shadow_service = ShadowService()
+raster_service = RasterService()
 
 @app.exception_handler(ValueError)
 async def value_error_exception_handler(request: Request, exc: ValueError):
@@ -54,7 +49,7 @@ def burn_point_to_raster(req: BurnRequest):
     Uses hardcoded input raster
     """
     input_raster = "/app/data/bbox-test.tif"
-    burn_points_to_raster(input_raster, req.points)
+    raster_service.burn_points_to_raster(input_raster, req.points)
 
     return {
         "status": "success",
@@ -70,22 +65,22 @@ def get_uhi_zone():
     uhi = "/app/data/uhi/uhi-air-temp-u-1.2 copy.geojson"
     output = "/app/data/uhi/raster_pet_shadow.tif"
     referenceRaster = "/app/data/bbox-dsm.tif"
-    referenceRaster = load_raster_layer(referenceRaster, "bbox-dm")
-    vector = load_zonal_layer(uhi)
-    obj = calculate_wet_bulb_temp(vector, "air_mean")
+    referenceRaster = raster_service.load_raster_layer(referenceRaster, "bbox-dm")
+    vector = pet_service.load_zonal_layer(uhi)
+    obj = pet_service.calculate_wet_bulb_temp(vector, "air_mean")
     
-    obj = calculate_zonal_part_pet_sun(obj, "air_mean", "t_w", "geschaalde_u_1.2_corr")
-    result = rasterize_vector_layer(obj, "pet_sun_partial", output)
-    clip_raster_by_extent(result, referenceRaster, "/app/data/uhi/sun-bbox.tif")
+    obj = pet_service.calculate_zonal_part_pet_sun(obj, "air_mean", "t_w", "geschaalde_u_1.2_corr")
+    result = raster_service.rasterize_vector_layer(obj, "pet_sun_partial", output)
+    raster_service.clip_raster_by_extent(result, referenceRaster, "/app/data/uhi/sun-bbox.tif")
     
-    obj = calculate_zonal_part_pet_shadow(vector, "air_mean", "t_w", "geschaalde_u_1.2_corr")
-    result = rasterize_vector_layer(obj, "pet_shadow_partial", output)
-    clip_raster_by_extent(result, referenceRaster, "/app/data/uhi/shadow-bbox.tif")
+    obj = pet_service.calculate_zonal_part_pet_shadow(vector, "air_mean", "t_w", "geschaalde_u_1.2_corr")
+    result = raster_service.rasterize_vector_layer(obj, "pet_shadow_partial", output)
+    raster_service.clip_raster_by_extent(result, referenceRaster, "/app/data/uhi/shadow-bbox.tif")
 
-    rasterize_vector_layer(obj, "air_mean", "/app/data/uhi/t_a.tif")
+    raster_service.rasterize_vector_layer(obj, "air_mean", "/app/data/uhi/t_a.tif")
 
-    calculate_total_pet_sun("/app/data/uhi/sun-bbox.tif", "/app/data/raster/br-reproject.tif", "/app/data/raster/svf-reproject.tif", "/app/data/uhi/sun-pet.tif")
-    calculate_total_pet_shadow("/app/data/uhi/shadow-bbox.tif", "/app/data/raster/svf-reproject.tif",  "/app/data/uhi/t_a.tif", "/app/data/uhi/shadow-pet.tif")
+    pet_service.calculate_total_pet_sun("/app/data/uhi/sun-bbox.tif", "/app/data/raster/br-reproject.tif", "/app/data/raster/svf-reproject.tif", "/app/data/uhi/sun-pet.tif")
+    pet_service.calculate_total_pet_shadow("/app/data/uhi/shadow-bbox.tif", "/app/data/raster/svf-reproject.tif",  "/app/data/uhi/t_a.tif", "/app/data/uhi/shadow-pet.tif")
 
     return {
         "status": "success"
@@ -99,7 +94,7 @@ def create_hillshade(req: ShadowMapRequest):
         lat = 51.498
         lon = 3.613
 
-        generate_hillshade_maps(req.dem_path, output_folder, lat, lon, req.start_dt, req.end_dt)
+        shadow_service.generate_hillshade_maps(req.dem_path, output_folder, lat, lon, req.start_dt, req.end_dt)
 
         return {
             "status": "success",
