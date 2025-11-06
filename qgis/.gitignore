@@ -2,5 +2,14 @@ __pycache__
 data/*
 !data/.gitkeep      
 !data/shadow-maps/
+!data/pet/
+!data/raster/
+!data/uhi/
 data/shadow-maps/*
+data/raster/*
+data/pet/*
+data/uhi/*
 !data/shadow-maps/.gitkeep
+!data/pet/.gitkeep
+!data/uhi/.gitkeep
+!data/raster/.gitkeep

@@ -269,18 +269,29 @@ class PETService:
         shadow_map_obj, shadow_map_path = self.convert_raster_layer_to_qgs_and_path(shadow_map)
         sun_pet_obj, sun_pet_path = self.convert_raster_layer_to_qgs_and_path(sun_pet)
         shadow_pet_obj, shadow_pet_path = self.convert_raster_layer_to_qgs_and_path(shadow_pet)
-        
-        shadow_map_obj = self.resample_raster(shadow_map_obj, '/app/data/resample/shadow_map.tiff', 1)
-        
+                
         for layer in [shadow_map_obj, sun_pet_obj, shadow_pet_obj]:
             if not layer.isValid():
                 raise Exception(f"Raster layer is invalid: {layer.name()}")
+        
+        aligned_shadow_map_path = os.path.join(os.path.dirname(output_path), "shadow_map_aligned.tif")
 
-        # Use string paths in parameters
+        warp_params = {
+            'INPUT': shadow_map_path,
+            'TARGET_CRS': sun_pet_obj.crs().authid(),
+            'RESAMPLING': 0,  
+            'TARGET_RESOLUTION': 1,
+            'OPTIONS': '',     
+            'DATA_TYPE': 5,     
+            'TARGET_ALIGN': True, 
+            'OUTPUT': aligned_shadow_map_path
+        }
+        processing.run("gdal:warpreproject", warp_params, feedback=feedback)
+
         params = {
             'INPUT_A': sun_pet_path,
             'BAND_A': 1,
-            'INPUT_B': '/app/data/resample/shadow_map.tiff',
+            'INPUT_B': aligned_shadow_map_path,
             'BAND_B': 1,
             'INPUT_C': shadow_pet_path,
             'BAND_C': 1,

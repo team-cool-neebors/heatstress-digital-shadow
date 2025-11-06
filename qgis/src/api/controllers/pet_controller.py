@@ -44,7 +44,7 @@ def get_uhi_zone():
 @router.get("/pet")
 def get_pet(): 
     pet_service.calculate_total_pet_map(
-        '/app/data/shadow-maps/hillshade_20150701_1500.tif',
+        "/app/data/shadow-maps/hillshade_20150701_1200.tif",
         "/app/data/uhi/sun-pet.tif",
         "/app/data/uhi/shadow-pet.tif",
         "/app/data/pet/pet.tif",
