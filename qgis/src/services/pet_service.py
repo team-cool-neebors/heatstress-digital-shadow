@@ -274,19 +274,10 @@ class PETService:
             if not layer.isValid():
                 raise Exception(f"Raster layer is invalid: {layer.name()}")
         
-        aligned_shadow_map_path = os.path.join(os.path.dirname(output_path), "shadow_map_aligned.tif")
+        shadow_maps_folder_path = "/app/data/shadow-maps"
+        aligned_shadow_map_path = os.path.join(shadow_maps_folder_path, "shadow_map_aligned.tif")
 
-        warp_params = {
-            'INPUT': shadow_map_path,
-            'TARGET_CRS': sun_pet_obj.crs().authid(),
-            'RESAMPLING': 0,  
-            'TARGET_RESOLUTION': 1,
-            'OPTIONS': '',     
-            'DATA_TYPE': 5,     
-            'TARGET_ALIGN': True, 
-            'OUTPUT': aligned_shadow_map_path
-        }
-        processing.run("gdal:warpreproject", warp_params, feedback=feedback)
+        self.adjust_raster_pixel_resolution(shadow_map_path, sun_pet_obj, aligned_shadow_map_path)
 
         params = {
             'INPUT_A': sun_pet_path,
@@ -308,3 +299,41 @@ class PETService:
         total_pet_layer = QgsRasterLayer(result['OUTPUT'], os.path.basename(output_path))
 
         return total_pet_layer
+
+    def adjust_raster_pixel_resolution(
+        self,
+        input_raster: str | QgsRasterLayer,
+        target_layer_obj: QgsRasterLayer,
+        resampled_output_path: str,
+        resampling: int = 0,
+        target_resolution: float = 1,
+        ):
+        import processing
+        feedback = QgsProcessingFeedback()
+        """
+        Reprojects and resamples a raster to match the CRS and alignment of a target layer.
+
+        :param input_raster_path: file path or QgsRasterLayer to warp
+        :param target_layer_objr: QgsRasterLayer whose CRS/resolution/alignment will be matched
+        :param resampled_output_path: output file path for the warped raster
+        :param resampling: resampling method index (0=nearest, 1=bilinear, etc.)
+        :param target_resolution: target resolution in map units
+        """
+
+        warp_params = {
+            'INPUT': input_raster,
+            'TARGET_CRS': target_layer_obj.crs().authid(),
+            'RESAMPLING': resampling,  
+            'TARGET_RESOLUTION': target_resolution,
+            'OPTIONS': '',     
+            'DATA_TYPE': 5,     
+            'TARGET_ALIGN': True, 
+            'OUTPUT': resampled_output_path
+        }
+        
+        processing.run("gdal:warpreproject", warp_params, feedback=feedback)
+
+        if not os.path.exists(resampled_output_path):
+            raise Exception(f"Warped raster was not created at: {resampled_output_path}")
+
+        return resampled_output_path
