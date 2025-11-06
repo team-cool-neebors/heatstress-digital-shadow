@@ -151,3 +151,50 @@ class RasterService:
             raise Exception("Raster clipping failed — could not load output raster.")
         
         return clipped_raster
+
+    def fill_nodata_gdal(
+        self,
+        input_raster: QgsRasterLayer,
+        output_path: str,
+        band: int = 1,
+        distance: float = 10,
+        iterations: int = 0,
+    ) -> QgsRasterLayer:
+        """
+        Fills NoData pixels in a raster using GDAL's Fill NoData algorithm.
+
+        Equivalent to running:
+        gdal_fillnodata.bat <input> <output> -md <distance> -b <band>
+
+        :param QgsRasterLayer input_raster: Input raster layer with gaps (NoData)
+        :param str output_path: Path to save the filled raster (e.g. '/tmp/filled.tif')
+        :param int band: Band number to process (default: 1)
+        :param float distance: Maximum distance (in pixels) to search for values (default: 10)
+        :param int iterations: Number of smoothing iterations (default: 0)
+        :return: QgsRasterLayer of the filled raster
+        :rtype: QgsRasterLayer
+        """
+        import processing
+        from qgis.core import QgsProcessingFeedback
+        import os
+
+        feedback = QgsProcessingFeedback()
+
+        params = {
+            'INPUT': input_raster,
+            'BAND': band,
+            'DISTANCE': distance,
+            'ITERATIONS': iterations,
+            'MASK_LAYER': None,
+            'OPTIONS': '',
+            'EXTRA': '',
+            'OUTPUT': output_path
+        }
+
+        result = processing.run("gdal:fillnodata", params, feedback=feedback)
+        filled_raster = QgsRasterLayer(result['OUTPUT'], os.path.basename(output_path))
+
+        if not filled_raster.isValid():
+            raise Exception("NoData filling failed — could not load output raster.")
+
+        return filled_raster
