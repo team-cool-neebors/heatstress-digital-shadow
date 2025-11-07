@@ -1,21 +1,23 @@
 import sqlite3
 import os
 
-DB_FILE = "heatstressmeasures.sqlite"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(SCRIPT_DIR, "heatstressmeasures.sqlite")
 
 SQL_FILES = [
-    "init.sql",      
-    "seed.sql",      
-    "seedchild.sql"  
+    os.path.join(SCRIPT_DIR, "init.sql"),
+    os.path.join(SCRIPT_DIR, "seed.sql"),
 ]
 
+
+print(f"SCRIPT_DIR: {SCRIPT_DIR}")
+print(f"DB_FILE: {DB_FILE}")
+
 if not os.path.exists(DB_FILE):
-    print(f"Creating database '{DB_FILE}'...")
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     for sql_file in SQL_FILES:
-        print(f"Running {sql_file}...")
         with open(sql_file, "r") as f:
             sql_script = f.read()
             cursor.executescript(sql_script)

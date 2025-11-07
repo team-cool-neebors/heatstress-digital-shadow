@@ -53,3 +53,38 @@ VALUES ('Evaporation'),
        ('Ventilation');
 
 
+-- many to many linking table
+INSERT INTO measures_cooling_principles (measures_id, cooling_principle_id)
+
+VALUES (1, 1),
+       (1, 2),
+       (2, 1),
+       (2, 3),
+       (3, 1),
+       (4, 1),
+       (5, 1),
+       (6, 1),
+       (7, 1), 
+       (7, 2), 
+       (8, 1),
+       (9, 1),
+       (10, 1),
+       (11, 1),
+       (11, 4),
+       (12, 1),
+       (13, 1),
+       (14, 1),
+       (15, 1), 
+       (16, 2),
+       (17, 4),
+       (18, 4),
+       (19, 4),
+       (20, 2),
+       (20, 4),
+       (21, 2),
+       (21, 4),
+       (22, 3),
+       (23, 3),
+       (24, 3);
+
+
