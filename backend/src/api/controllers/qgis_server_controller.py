@@ -50,6 +50,7 @@ async def get_tree_features(
         'VERSION': '1.1.0',
         'REQUEST': 'GetFeature',
         'TYPENAME': QGIS_LAYER_NAME,
+        'SRSNAME': TARGET_CRS,
         'OUTPUTFORMAT': 'application/json',
     }
     
