@@ -15,6 +15,8 @@ type UseDeckLayersOpts = {
   showObjects?: boolean;
 };
 
+const BBOX = "31593.331,391390.397,32093.331,391890.397";
+
 function resolveUrl(path?: string): string | undefined {
   if (!path) return undefined;
   const base =
@@ -103,7 +105,7 @@ export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjec
       try {
         // Fetch data from backend
         // TODO: also fetch other placeable objects when the db is implemented
-        const response = await fetch('/backend/objects/trees?bbox=31593.331,391390.397,32093.331,391890.397');
+        const response = await fetch(`/backend/objects/trees?bbox=${BBOX}`);
         const json = await response.json();
 
         const features = (json.features || []) as {
