@@ -52,9 +52,10 @@ function getPositionArray(mesh: Mesh): Float32Array {
 
 export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjects }: UseDeckLayersOpts) {
   const objUrl = showBuildings ? resolveUrl(objPath) : undefined;
+  const treeModelUrl = showObjects ? resolveUrl(treeModelPath) : '';
   const osmBase = useMemo<Layer>(() => makeOsmTileLayer(), []);
   const [buildingsLayer, setbuildingsLayer] = useState<Layer | null>(null);
-  const [treeLayer, setTreeLayer] = useState<Layer | null>(null);
+  const [objectLayer, setObjectLayer] = useState<Layer | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
@@ -96,7 +97,7 @@ export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjec
 
     async function fetchObjectData() {
       if (!showObjects) {
-        setTreeLayer(null);
+        setObjectLayer(null);
         return;
       }
       try {
@@ -134,10 +135,10 @@ export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjec
         const layer = makeScenegraphLayerForObjects(
           'objects',
           data,
-          treeModelPath
+          treeModelUrl
         );
 
-        if (!cancelled) setTreeLayer(layer);
+        if (!cancelled) setObjectLayer(layer);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
       }
@@ -145,14 +146,14 @@ export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjec
 
     fetchObjectData();
     return () => { cancelled = true; };
-  }, [showObjects]);
+  }, [treeModelUrl, showObjects]);
 
   const layers: Layer[] = useMemo(() => {
     const arr: Layer[] = [osmBase];
     if (buildingsLayer) arr.push(buildingsLayer);
-    if (treeLayer) arr.push(treeLayer);
+    if (objectLayer) arr.push(objectLayer);
     return arr;
-  }, [osmBase, buildingsLayer, treeLayer]);
+  }, [osmBase, buildingsLayer, objectLayer]);
 
   return { layers, error };
 }
