@@ -110,7 +110,7 @@ export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjec
 
         const features = (json.features || []) as {
           geometry: { coordinates: [number, number] }; // [xRD, yRD]
-          properties: { relatieve_hoogteligging?: number, [key: string]: any };
+          properties: { relatieve_hoogteligging?: number } & Record<string, unknown>;
         }[];
 
         // Transform the data
