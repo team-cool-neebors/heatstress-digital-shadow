@@ -7,11 +7,12 @@ import { useOnClickOutside } from "./ui/hooks/useOnClickOutside";
 
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
-  const [showTrees, setShowTrees] = React.useState(false);
-    const { layers, error } = useDeckLayers({
+  const [showObjects, setShowObjects] = React.useState(false);
+  const { layers, error } = useDeckLayers({
     showBuildings,
-    showTrees,
+    showObjects,
     objPath: 'data/10-72-338-LoD22-3D.obj',
+    treeModelPath: 'models/tree-pine.glb',
   });
 
   const [open, setOpen] = React.useState(false);
@@ -42,12 +43,12 @@ export default function App() {
             open={open}
             onClose={() => setOpen(false)}
             showBuildings={showBuildings}
-            showTrees={showTrees}
+            showObjects={showObjects}
             onToggleBuildings={setShowBuildings}
-            onToggleTrees={setShowTrees}
+            onToggleObjects={setShowObjects}
           />
           {error && showBuildings && (
-            <div style={{ margin: 8, padding: 8, background:'#ffecec', color:'#a00', borderRadius:8 }}>
+            <div style={{ margin: 8, padding: 8, background: '#ffecec', color: '#a00', borderRadius: 8 }}>
               Failed to load OBJ: {String(error.message || error)}
             </div>
           )}

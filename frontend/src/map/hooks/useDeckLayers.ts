@@ -1,17 +1,18 @@
-import {useEffect, useMemo, useState} from 'react';
-import type {Layer} from '@deck.gl/core';
-import {makeOsmTileLayer} from '../layers/osmLayer';
-import {load} from '@loaders.gl/core';
-import {OBJLoader} from '@loaders.gl/obj';
-import {buildObjLayerFromMesh, computeCentroidRD} from '../layers/buildingsLayer';
-import {rdToLonLat} from '../utils/crs';
-import type {Mesh, MeshAttribute} from '@loaders.gl/schema';
-import { makeScenegraphLayerForObjects, type TreeFeature } from '../layers/objectLayer';
+import { useEffect, useMemo, useState } from 'react';
+import type { Layer } from '@deck.gl/core';
+import { makeOsmTileLayer } from '../layers/osmLayer';
+import { load } from '@loaders.gl/core';
+import { OBJLoader } from '@loaders.gl/obj';
+import { buildObjLayerFromMesh, computeCentroidRD } from '../layers/buildingsLayer';
+import { makeScenegraphLayerForObjects, type ObjectFeature } from '../layers/objectLayer';
+import { rdToLonLat } from '../utils/crs';
+import type { Mesh, MeshAttribute } from '@loaders.gl/schema';
 
 type UseDeckLayersOpts = {
   objPath?: string;
+  treeModelPath: string,
   showBuildings?: boolean;
-  showTrees?: boolean;
+  showObjects?: boolean;
 };
 
 function resolveUrl(path?: string): string | undefined {
@@ -49,10 +50,10 @@ function getPositionArray(mesh: Mesh): Float32Array {
   throw new Error('Unsupported POSITION value type');
 }
 
-export function useDeckLayers({ objPath, showBuildings, showTrees }: UseDeckLayersOpts) {
+export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjects }: UseDeckLayersOpts) {
   const objUrl = showBuildings ? resolveUrl(objPath) : undefined;
   const osmBase = useMemo<Layer>(() => makeOsmTileLayer(), []);
-  const [objLayer, setObjLayer] = useState<Layer | null>(null);
+  const [buildingsLayer, setbuildingsLayer] = useState<Layer | null>(null);
   const [treeLayer, setTreeLayer] = useState<Layer | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
@@ -62,7 +63,7 @@ export function useDeckLayers({ objPath, showBuildings, showTrees }: UseDeckLaye
     async function go() {
       setError(null);
       if (!showBuildings || !objUrl) {
-        setObjLayer(null);
+        setbuildingsLayer(null);
         return;
       }
       try {
@@ -80,7 +81,7 @@ export function useDeckLayers({ objPath, showBuildings, showTrees }: UseDeckLaye
           heightScale: 1,
         });
 
-        if (!cancelled) setObjLayer(layer);
+        if (!cancelled) setbuildingsLayer(layer);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
       }
@@ -91,67 +92,67 @@ export function useDeckLayers({ objPath, showBuildings, showTrees }: UseDeckLaye
   }, [objUrl, showBuildings]);
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false;
 
-    async function fetchTreeData() {
-      if (!showTrees) {
-        setTreeLayer(null);
-        return;
-      }
-      try {
-        // 1. Fetch data from your backend proxy (which calls QGIS Server)
-        const response = await fetch('/backend/objects/trees?bbox=31593.331,391390.397,32093.331,391890.397');
-        const json = await response.json();
-        
-        // Ensure we are handling the GeoJSON structure
-        const features = (json.features || []) as {
-          geometry: { coordinates: [number, number] }; // [xRD, yRD]
-          properties: { relatieve_hoogteligging?: number, [key: string]: any };
-        }[];
+    async function fetchObjectData() {
+      if (!showObjects) {
+        setTreeLayer(null);
+        return;
+      }
+      try {
+        // Fetch data from backend
+        // TODO: also fetch other placeable objects when the db is implemented
+        const response = await fetch('/backend/objects/trees?bbox=31593.331,391390.397,32093.331,391890.397');
+        const json = await response.json();
 
-        // 2. Transform the data
-        const data: TreeFeature[] = features.map((feature) => {
-          // Coordinates are expected to be in RD (EPSG:28992) from QGIS Server
-          const [xRD, yRD] = feature.geometry.coordinates;
-          const [lon, lat] = rdToLonLat(xRD, yRD); // Convert RD to WGS84 (lon, lat)
+        const features = (json.features || []) as {
+          geometry: { coordinates: [number, number] }; // [xRD, yRD]
+          properties: { relatieve_hoogteligging?: number, [key: string]: any };
+        }[];
 
-          // Use 'relatieve_hoogteligging' property for height, default to 15m
-          const rawHeight = feature.properties?.relatieve_hoogteligging;
-          const height = (rawHeight && rawHeight > 0) ? rawHeight : 15;
-          
-          return {
-            // position: [lon, lat, elevation]. Assuming ground level is 5m for visibility.
-            position: [lon, lat, 1], 
-            // scale is the actual desired height in meters
-            scale: height 
-          };
-        });
-        
-        console.log(`Loaded ${data.length} tree features.`);
-        
-        // 3. Create the ScenegraphLayer using the abstracted function
-        const layer = makeScenegraphLayerForObjects(
-            'trees', 
-            data, 
-            '/models/tree-pine.glb'
+        // Transform the data
+        const data: ObjectFeature[] = features.map((feature) => {
+          // Coordinates are expected to be in RD (EPSG:28992) from QGIS Server
+          const [xRD, yRD] = feature.geometry.coordinates;
+          const [lon, lat] = rdToLonLat(xRD, yRD); // Convert RD to WGS84 (lon, lat)
+
+          // Use 'relatieve_hoogteligging' property for height, default to 15m
+          const rawHeight = feature.properties?.relatieve_hoogteligging;
+          const height = (rawHeight && rawHeight > 0) ? rawHeight : 15;
+
+          return {
+            // position: [lon, lat, elevation].
+            position: [lon, lat, 1],
+            // scale is the actual desired height in meters
+            scale: height
+          };
+        });
+
+        console.log(`Loaded ${data.length} object features.`);
+
+        // Create the ScenegraphLayer using the abstracted function
+        const layer = makeScenegraphLayerForObjects(
+          'objects',
+          data,
+          treeModelPath
         );
 
-        if (!cancelled) setTreeLayer(layer);
-      } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
-      }
-    }
+        if (!cancelled) setTreeLayer(layer);
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
+      }
+    }
 
-    fetchTreeData();
-    return () => { cancelled = true; };
-  }, [showTrees]);
+    fetchObjectData();
+    return () => { cancelled = true; };
+  }, [showObjects]);
 
   const layers: Layer[] = useMemo(() => {
-    const arr: Layer[] = [osmBase];
-    if (objLayer) arr.push(objLayer);
-    if (treeLayer) arr.push(treeLayer);
-    return arr;
-  }, [osmBase, objLayer, treeLayer]);
+    const arr: Layer[] = [osmBase];
+    if (buildingsLayer) arr.push(buildingsLayer);
+    if (treeLayer) arr.push(treeLayer);
+    return arr;
+  }, [osmBase, buildingsLayer, treeLayer]);
 
   return { layers, error };
 }
