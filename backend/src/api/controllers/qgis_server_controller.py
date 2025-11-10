@@ -6,14 +6,12 @@ import re
 
 QGIS_SERVER_BASE_URL = os.getenv('QGIS_SERVER_URL', 'http://nginx/')
 QGIS_TIMEOUT = 30.0
-QGIS_LAYER_NAME = "trees"
 TARGET_CRS = "EPSG:28992"
 BBOX_REGEX = re.compile(r"^\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*$")
 
 async def get_resource(params: dict, path: str = '') -> Response:
     """Makes an asynchronous GET request to the QGIS Server."""
     full_url = f"{QGIS_SERVER_BASE_URL}{path}"
-    print(full_url)
     
     async with httpx.AsyncClient() as client:
         try:
@@ -37,19 +35,24 @@ async def get_resource(params: dict, path: str = '') -> Response:
 
 router = APIRouter()
 
-@router.get("/trees")
-async def get_tree_features(
+@router.get("/objects")
+async def get_objects():
+    return Response(content="Not implemented yet", media_type="text/plain")
+
+@router.get("/objects/{type}")
+async def get_objects_by_type(
+    type: str,
     bbox: str = Query(None, description="Bounding box for spatial filtering (minX, minY, maxX, maxY) in EPSG:28992.")
 ):
     """
-    Fetches tree features using BBOX filter from the QGIS Server WFS.
+    Fetches object features using optional BBOX filter from the QGIS Server WFS.
     """
     
     wfs_params = {
         'SERVICE': 'WFS',
         'VERSION': '1.1.0',
         'REQUEST': 'GetFeature',
-        'TYPENAME': QGIS_LAYER_NAME,
+        'TYPENAME': type,
         'SRSNAME': TARGET_CRS,
         'OUTPUTFORMAT': 'application/json',
     }

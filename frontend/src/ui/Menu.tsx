@@ -5,7 +5,9 @@ type Props = {
   onClose?: () => void;
   id?: string;
   showBuildings: boolean;
+  showTrees: boolean;
   onToggleBuildings: (v: boolean) => void;
+  onToggleTrees: (v: boolean) => void;
 };
 
 const StyledMenu = styled.nav<{ open: boolean }>`
@@ -48,7 +50,7 @@ const StyledMenu = styled.nav<{ open: boolean }>`
   }
 `;
 
-export default function Menu({ open, id, showBuildings, onToggleBuildings }: Props) {
+export default function Menu({ open, id, showBuildings, showTrees, onToggleBuildings, onToggleTrees }: Props) {
   return (
     <StyledMenu id={id} open={open} aria-hidden={!open}>
       <label style={{ display: "flex", alignItems: "center", gap: ".75rem", color: "#0d0c1d" }}>
@@ -58,6 +60,15 @@ export default function Menu({ open, id, showBuildings, onToggleBuildings }: Pro
           onChange={(e) => onToggleBuildings(e.target.checked)}
         />
         Show buildings
+      </label>
+
+      <label style={{ display: "flex", alignItems: "center", gap: ".75rem", color: "#0d0c1d" }}>
+        <input
+          type="checkbox"
+          checked={showTrees}
+          onChange={(e) => onToggleTrees(e.target.checked)}
+        />
+        Show trees
       </label>
       {/* ...other links/items */}
     </StyledMenu>

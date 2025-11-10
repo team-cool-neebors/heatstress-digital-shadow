@@ -6,10 +6,12 @@ import {OBJLoader} from '@loaders.gl/obj';
 import {buildObjLayerFromMesh, computeCentroidRD} from '../layers/buildingsLayer';
 import {rdToLonLat} from '../utils/crs';
 import type {Mesh, MeshAttribute} from '@loaders.gl/schema';
+import { makeScenegraphLayerForObjects, type TreeFeature } from '../layers/objectLayer';
 
 type UseDeckLayersOpts = {
   objPath?: string;
   showBuildings?: boolean;
+  showTrees?: boolean;
 };
 
 function resolveUrl(path?: string): string | undefined {
@@ -47,10 +49,11 @@ function getPositionArray(mesh: Mesh): Float32Array {
   throw new Error('Unsupported POSITION value type');
 }
 
-export function useDeckLayers({ objPath, showBuildings }: UseDeckLayersOpts) {
+export function useDeckLayers({ objPath, showBuildings, showTrees }: UseDeckLayersOpts) {
   const objUrl = showBuildings ? resolveUrl(objPath) : undefined;
   const osmBase = useMemo<Layer>(() => makeOsmTileLayer(), []);
   const [objLayer, setObjLayer] = useState<Layer | null>(null);
+  const [treeLayer, setTreeLayer] = useState<Layer | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
@@ -87,10 +90,68 @@ export function useDeckLayers({ objPath, showBuildings }: UseDeckLayersOpts) {
     return () => { cancelled = true; };
   }, [objUrl, showBuildings]);
 
-  const layers = useMemo<Layer[]>(
-    () => [osmBase, ...(objLayer ? [objLayer] : [])],
-    [osmBase, objLayer]
-  );
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchTreeData() {
+      if (!showTrees) {
+        setTreeLayer(null);
+        return;
+      }
+      try {
+        // 1. Fetch data from your backend proxy (which calls QGIS Server)
+        const response = await fetch('/backend/objects/trees?bbox=31593.331,391390.397,32093.331,391890.397');
+        const json = await response.json();
+        
+        // Ensure we are handling the GeoJSON structure
+        const features = (json.features || []) as {
+          geometry: { coordinates: [number, number] }; // [xRD, yRD]
+          properties: { relatieve_hoogteligging?: number, [key: string]: any };
+        }[];
+
+        // 2. Transform the data
+        const data: TreeFeature[] = features.map((feature) => {
+          // Coordinates are expected to be in RD (EPSG:28992) from QGIS Server
+          const [xRD, yRD] = feature.geometry.coordinates;
+          const [lon, lat] = rdToLonLat(xRD, yRD); // Convert RD to WGS84 (lon, lat)
+
+          // Use 'relatieve_hoogteligging' property for height, default to 15m
+          const rawHeight = feature.properties?.relatieve_hoogteligging;
+          const height = (rawHeight && rawHeight > 0) ? rawHeight : 15;
+          
+          return {
+            // position: [lon, lat, elevation]. Assuming ground level is 5m for visibility.
+            position: [lon, lat, 1], 
+            // scale is the actual desired height in meters
+            scale: height 
+          };
+        });
+        
+        console.log(`Loaded ${data.length} tree features.`);
+        
+        // 3. Create the ScenegraphLayer using the abstracted function
+        const layer = makeScenegraphLayerForObjects(
+            'trees', 
+            data, 
+            '/models/tree-pine.glb'
+        );
+
+        if (!cancelled) setTreeLayer(layer);
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
+      }
+    }
+
+    fetchTreeData();
+    return () => { cancelled = true; };
+  }, [showTrees]);
+
+  const layers: Layer[] = useMemo(() => {
+    const arr: Layer[] = [osmBase];
+    if (objLayer) arr.push(objLayer);
+    if (treeLayer) arr.push(treeLayer);
+    return arr;
+  }, [osmBase, objLayer, treeLayer]);
 
   return { layers, error };
 }

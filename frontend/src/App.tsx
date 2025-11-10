@@ -7,8 +7,10 @@ import { useOnClickOutside } from "./ui/hooks/useOnClickOutside";
 
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
+  const [showTrees, setShowTrees] = React.useState(false);
     const { layers, error } = useDeckLayers({
     showBuildings,
+    showTrees,
     objPath: 'data/10-72-338-LoD22-3D.obj',
   });
 
@@ -40,7 +42,9 @@ export default function App() {
             open={open}
             onClose={() => setOpen(false)}
             showBuildings={showBuildings}
+            showTrees={showTrees}
             onToggleBuildings={setShowBuildings}
+            onToggleTrees={setShowTrees}
           />
           {error && showBuildings && (
             <div style={{ margin: 8, padding: 8, background:'#ffecec', color:'#a00', borderRadius:8 }}>

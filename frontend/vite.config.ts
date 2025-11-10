@@ -16,6 +16,11 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         rewrite: p => p.replace(/^\/qgis/, '')
+      },
+      '/backend': {
+        target: 'http://backend:8000',
+        changeOrigin: true,
+        rewrite: p => p.replace(/^\/backend/, '')
       }
     }
   }
