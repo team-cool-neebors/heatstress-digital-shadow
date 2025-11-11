@@ -1,6 +1,8 @@
 import DeckGL from '@deck.gl/react';
-import {MapView} from '@deck.gl/core';
-import type {Layer} from '@deck.gl/core';
+import { MapView } from '@deck.gl/core';
+import type { Layer, PickingInfo } from '@deck.gl/core';
+
+type ClickHandler = (info: PickingInfo, event: any) => void;
 
 type Props = {
   layers: Layer[];
@@ -11,16 +13,18 @@ type Props = {
     pitch?: number;
     bearing?: number;
   };
+  onClick: ClickHandler;
 };
 
-export default function DeckMap({layers, initialViewState}: Props) {
+export default function DeckMap({ layers, initialViewState, onClick }: Props) {
   return (
-    <div onContextMenu={evt => evt.preventDefault()} style={{position: 'absolute', inset: 0}}>
+    <div onContextMenu={(evt) => { evt.preventDefault(); }} style={{ position: 'absolute', inset: 0 }}>
       <DeckGL
-        views={new MapView({id: 'main'})}
+        views={new MapView({ id: 'main' })}
         controller={true}
         layers={layers}
         initialViewState={initialViewState}
+        onClick={onClick}
       />
       <div
         style={{

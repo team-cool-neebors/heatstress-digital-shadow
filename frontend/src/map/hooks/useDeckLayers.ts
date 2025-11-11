@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Layer } from '@deck.gl/core';
 import { makeOsmTileLayer } from '../layers/osmLayer';
 import { load } from '@loaders.gl/core';
@@ -10,12 +10,26 @@ import type { Mesh, MeshAttribute } from '@loaders.gl/schema';
 
 type UseDeckLayersOpts = {
   objPath?: string;
-  treeModelPath: string,
   showBuildings?: boolean;
   showObjects?: boolean;
+  isEditingMode: boolean;
+  selectedObjectType: string;
 };
 
 const BBOX = "31593.331,391390.397,32093.331,391890.397";
+
+const OBJECTS: Record<string, {
+  url: string,
+  scale: number,
+  rotation: [number, number, number],
+}> = {
+  'tree': {
+    url: '/models/tree-pine.glb',
+    scale: 15,
+    rotation: [0, 0, 90],
+  },
+};
+const DEFAULT_OBJECT_TYPE = 'tree';
 
 function resolveUrl(path?: string): string | undefined {
   if (!path) return undefined;
@@ -52,12 +66,14 @@ function getPositionArray(mesh: Mesh): Float32Array {
   throw new Error('Unsupported POSITION value type');
 }
 
-export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjects }: UseDeckLayersOpts) {
+export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMode, selectedObjectType }: UseDeckLayersOpts) {
   const objUrl = showBuildings ? resolveUrl(objPath) : undefined;
-  const treeModelUrl = showObjects ? resolveUrl(treeModelPath) : '';
   const osmBase = useMemo<Layer>(() => makeOsmTileLayer(), []);
   const [buildingsLayer, setbuildingsLayer] = useState<Layer | null>(null);
   const [objectLayer, setObjectLayer] = useState<Layer | null>(null);
+  const [userObjects, setUserObjects] = useState<ObjectFeature[]>([]);
+  const [objectsToSave, setObjectsToSave] = useState<ObjectFeature[]>([]);
+  const [nextClientId, setNextClientId] = useState(0);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
@@ -109,6 +125,7 @@ export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjec
         const json = await response.json();
 
         const features = (json.features || []) as {
+          id: string;
           geometry: { coordinates: [number, number] }; // [xRD, yRD]
           properties: { relatieve_hoogteligging?: number } & Record<string, unknown>;
         }[];
@@ -124,6 +141,8 @@ export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjec
           const height = (rawHeight && rawHeight > 0) ? rawHeight : 15;
 
           return {
+            id: feature.id,
+            objectType: 'tree',
             // position: [lon, lat, elevation].
             position: [lon, lat, 1],
             // scale is the actual desired height in meters
@@ -137,7 +156,7 @@ export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjec
         const layer = makeScenegraphLayerForObjects(
           'objects',
           data,
-          treeModelUrl
+          OBJECTS[selectedObjectType].url
         );
 
         if (!cancelled) setObjectLayer(layer);
@@ -148,14 +167,118 @@ export function useDeckLayers({ objPath, treeModelPath, showBuildings, showObjec
 
     fetchObjectData();
     return () => { cancelled = true; };
-  }, [treeModelUrl, showObjects]);
+  }, [showObjects]);
+
+  const handleInteraction = useCallback((info: any) => {
+    if (!isEditingMode) return;
+
+    if (info.object) {
+      // Check if the clicked object is one of our client-placed objects
+      const clickedObject = info.object as ObjectFeature;
+      const clickedLayerId = info.layer?.id;
+
+      if (clickedLayerId === 'user-objects') {
+        const objectIdToRemove = clickedObject.id;
+
+        // Only allow removal if it's a client-placed object (ID starts with 'CLIENT-')
+        if (objectIdToRemove && objectIdToRemove.startsWith('CLIENT-')) {
+          setUserObjects(prev => prev.filter(t => t.id !== objectIdToRemove));
+          setObjectsToSave(prev => prev.filter(t => t.id !== objectIdToRemove));
+          return true; // Event handled (removal successful)
+        } else {
+          return;
+        }
+      }
+
+      // If clicked any other object (like a building or server object), do nothing
+      return;
+    }
+
+    const [lon, lat] = info.coordinate;
+    const typeConfig = OBJECTS[selectedObjectType] || OBJECTS[DEFAULT_OBJECT_TYPE];
+
+    // Generate Unique Client ID
+    const newId = `CLIENT-${selectedObjectType}-${nextClientId}`;
+    setNextClientId(prev => prev + 1);
+
+    const newObject: ObjectFeature = {
+      id: newId,
+      objectType: selectedObjectType,
+      position: [lon, lat, 1],
+      scale: typeConfig.scale,
+    };
+
+    setUserObjects(prev => [...prev, newObject]);
+    setObjectsToSave(prev => [...prev, newObject]);
+
+    return true; // Event handled (placement successful)
+  }, [isEditingMode, selectedObjectType, nextClientId]);
+
+  const userObjectLayer = useMemo<Layer | null>(() => {
+    if (userObjects.length === 0) return null;
+
+    const typeConfig = OBJECTS[DEFAULT_OBJECT_TYPE];
+
+    return makeScenegraphLayerForObjects(
+      'user-objects',
+      userObjects,
+      typeConfig.url,
+      {
+        color: [0, 255, 0, 255],
+        orientation: typeConfig.rotation
+      }
+    );
+  }, [userObjects]);
+
+  const saveObjects = useCallback(async () => {
+    if (objectsToSave.length === 0) {
+      return;
+    }
+
+    try {
+      console.log(`Sending ${objectsToSave.length} objects to backend...`);
+
+      const payload = objectsToSave.map(obj => ({
+        type: obj.objectType,
+        position: obj.position,
+        scale: obj.scale,
+      }));
+
+      return;
+
+      // TODO: implement saving once the db is added
+      const response = await fetch('/backend/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newObjects: payload }),
+      });
+
+      if (response.ok) {
+        setObjectsToSave([]);
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Save failed: ${errorText}`);
+      }
+    } catch (e) {
+      console.error('Error saving objects:', e);
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
+  }, [objectsToSave]);
 
   const layers: Layer[] = useMemo(() => {
     const arr: Layer[] = [osmBase];
-    if (buildingsLayer) arr.push(buildingsLayer);
-    if (objectLayer) arr.push(objectLayer);
-    return arr;
-  }, [osmBase, buildingsLayer, objectLayer]);
 
-  return { layers, error };
+    if (buildingsLayer) arr.push(buildingsLayer);
+    if (objectLayer) arr.push(objectLayer)
+    if (userObjectLayer) arr.push(userObjectLayer);
+
+    return arr;
+  }, [osmBase, buildingsLayer, objectLayer, userObjectLayer]);
+
+  return {
+    layers,
+    error,
+    onViewStateClick: handleInteraction,
+    saveObjects: saveObjects,
+  };
 }

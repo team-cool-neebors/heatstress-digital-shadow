@@ -8,6 +8,8 @@ type Props = {
   showObjects: boolean;
   onToggleBuildings: (v: boolean) => void;
   onToggleObjects: (v: boolean) => void;
+  isEditingMode: boolean;
+  onToggleEditingMode: (v: boolean) => void;
 };
 
 const StyledMenu = styled.nav<{ open: boolean }>`
@@ -50,7 +52,16 @@ const StyledMenu = styled.nav<{ open: boolean }>`
   }
 `;
 
-export default function Menu({ open, id, showBuildings, showObjects, onToggleBuildings, onToggleObjects }: Props) {
+export default function Menu({
+  open,
+  id,
+  showBuildings,
+  showObjects,
+  onToggleBuildings,
+  onToggleObjects,
+  isEditingMode,
+  onToggleEditingMode,
+}: Props) {
   return (
     <StyledMenu id={id} open={open} aria-hidden={!open}>
       <label style={{ display: "flex", alignItems: "center", gap: ".75rem", color: "#0d0c1d" }}>
@@ -68,8 +79,18 @@ export default function Menu({ open, id, showBuildings, showObjects, onToggleBui
           checked={showObjects}
           onChange={(e) => onToggleObjects(e.target.checked)}
         />
-        Show trees
+        Show objects
       </label>
+
+      <label style={{ display: "flex", alignItems: "center", gap: ".75rem", color: "#0d0c1d" }}>
+        <input
+          type="checkbox"
+          checked={isEditingMode}
+          onChange={(e) => onToggleEditingMode(e.target.checked)}
+        />
+        Editing Mode
+      </label>
+
       {/* ...other links/items */}
     </StyledMenu>
   );

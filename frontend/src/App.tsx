@@ -5,14 +5,25 @@ import Burger from "./ui/Burger";
 import Menu from "./ui/Menu";
 import { useOnClickOutside } from "./ui/hooks/useOnClickOutside";
 
+// TODO: change this to backend API call to fetch available object types when db is added
+const OBJECT_TYPES = ['tree'];
+
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
   const [showObjects, setShowObjects] = React.useState(false);
-  const { layers, error } = useDeckLayers({
+  const [isEditingMode, setIsEditingMode] = React.useState(false);
+  const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
+  const {
+    layers,
+    error,
+    onViewStateClick,
+    saveObjects,
+  } = useDeckLayers({
     showBuildings,
     showObjects,
+    isEditingMode,
+    selectedObjectType,
     objPath: 'data/10-72-338-LoD22-3D.obj',
-    treeModelPath: 'models/tree-pine.glb',
   });
 
   const [open, setOpen] = React.useState(false);
@@ -30,7 +41,28 @@ export default function App() {
           pitch: 45,
           bearing: 0,
         }}
+        onClick={onViewStateClick}
       />
+
+      {isEditingMode && (
+          <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}>
+              <select 
+                  value={selectedObjectType} 
+                  onChange={(e) => setSelectedObjectType(e.target.value)}
+                  style={{ padding: '8px', marginRight: '10px' }}
+              >
+                  {OBJECT_TYPES.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                  ))}
+              </select>
+              <button 
+                  onClick={saveObjects} 
+                  style={{ padding: '8px 15px', cursor: 'pointer' }}
+              >
+                  Save Objects
+              </button>
+          </div>
+      )}
 
       <div ref={menuNode} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
         <div style={{ pointerEvents: "auto" }}>
@@ -46,6 +78,8 @@ export default function App() {
             showObjects={showObjects}
             onToggleBuildings={setShowBuildings}
             onToggleObjects={setShowObjects}
+            isEditingMode={isEditingMode}
+            onToggleEditingMode={setIsEditingMode}
           />
           {error && showBuildings && (
             <div style={{ margin: 8, padding: 8, background: '#ffecec', color: '#a00', borderRadius: 8 }}>
