@@ -45,23 +45,31 @@ export default function App() {
       />
 
       {isEditingMode && (
-          <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}>
-              <select 
-                  value={selectedObjectType} 
-                  onChange={(e) => setSelectedObjectType(e.target.value)}
-                  style={{ padding: '8px', marginRight: '10px' }}
-              >
-                  {OBJECT_TYPES.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                  ))}
-              </select>
-              <button 
-                  onClick={saveObjects} 
-                  style={{ padding: '8px 15px', cursor: 'pointer' }}
-              >
-                  Save Objects
-              </button>
-          </div>
+        <div style={{
+          position: 'absolute',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          top: 10,
+          right: 10,
+          zIndex: 10
+        }}>
+          <select
+            value={selectedObjectType}
+            onChange={(e) => setSelectedObjectType(e.target.value)}
+            style={{ padding: '8px', marginRight: '10px' }}
+          >
+            {OBJECT_TYPES.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+          <button
+            onClick={saveObjects}
+            style={{ padding: '8px 15px', cursor: 'pointer' }}
+          >
+            Save Objects
+          </button>
+        </div>
       )}
 
       <div ref={menuNode} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>

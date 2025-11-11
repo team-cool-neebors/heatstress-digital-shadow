@@ -11,7 +11,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   width: 100%;
   margin: 0;
@@ -24,6 +26,7 @@ a {
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
@@ -33,7 +36,33 @@ h1 {
   line-height: 1.1;
 }
 
+select {
+  width: 9rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.25s;
+
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  /* Add a custom arrow using a background image */
+  background-image: url("data:image/svg+xml;charset=UTF8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23FFFFFF' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7em top 50%;
+  background-size: 0.65em auto;
+}
+
 button {
+  width: 9rem;
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -44,11 +73,16 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
+
+button:hover,
+select:hover {
   border-color: #646cff;
 }
+
 button:focus,
-button:focus-visible {
+button:focus-visible,
+select:focus,
+select:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
@@ -57,9 +91,11 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
   }
