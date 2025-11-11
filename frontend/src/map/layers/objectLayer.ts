@@ -6,7 +6,7 @@ export type ObjectFeature = {
     id: string;
     objectType: string; // (e.g., 'tree', 'bench')
     position: [number, number, number]; // [longitude, latitude, elevation]
-    scale: number; // The scale factor derived from the object's size (in meters)
+    scale: number;
 };
 
 // Common scale multiplier for the model

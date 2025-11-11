@@ -194,6 +194,7 @@ export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMo
       return;
     }
 
+    if (!info.coordinate) return;
     const [lon, lat] = info.coordinate;
     const typeConfig = OBJECTS[selectedObjectType] || OBJECTS[DEFAULT_OBJECT_TYPE];
 
