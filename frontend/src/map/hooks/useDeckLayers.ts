@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Layer } from '@deck.gl/core';
+import type { Layer, PickingInfo } from '@deck.gl/core';
 import { makeOsmTileLayer } from '../layers/osmLayer';
 import { load } from '@loaders.gl/core';
 import { OBJLoader } from '@loaders.gl/obj';
@@ -167,9 +167,9 @@ export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMo
 
     fetchObjectData();
     return () => { cancelled = true; };
-  }, [showObjects]);
+  }, [showObjects, selectedObjectType]);
 
-  const handleInteraction = useCallback((info: any) => {
+  const handleInteraction = useCallback((info: PickingInfo) => {
     if (!isEditingMode) return;
 
     if (info.object) {

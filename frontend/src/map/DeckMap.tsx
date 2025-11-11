@@ -2,7 +2,7 @@ import DeckGL from '@deck.gl/react';
 import { MapView } from '@deck.gl/core';
 import type { Layer, PickingInfo } from '@deck.gl/core';
 
-type ClickHandler = (info: PickingInfo, event: any) => void;
+type ClickHandler = (info: PickingInfo) => void | boolean;
 
 type Props = {
   layers: Layer[];
