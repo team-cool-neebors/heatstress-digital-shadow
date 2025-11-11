@@ -2,5 +2,8 @@ __pycache__
 data/*
 !data/.gitkeep      
 !data/shadow-maps/
+!data/json/
 data/shadow-maps/*
+data/json/*
 !data/shadow-maps/.gitkeep
+!data/json/.gitkeep
