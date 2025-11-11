@@ -5,11 +5,16 @@ data/*
 !data/pet/
 !data/raster/
 !data/uhi/
+!data/json/
+data/shadow-maps/*
 data/shadow-maps/*
 data/raster/*
 data/pet/*
 data/uhi/*
+data/json/*
+!data/shadow-maps/.gitkeep
 !data/shadow-maps/.gitkeep
 !data/pet/.gitkeep
 !data/uhi/.gitkeep
 !data/raster/.gitkeep
+!data/json/.gitkeep
