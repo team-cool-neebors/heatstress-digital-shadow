@@ -151,3 +151,41 @@ class RasterService:
             raise Exception("Raster clipping failed — could not load output raster.")
         
         return clipped_raster
+
+    def adjust_raster_pixel_resolution(
+        self,
+        input_raster: str | QgsRasterLayer,
+        target_layer_obj: QgsRasterLayer,
+        resampled_output_path: str,
+        resampling: int = 0,
+        target_resolution: float = 1,
+    )-> str:
+        import processing
+        feedback = QgsProcessingFeedback()
+        """
+        Reprojects and resamples a raster to match the CRS and alignment of a target layer.
+
+        :param input_raster_path: file path or QgsRasterLayer to warp
+        :param target_layer_objr: QgsRasterLayer whose CRS/resolution/alignment will be matched
+        :param resampled_output_path: output file path for the warped raster
+        :param resampling: resampling method index (0=nearest, 1=bilinear, etc.)
+        :param target_resolution: target resolution in map units
+        """
+
+        warp_params = {
+            'INPUT': input_raster,
+            'TARGET_CRS': target_layer_obj.crs().authid(),
+            'RESAMPLING': resampling,  
+            'TARGET_RESOLUTION': target_resolution,
+            'OPTIONS': '',     
+            'DATA_TYPE': 5,     
+            'TARGET_ALIGN': True, 
+            'OUTPUT': resampled_output_path
+        }
+        
+        processing.run("gdal:warpreproject", warp_params, feedback=feedback)
+
+        if not os.path.exists(resampled_output_path):
+            raise Exception(f"Warped raster was not created at: {resampled_output_path}")
+
+        return resampled_output_path
