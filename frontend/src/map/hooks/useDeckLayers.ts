@@ -243,10 +243,6 @@ export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMo
   }, [objectsToSave, showObjects]);
 
   const saveObjects = useCallback(async () => {
-    if (objectsToSave.length === 0) {
-      return;
-    }
-
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
 
