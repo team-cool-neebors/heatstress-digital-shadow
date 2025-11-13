@@ -54,13 +54,14 @@ export default function MenuUploadItem({
     <div className={styles.menuItem}>
       <div className={styles.menuItemLabel}>{label}</div>
 
+      {/* Dropdown + custom upload button */}
       <div className={styles.menuUploadRowHorizontal}>
         <select
           className={styles.menuSelect}
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
-          <option value="">Select a Map</option>
+          <option value="">Select Map</option>
           {categories.map((c) => (
             <option key={c} value={c}>
               {c}
@@ -68,14 +69,23 @@ export default function MenuUploadItem({
           ))}
         </select>
 
+        {/* Hidden native file input */}
         <input
           id="fileUpload"
           type="file"
           accept={accept}
           onChange={handleFileChange}
-          className={styles.menuFileInput}
+          className={styles.hiddenFileInput}
           disabled={!selectedCategory}
         />
+
+        {/* Custom styled button triggers input click */}
+        <label
+          htmlFor="fileUpload"
+          className={`${styles.customFileButton} ${!selectedCategory ? styles.disabledButton : ""}`}
+        >
+          Choose File
+        </label>
       </div>
 
       {selectedFile && (
@@ -85,7 +95,6 @@ export default function MenuUploadItem({
             label="Upload"
             onClick={handleUploadClick}
             disabled={!selectedCategory || !selectedFile}
-            variant="primary"
           />
         </div>
       )}
