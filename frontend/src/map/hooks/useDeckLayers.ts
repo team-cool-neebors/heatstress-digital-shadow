@@ -17,6 +17,7 @@ type UseDeckLayersOpts = {
 };
 
 const BBOX = "31593.331,391390.397,32093.331,391890.397";
+const LOCAL_STORAGE_KEY = 'userPlacedObjects';
 
 const OBJECTS: Record<string, {
   url: string,
@@ -71,10 +72,22 @@ export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMo
   const osmBase = useMemo<Layer>(() => makeOsmTileLayer(), []);
   const [buildingsLayer, setbuildingsLayer] = useState<Layer | null>(null);
   const [objectLayer, setObjectLayer] = useState<Layer | null>(null);
-  const [userObjects, setUserObjects] = useState<ObjectFeature[]>([]);
-  const [objectsToSave, setObjectsToSave] = useState<ObjectFeature[]>([]);
+  const [userObjects, setUserObjects] = useState<ObjectFeature[]>(() => {
+    try {
+      const storedValue = localStorage.getItem(LOCAL_STORAGE_KEY);
+      return storedValue ? JSON.parse(storedValue) : [];
+    } catch (e) {
+      console.error("Error loading user objects from local storage:", e);
+      return [];
+    }
+  });
+  const [objectsToSave, setObjectsToSave] = useState<ObjectFeature[]>(userObjects);
   const [nextClientId, setNextClientId] = useState(0);
   const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    setObjectsToSave(userObjects);
+  }, [userObjects]);
 
   useEffect(() => {
     let cancelled = false;
@@ -182,7 +195,6 @@ export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMo
 
         // Only allow removal if it's a client-placed object (ID starts with 'CLIENT-')
         if (objectIdToRemove && objectIdToRemove.startsWith('CLIENT-')) {
-          setUserObjects(prev => prev.filter(t => t.id !== objectIdToRemove));
           setObjectsToSave(prev => prev.filter(t => t.id !== objectIdToRemove));
           return true; // Event handled (removal successful)
         } else {
@@ -199,7 +211,7 @@ export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMo
     const typeConfig = OBJECTS[selectedObjectType] || OBJECTS[DEFAULT_OBJECT_TYPE];
 
     // Generate Unique Client ID
-    const newId = `CLIENT-${selectedObjectType}-${nextClientId}`;
+    const newId = `CLIENT-${selectedObjectType}-${Date.now()}-${nextClientId}`;
     setNextClientId(prev => prev + 1);
 
     const newObject: ObjectFeature = {
@@ -209,27 +221,26 @@ export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMo
       scale: typeConfig.scale,
     };
 
-    setUserObjects(prev => [...prev, newObject]);
     setObjectsToSave(prev => [...prev, newObject]);
 
     return true; // Event handled (placement successful)
   }, [isEditingMode, selectedObjectType, nextClientId]);
 
   const userObjectLayer = useMemo<Layer | null>(() => {
-    if (userObjects.length === 0) return null;
+    if (!showObjects || objectsToSave.length === 0) return null;
 
     const typeConfig = OBJECTS[DEFAULT_OBJECT_TYPE];
 
     return makeScenegraphLayerForObjects(
       'user-objects',
-      userObjects,
+      objectsToSave,
       typeConfig.url,
       {
         color: [0, 255, 0, 255],
         orientation: typeConfig.rotation
       }
     );
-  }, [userObjects]);
+  }, [objectsToSave, showObjects]);
 
   const saveObjects = useCallback(async () => {
     if (objectsToSave.length === 0) {
@@ -237,17 +248,19 @@ export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMo
     }
 
     try {
-      console.log(`Sending ${objectsToSave.length} objects to backend...`);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
 
+      setUserObjects(objectsToSave);
+
+      return;
+
+      // TODO: implement saving once the db is added
       const payload = objectsToSave.map(obj => ({
         type: obj.objectType,
         position: obj.position,
         scale: obj.scale,
       }));
 
-      return;
-
-      // TODO: implement saving once the db is added
       const response = await fetch('/backend/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
