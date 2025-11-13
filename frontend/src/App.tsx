@@ -1,9 +1,9 @@
 import React from "react";
 import DeckMap from "./map/DeckMap";
 import { useDeckLayers } from "./map/hooks/useDeckLayers";
-import Burger from "./ui/Burger";
-import Menu from "./ui/Menu";
-import { useOnClickOutside } from "./ui/hooks/useOnClickOutside";
+import Burger from "./components/ui/Burger";
+import SideMenu from "./components/ui/SideMenu";
+import { useOnClickOutside } from "./components/ui/hooks/useOnClickOutside";
 
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
@@ -35,7 +35,7 @@ export default function App() {
         </div>
 
         <div style={{ pointerEvents: "auto" }}>
-          <Menu
+          <SideMenu
             id="main-menu"
             open={open}
             onClose={() => setOpen(false)}
