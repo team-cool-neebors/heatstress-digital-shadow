@@ -1,0 +1,20 @@
+.menuFileInput {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 0.4rem;
+  padding: 0.4rem;
+  background-color: #fafafa;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.menuFileInput:hover {
+  border-color: #888;
+}
+
+.menuFileInput:focus {
+  outline: none;
+  border-color: #343078;
+}

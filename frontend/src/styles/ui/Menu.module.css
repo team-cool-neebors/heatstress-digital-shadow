@@ -30,7 +30,6 @@
   }
 }
 
-/* Title */
 .menuTitle {
   font-size: 1.5rem;
   font-weight: 600;
@@ -40,14 +39,12 @@
   padding-bottom: 0.5rem;
 }
 
-/* Menu items container */
 .menuItems {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-/* Individual item */
 .menuItem {
   background: #f9f9f9;
   border-radius: 0.5rem;
@@ -59,7 +56,6 @@
   background: #f1f1f1;
 }
 
-/* Checkbox + label */
 .menuItemLabel {
   display: flex;
   align-items: center;
