@@ -1,44 +1,94 @@
+import React, { useState } from "react";
 import styles from "../../styles/ui/UploadItemMenu.module.css";
+import Button from "./Button";
 
 type MenuUploadItemProps = {
   label: string;
   accept?: string;
-  onFileSelect: (file: File) => void;
+  categories?: string[];
+  onUpload: (file: File, category: string) => void;
 };
 
 export default function MenuUploadItem({
   label,
-  accept=".geojson,.tif,.qgz",
-  onFileSelect,
+  accept = ".geojson,.tif,.qgz",
+  categories = ["Wind Map", "PET Map", "Weather Map"],
+  onUpload,
 }: MenuUploadItemProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!selectedCategory) {
+      alert("Please select a category before choosing a file.");
+      e.target.value = "";
+      return;
+    }
 
     const allowedExts = accept.split(",").map(ext => ext.trim().toLowerCase());
     const isValid = allowedExts.some(ext => file.name.toLowerCase().endsWith(ext));
 
     if (!isValid) {
-      alert(`Please upload a valid file type (${accept})`);
+      alert(`Please upload a valid file (${accept})`);
       e.target.value = "";
       return;
     }
 
-    onFileSelect(file);
+    setSelectedFile(file);
   };
 
-   return (
+  const handleUploadClick = () => {
+    if (!selectedCategory || !selectedFile) {
+      alert("Please select a category and choose a file first.");
+      return;
+    }
+
+    onUpload(selectedFile, selectedCategory);
+    setSelectedFile(null);
+  };
+
+  return (
     <div className={styles.menuItem}>
-      <label className={styles.menuItemLabel} htmlFor="fileUpload">
-        {label}
-      </label>
-      <input
-        id="fileUpload"
-        type="file"
-        accept={accept}
-        onChange={handleFileChange}
-        className={styles.menuFileInput}
-      />
+      <div className={styles.menuItemLabel}>{label}</div>
+
+      <div className={styles.menuUploadRowHorizontal}>
+        <select
+          className={styles.menuSelect}
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          <option value="">Select a Map</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+
+        <input
+          id="fileUpload"
+          type="file"
+          accept={accept}
+          onChange={handleFileChange}
+          className={styles.menuFileInput}
+          disabled={!selectedCategory}
+        />
+      </div>
+
+      {selectedFile && (
+        <div className={styles.menuFileInfoRow}>
+          <span className={styles.menuFileName}>{selectedFile.name}</span>
+          <Button
+            label="Upload"
+            onClick={handleUploadClick}
+            disabled={!selectedCategory || !selectedFile}
+            variant="primary"
+          />
+        </div>
+      )}
     </div>
   );
 }

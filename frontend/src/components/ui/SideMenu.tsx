@@ -29,9 +29,10 @@ export default function SideMenu({ open, id, showBuildings, onToggleBuildings }:
         />
         <MenuUploadItem
           label="Import Your Own Map"
-          accept=".geojson,.tif, .qgz"
-          onFileSelect={(file) => {
-            console.log("Selected file:", file);
+          categories={["Wind Map", "PET Map", "Weather Map"]}
+          accept=".geojson,.tif,.qgz"
+          onUpload={(file, category) => {
+            console.log("Uploading:", file.name, "→", category);
           }}
         />
       </div>
