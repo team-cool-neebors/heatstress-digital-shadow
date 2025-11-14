@@ -88,7 +88,7 @@ export function useDeckLayers({
       width: WMS_WIDTH,
       height: WMS_HEIGHT,
       transparent: true,
-      opacity: 0.8,
+      opacity: 1,
     });
   }, [showOverlay, overlayLayerId]);
 
