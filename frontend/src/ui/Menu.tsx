@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import type { QgisLayerId } from "../map/hooks/qgisLayers";
 
 type Props = {
   open: boolean;
@@ -6,6 +7,12 @@ type Props = {
   id?: string;
   showBuildings: boolean;
   onToggleBuildings: (v: boolean) => void;
+
+  showOverlay: boolean;
+  onToggleOverlay: (value: boolean) => void;
+  overlayLayerId: QgisLayerId;
+  onChangeOverlayLayer: (value: QgisLayerId) => void;
+  overlayLayerOptions: ReadonlyArray<{ id: QgisLayerId; label: string }>;
 };
 
 const StyledMenu = styled.nav<{ open: boolean }>`
@@ -48,10 +55,29 @@ const StyledMenu = styled.nav<{ open: boolean }>`
   }
 `;
 
-export default function Menu({ open, id, showBuildings, onToggleBuildings }: Props) {
+export default function Menu({
+  open,
+  id,
+  showBuildings,
+  onToggleBuildings,
+  showOverlay,
+  onToggleOverlay,
+  overlayLayerId,
+  onChangeOverlayLayer,
+  overlayLayerOptions,
+}: Props) {
   return (
     <StyledMenu id={id} open={open} aria-hidden={!open}>
-      <label style={{ display: "flex", alignItems: "center", gap: ".75rem", color: "#0d0c1d" }}>
+      {/* Buildings toggle */}
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: ".75rem",
+          color: "#0d0c1d",
+          marginBottom: "1rem",
+        }}
+      >
         <input
           type="checkbox"
           checked={showBuildings}
@@ -59,8 +85,56 @@ export default function Menu({ open, id, showBuildings, onToggleBuildings }: Pro
         />
         Show buildings
       </label>
-      {/* ...other links/items */}
+
+      {/* QGIS overlay toggle */}
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: ".75rem",
+          color: "#0d0c1d",
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={showOverlay}
+          onChange={(e) => onToggleOverlay(e.target.checked)}
+        />
+        Show QGIS overlay
+      </label>
+
+      {/* Overlay layer dropdown (only when enabled) */}
+      {showOverlay && (
+        <div style={{ marginTop: ".75rem" }}>
+          <label
+            style={{
+              display: "block",
+              fontSize: ".85rem",
+              color: "#555",
+              marginBottom: ".25rem",
+            }}
+          >
+            Overlay layer
+          </label>
+          <select
+            value={overlayLayerId}
+            onChange={(e) =>
+              onChangeOverlayLayer(e.target.value as QgisLayerId)
+            }
+            style={{
+              width: "100%",
+              padding: ".35rem .5rem",
+              fontSize: ".9rem",
+            }}
+          >
+            {overlayLayerOptions.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
     </StyledMenu>
   );
 }
-

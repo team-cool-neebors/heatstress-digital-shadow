@@ -1,15 +1,30 @@
 import {useEffect, useMemo, useState} from 'react';
-import type {Layer} from '@deck.gl/core';
+import type {Layer, PickingInfo} from '@deck.gl/core';
 import {makeOsmTileLayer} from '../layers/osmLayer';
 import {load} from '@loaders.gl/core';
 import {OBJLoader} from '@loaders.gl/obj';
 import {buildObjLayerFromMesh, computeCentroidRD} from '../layers/buildingsLayer';
 import {rdToLonLat} from '../utils/crs';
 import type {Mesh, MeshAttribute} from '@loaders.gl/schema';
+import { makeWmsLayer } from '../layers/wmsLayer';
+import { useQgisFeatureInfo } from "./qgisFeatureInfo";
+import type { QgisLayerId } from "./qgisLayers";
+
+export const WMS_BOUNDS: [number, number, number, number] = [
+  3.609725,     // west
+  51.4979978,   // south
+  3.6170983,    // east
+  51.5025997    // north
+];
+
+export const WMS_WIDTH = 2048;
+export const WMS_HEIGHT = 2048;
 
 type UseDeckLayersOpts = {
   objPath?: string;
   showBuildings?: boolean;
+  showOverlay: boolean;
+  overlayLayerId: QgisLayerId;
 };
 
 function resolveUrl(path?: string): string | undefined {
@@ -47,11 +62,41 @@ function getPositionArray(mesh: Mesh): Float32Array {
   throw new Error('Unsupported POSITION value type');
 }
 
-export function useDeckLayers({ objPath, showBuildings }: UseDeckLayersOpts) {
+export function useDeckLayers({
+  objPath, showBuildings, showOverlay, overlayLayerId, 
+}: UseDeckLayersOpts) {
   const objUrl = showBuildings ? resolveUrl(objPath) : undefined;
   const osmBase = useMemo<Layer>(() => makeOsmTileLayer(), []);
   const [objLayer, setObjLayer] = useState<Layer | null>(null);
   const [error, setError] = useState<Error | null>(null);
+
+  const { featureInfo, request, clear } = useQgisFeatureInfo({
+    bounds: WMS_BOUNDS,
+    width: WMS_WIDTH,
+    height: WMS_HEIGHT,
+    baseUrl: "/qgis",
+    layerName: overlayLayerId,
+  });
+
+  const wmsLayer = useMemo<Layer | null>(() => {
+    if (!showOverlay) return null;
+
+    return makeWmsLayer({
+      baseUrl: "/qgis",
+      layerName: overlayLayerId,
+      bounds: WMS_BOUNDS,
+      width: WMS_WIDTH,
+      height: WMS_HEIGHT,
+      transparent: true,
+      opacity: 0.8,
+    });
+  }, [showOverlay, overlayLayerId]);
+
+  useEffect(() => {
+    if (!showOverlay) {
+      clear();
+    }
+  }, [showOverlay, clear]);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,9 +133,21 @@ export function useDeckLayers({ objPath, showBuildings }: UseDeckLayersOpts) {
   }, [objUrl, showBuildings]);
 
   const layers = useMemo<Layer[]>(
-    () => [osmBase, ...(objLayer ? [objLayer] : [])],
-    [osmBase, objLayer]
+    () => [
+      osmBase,
+      ...(objLayer ? [objLayer] : []),
+      ...(wmsLayer ? [wmsLayer] : []),
+    ],
+    [osmBase, objLayer, wmsLayer]
   );
 
-  return { layers, error };
+  function handleMapClick(info: PickingInfo): void {
+    if (!showOverlay) return;
+    if (!info.coordinate) return;
+
+    const [lon, lat] = info.coordinate as [number, number];
+    void request(lon, lat);
+  }
+
+  return { layers, error, featureInfo, handleMapClick };
 }

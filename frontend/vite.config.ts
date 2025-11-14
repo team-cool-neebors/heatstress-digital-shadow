@@ -13,9 +13,17 @@ export default defineConfig({
         rewrite: path => path.replace(/^\/3dbag/, '')
       },
       '/qgis': {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8010',
         changeOrigin: true,
-        rewrite: p => p.replace(/^\/qgis/, '')
+        // strip the /qgis prefix so QGIS still sees ?SERVICE=...
+        rewrite: (path) => path.replace(/^\/qgis/, ''),
+        configure: (proxy) => {
+          // add permissive CORS headers on the fly (dev only)
+          proxy.on('proxyRes', (proxyRes) => {
+            proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+            proxyRes.headers['Access-Control-Allow-Headers'] = '*';
+          });
+        }
       }
     }
   }
