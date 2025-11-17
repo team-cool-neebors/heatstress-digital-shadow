@@ -1,10 +1,5 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo} from 'react';
 import type {Layer, PickingInfo} from '@deck.gl/core';
-import {load} from '@loaders.gl/core';
-import {OBJLoader} from '@loaders.gl/obj';
-import {buildObjLayerFromMesh, computeCentroidRD} from '../layers/buildingsLayer';
-import {rdToLonLat} from '../utils/crs';
-import type {Mesh, MeshAttribute} from '@loaders.gl/schema';
 import { makeWmsLayer } from '../layers/wmsLayer';
 import { useQgisFeatureInfo } from "./qgisFeatureInfo";
 import type { QgisLayerId } from "./qgisLayers";
