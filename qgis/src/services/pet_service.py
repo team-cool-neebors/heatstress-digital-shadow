@@ -123,7 +123,7 @@ class PETService:
             t_a = feature[t_a_field]
             if t_a is None:
                 wet_bulb = None
-            else:  
+            else:
                 temp_val = t_a
                 wet_bulb = (
                     temp_val * math.atan(0.151977 * math.sqrt(r_h + 8.313659)) +

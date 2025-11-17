@@ -70,4 +70,3 @@ def get_uhi_zone():
         "status": "success",
         "message": "Map(s) generated successfully",
     }
-    

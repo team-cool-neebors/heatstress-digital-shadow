@@ -1,4 +1,3 @@
-
 from datetime import datetime, date
 
 class UHILookupTables:
@@ -71,4 +70,3 @@ class UHILookupTables:
             raise ValueError(f"Hour must be between 0 and 23, got {hour}")
         
         return UHILookupTables.UHI_FACTORS[category][hour]
-    
