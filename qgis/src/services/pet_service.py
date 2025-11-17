@@ -4,8 +4,12 @@ from qgis.PyQt.QtCore import QVariant
 from qgis.core import (
     QgsVectorLayer, QgsField, QgsRasterLayer, QgsProcessingFeedback
 )
+from src.services.raster_service import RasterService
+
 
 class PETService:
+    def __init__(self):
+        self.raster_service = RasterService()
     def load_zonal_layer(self, path: str) -> QgsVectorLayer:
         return QgsVectorLayer(path, "zonal_layer", "ogr")
 
@@ -245,3 +249,57 @@ class PETService:
             raise Exception(f"Raster layer is invalid: {layer_obj.name()}")
         
         return layer_obj, layer_path
+
+    def calculate_total_pet_map(
+        self,
+        shadow_map: str|QgsRasterLayer,
+        sun_pet: str|QgsRasterLayer,
+        shadow_pet: str|QgsRasterLayer,
+        output_path: str,
+        shadow_threshold: float = 127,
+        ) :
+        """
+        Calculates and returns the total PET map
+        
+        :param shadow_map: a file path string or QgsRasterLayer object that contains the shadow map
+        :param sun_pet: a file path string or QgsRasterLayer object that contains the sun PET
+        :param shadow_pet: a file path string or QgsRasterLayer object that contains the shadow PET
+        :param output_path: the output path
+        :param shadow_threshold: a number between 0-255 that determines which values are shadow and which sun
+        """
+        import processing
+        feedback = QgsProcessingFeedback()
+        
+        shadow_map_obj, shadow_map_path = self.convert_raster_layer_to_qgs_and_path(shadow_map)
+        sun_pet_obj, sun_pet_path = self.convert_raster_layer_to_qgs_and_path(sun_pet)
+        shadow_pet_obj, shadow_pet_path = self.convert_raster_layer_to_qgs_and_path(shadow_pet)
+                
+        for layer in [shadow_map_obj, sun_pet_obj, shadow_pet_obj]:
+            if not layer.isValid():
+                raise Exception(f"Raster layer is invalid: {layer.name()}")
+        
+        shadow_maps_folder_path = "/app/data/shadow-maps"
+        aligned_shadow_map_path = os.path.join(shadow_maps_folder_path, "shadow_map_aligned.tif")
+
+        self.raster_service.adjust_raster_pixel_resolution(shadow_map_path, sun_pet_obj, aligned_shadow_map_path)
+
+        params = {
+            'INPUT_A': sun_pet_path,
+            'BAND_A': 1,
+            'INPUT_B': aligned_shadow_map_path,
+            'BAND_B': 1,
+            'INPUT_C': shadow_pet_path,
+            'BAND_C': 1,
+            'FORMULA': f'(A * (B > {shadow_threshold})) + (C * (B <= {shadow_threshold}))',
+            'NO_DATA': None,
+            'EXTENT_OPT': 0,  # 0 = intersect
+            'PROJWIN': shadow_map_obj.extent(),
+            'RTYPE': 5,  # Float32
+            'OUTPUT': output_path
+        }
+
+        result = processing.run("gdal:rastercalculator", params, feedback=feedback)
+
+        total_pet_layer = QgsRasterLayer(result['OUTPUT'], os.path.basename(output_path))
+
+        return total_pet_layer

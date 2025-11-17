@@ -1,10 +1,24 @@
 from fastapi import APIRouter
 from src.services.pet_service import PETService
 from src.services.raster_service import RasterService
+from src.services.geojson_service import GeoJSONService
+import os
 
 router = APIRouter()
 pet_service = PETService()
 raster_service = RasterService()
+geojson_service = GeoJSONService()
+
+@router.get("/u")
+def get_geschaalde_u():
+    u = "/app/data/json/wind_reduction copy.geojson"
+    if not os.path.exists(u):
+        return {"status": "error", "message": f"File not found: {u}"}
+    vector = pet_service.load_zonal_layer(u)
+    geojson_service.calculate_wind_speed_1_2(vector)
+
+    return {"status": "success"}
+    
 
 @router.get("/uhi-zone")
 def get_uhi_zone():
@@ -39,4 +53,15 @@ def get_uhi_zone():
         "/app/data/uhi/shadow-pet.tif",
     )
 
+    return {"status": "success"}
+
+@router.get("/pet")
+def get_pet(): 
+    pet_service.calculate_total_pet_map(
+        "/app/data/shadow-maps/hillshade_20150701_1200.tif",
+        "/app/data/uhi/sun-pet.tif",
+        "/app/data/uhi/shadow-pet.tif",
+        "/app/data/pet/pet.tif",
+    )
+    
     return {"status": "success"}
