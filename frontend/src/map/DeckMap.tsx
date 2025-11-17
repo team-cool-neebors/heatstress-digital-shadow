@@ -1,9 +1,10 @@
 import DeckGL from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
-import type {Layer} from '@deck.gl/core';
+import type {Layer, PickingInfo} from '@deck.gl/core';
 
 type Props = {
   layers: Layer[];
+  onMapClick?: (info: PickingInfo) => void;
   initialViewState: {
     longitude: number;
     latitude: number;
@@ -13,7 +14,7 @@ type Props = {
   };
 };
 
-export default function DeckMap({layers, initialViewState}: Props) {
+export default function DeckMap({layers, initialViewState, onMapClick }: Props) {
   return (
     <div onContextMenu={evt => evt.preventDefault()} style={{position: 'absolute', inset: 0}}>
       <DeckGL
@@ -21,6 +22,8 @@ export default function DeckMap({layers, initialViewState}: Props) {
         controller={true}
         layers={layers}
         initialViewState={initialViewState}
+        onClick={onMapClick}
+        getCursor={({ isDragging }) => (isDragging ? "grabbing" : "default")}
       />
       <div
         style={{

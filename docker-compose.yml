@@ -2,14 +2,14 @@ services:
   nginx:
     image: "nginx"
     volumes:
-     - ./server/conf/nginx-fcgi-sample.conf:/etc/nginx/nginx.conf
+      - ./server/conf/nginx-fcgi-sample.conf:/etc/nginx/nginx.conf
     ports:
-     - "127.0.0.1:8010:80"
-    networks:
-     - qgis-server-net
+      - "8010:80"
+    networks: 
+      - qgis-server-net
     restart: always
     depends_on:
-     - qgis-server
+      - qgis-server
  
   qgis-server:
     image: "qgis/qgis-server:stable"
@@ -23,14 +23,14 @@ services:
       QGIS_SERVER_WMS_MAX_HEIGHT: 5000
       QGIS_SERVER_WMS_MAX_WIDTH: 5000
     networks:
-     - qgis-server-net
+      - qgis-server-net
     volumes:
      # Data should be mount RO when working
      # with GeoPackages and more than one QGIS container
-     - ./server/test/data:/io/data:ro
-     - ./plugins:/io/plugins
-     - ./fonts:/usr/share/fonts
-     - ./svg:/var/lib/qgis/.local/share/QGIS/QGIS3/profiles/default/svg
+      - ./server/test/data:/io/data:ro
+      - ./plugins:/io/plugins
+      - ./fonts:/usr/share/fonts
+      - ./svg:/var/lib/qgis/.local/share/QGIS/QGIS3/profiles/default/svg
      # - ./conf/pg_service.conf:/etc/postgresql-common/pg_service.conf:ro
     restart: always
   
@@ -62,6 +62,8 @@ services:
     build: ./frontend
     ports:
       - "5173:5173"
+    networks:
+      - qgis-server-net
     volumes:
       - ./frontend:/app
       - /app/node_modules
