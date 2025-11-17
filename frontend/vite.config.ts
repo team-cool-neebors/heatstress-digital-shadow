@@ -14,7 +14,7 @@ export default defineConfig({
       '/nginx': {
         target: 'http://nginx:80',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/nginx/, ''),
+        rewrite: (p) => p.replace(/^\/nginx/, ''),
         configure: (proxy) => {
           // add permissive CORS headers on the fly (dev only)
           proxy.on('proxyRes', (proxyRes) => {
@@ -22,7 +22,6 @@ export default defineConfig({
             proxyRes.headers['Access-Control-Allow-Headers'] = '*';
           });
         }
-        rewrite: p => p.replace(/^\/qgis/, '')
       },
     }
   }

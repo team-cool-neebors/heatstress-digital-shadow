@@ -6,7 +6,7 @@ type ClickHandler = (info: PickingInfo) => void | boolean;
 
 type Props = {
   layers: Layer[];
-  onMapClick?: (info: PickingInfo) => void;
+  onMapInteraction?: ClickHandler;
   initialViewState: {
     longitude: number;
     latitude: number;
@@ -14,10 +14,9 @@ type Props = {
     pitch?: number;
     bearing?: number;
   };
-  onClick: ClickHandler;
 };
 
-export default function DeckMap({ layers, initialViewState, onClick, onMapClick }: Props) {
+export default function DeckMap({ layers, initialViewState, onMapInteraction }: Props) {
   return (
     <div onContextMenu={(evt) => { evt.preventDefault(); }} style={{ position: 'absolute', inset: 0 }}>
       <DeckGL
@@ -25,8 +24,7 @@ export default function DeckMap({ layers, initialViewState, onClick, onMapClick 
         controller={true}
         layers={layers}
         initialViewState={initialViewState}
-        onClick={onClick}
-        onClick={onMapClick}
+        onClick={onMapInteraction}
         getCursor={({ isDragging }) => (isDragging ? "grabbing" : "default")}
       />
       <div

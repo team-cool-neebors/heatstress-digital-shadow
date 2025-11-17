@@ -82,25 +82,47 @@ export function useUserObjectLayers(showObjects: boolean, isEditingMode: boolean
         );
     }, [objectsToSave, showObjects]);
 
+    const hasUnsavedChanges = useMemo(() => {
+        // If the references happen to be the same, content is definitely the same
+        if (userObjects === objectsToSave) {
+            return false;
+        }
+
+        // If lengths are different, changes exist
+        if (userObjects.length !== objectsToSave.length) {
+            return true;
+        }
+
+        const sortedUser = [...userObjects].sort((a, b) => a.id.localeCompare(b.id));
+        const sortedDraft = [...objectsToSave].sort((a, b) => a.id.localeCompare(b.id));
+
+        // Serialize and compare the strings
+        return JSON.stringify(sortedUser) !== JSON.stringify(sortedDraft);
+
+    }, [userObjects, objectsToSave]);
+
 
     const saveObjects = useCallback(async () => {
         try {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
 
             setUserObjects(objectsToSave);
-
-            // TODO: API call logic
         } catch (e) {
             console.error('Error saving objects to local storage:', e);
             setError(e instanceof Error ? e : new Error(String(e)));
         }
     }, [objectsToSave]);
 
+    const discardChanges = useCallback(() => {
+        setObjectsToSave(userObjects);
+    }, [userObjects]);
+
     return {
         userObjectLayer,
         handleInteraction,
         saveObjects,
+        discardChanges,
         error,
-        hasUnsavedChanges: objectsToSave !== userObjects
+        hasUnsavedChanges
     };
 }

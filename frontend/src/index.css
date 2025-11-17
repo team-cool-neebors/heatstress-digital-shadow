@@ -37,7 +37,7 @@ h1 {
 }
 
 select {
-  width: 9rem;
+  width: 10rem;
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -62,7 +62,7 @@ select {
 }
 
 button {
-  width: 9rem;
+  width: 10rem;
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
