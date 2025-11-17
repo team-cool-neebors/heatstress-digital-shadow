@@ -4,7 +4,7 @@ import { makeScenegraphLayerForObjects, type ObjectFeature } from '../layers/obj
 import { LOCAL_STORAGE_KEY, OBJECTS, DEFAULT_OBJECT_TYPE } from '../utils/deckUtils';
 
 export function useUserObjectLayers(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
-    
+
     const [userObjects, setUserObjects] = useState<ObjectFeature[]>(() => {
         try {
             const storedValue = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -38,13 +38,12 @@ export function useUserObjectLayers(showObjects: boolean, isEditingMode: boolean
             if (clickedLayerId === 'user-objects') {
                 if (objectIdToRemove && objectIdToRemove.startsWith('CLIENT-')) {
                     setObjectsToSave(prev => prev.filter(t => t.id !== objectIdToRemove));
-                    console.log(`Removed user-placed object: ${objectIdToRemove}`);
                     return true;
                 } else {
                     return; // Not a client-placed object
                 }
             }
-            return; 
+            return;
         }
 
         if (!info.coordinate) return;
@@ -87,7 +86,7 @@ export function useUserObjectLayers(showObjects: boolean, isEditingMode: boolean
     const saveObjects = useCallback(async () => {
         try {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
-            
+
             setUserObjects(objectsToSave);
 
             // TODO: API call logic
@@ -97,11 +96,11 @@ export function useUserObjectLayers(showObjects: boolean, isEditingMode: boolean
         }
     }, [objectsToSave]);
 
-    return { 
-        userObjectLayer, 
-        handleInteraction, 
-        saveObjects, 
+    return {
+        userObjectLayer,
+        handleInteraction,
+        saveObjects,
         error,
-        hasUnsavedChanges: objectsToSave !== userObjects 
+        hasUnsavedChanges: objectsToSave !== userObjects
     };
 }
