@@ -12,11 +12,11 @@ export default defineConfig({
         secure: true,
         rewrite: path => path.replace(/^\/3dbag/, '')
       },
-      '/qgis': {
-        target: 'http://127.0.0.1:8010',
+      '/nginx': {
+        target: 'http://nginx:80',
         changeOrigin: true,
         // strip the /qgis prefix so QGIS still sees ?SERVICE=...
-        rewrite: (path) => path.replace(/^\/qgis/, ''),
+        rewrite: (path) => path.replace(/^\/nginx/, ''),
         configure: (proxy) => {
           // add permissive CORS headers on the fly (dev only)
           proxy.on('proxyRes', (proxyRes) => {

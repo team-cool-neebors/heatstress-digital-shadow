@@ -74,7 +74,7 @@ export function useDeckLayers({
     bounds: WMS_BOUNDS,
     width: WMS_WIDTH,
     height: WMS_HEIGHT,
-    baseUrl: "/qgis",
+    baseUrl: "/nginx",
     layerName: overlayLayerId,
   });
 
@@ -82,7 +82,7 @@ export function useDeckLayers({
     if (!showOverlay) return null;
 
     return makeWmsLayer({
-      baseUrl: "/qgis",
+      baseUrl: "/nginx",
       layerName: overlayLayerId,
       bounds: WMS_BOUNDS,
       width: WMS_WIDTH,
