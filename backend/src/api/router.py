@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from src.api.controllers import WFSController
 from src.api.models import WFSParams
+from src.api.requests import PlacedObjectsRequest
 
 wfs_controller = WFSController()
 api_router = APIRouter()
@@ -18,3 +19,7 @@ async def get_objects_by_type(
         type=type,
         params=params,
     )
+
+@api_router.post("/update-pet")
+async def update_pet_map_based_on_objects(req: PlacedObjectsRequest):
+    
