@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import type { Layer } from '@deck.gl/core';
-import { makeScenegraphLayerForObjects, type ObjectFeature } from '../layers/objectLayer';
-import { rdToLonLat } from '../../features/buildings-3d/lib/crs';
-import { BBOX, OBJECTS } from '../utils/deckUtils';
+import { makeTreesLayer, type TreeInstance } from './lib/treeLayer';
+import { rdToLonLat } from '../../map/utils/crs';
+import { BBOX, OBJECTS } from '../../map/utils/deckUtils';
 
-export function useObjectLayers(showObjects: boolean, selectedObjectType: string) {
+export function useStaticTreesLayer(showObjects: boolean, selectedObjectType: string) {
   const [objectLayer, setObjectLayer] = useState<Layer | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
@@ -28,7 +28,7 @@ export function useObjectLayers(showObjects: boolean, selectedObjectType: string
         }[];
 
         // Transform the data
-        const data: ObjectFeature[] = features.map((feature) => {
+        const data: TreeInstance[] = features.map((feature) => {
           const [xRD, yRD] = feature.geometry.coordinates;
           const [lon, lat] = rdToLonLat(xRD, yRD);
 
@@ -43,7 +43,7 @@ export function useObjectLayers(showObjects: boolean, selectedObjectType: string
           };
         });
 
-        const layer = makeScenegraphLayerForObjects(
+        const layer = makeTreesLayer(
           'objects',
           data,
           OBJECTS[selectedObjectType].url

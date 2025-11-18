@@ -17,7 +17,7 @@ jest.mock('../../features/buildings-3d/lib/buildingsLayer', () => ({
   buildObjLayerFromMesh: jest.fn(),
   computeCentroidRD: jest.fn()
 }));
-jest.mock('../../features/buildings-3d/lib/crs', () => ({
+jest.mock('../utils/crs', () => ({
   rdToLonLat: jest.fn()
 }));
 
@@ -25,7 +25,7 @@ import {useDeckLayers} from './useDeckLayers';
 import {makeOsmTileLayer} from '../../features/basemap/lib/osmLayer';
 import {load} from '@loaders.gl/core';
 import {buildObjLayerFromMesh, computeCentroidRD} from '../../features/buildings-3d/lib/buildingsLayer';
-import {rdToLonLat} from '../../features/buildings-3d/lib/crs';
+import {rdToLonLat} from '../utils/crs';
 
 function meshWithPositions(arr: number[]): Mesh {
   const pos = Float32Array.from(arr);

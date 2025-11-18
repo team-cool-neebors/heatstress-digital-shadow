@@ -3,7 +3,7 @@ import type { Layer } from '@deck.gl/core';
 import { load } from '@loaders.gl/core';
 import { OBJLoader } from '@loaders.gl/obj';
 import { buildObjLayerFromMesh, computeCentroidRD } from './lib/buildingsLayer';
-import { rdToLonLat } from './lib/crs';
+import { rdToLonLat } from '../../map/utils/crs';
 import type { Mesh } from '@loaders.gl/schema';
 import { getPositionArray, resolveUrl } from '../../map/utils/deckUtils';
 

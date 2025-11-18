@@ -2,7 +2,7 @@ import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import type {Mesh, MeshAttribute} from '@loaders.gl/schema';
 import proj4 from 'proj4';
-import { RD } from './crs';
+import { RD } from '../../../map/utils/crs';
 
 /** centroid of a POSITION array [x,y,z,...] in RD meters */
 export function computeCentroidRD(positions: Float32Array) {
