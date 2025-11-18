@@ -1,22 +1,48 @@
-import React from "react";
+import React, { useCallback } from "react";
 import DeckMap from "./map/DeckMap";
 import { useDeckLayers } from "./map/hooks/useDeckLayers";
 import Burger from "./ui/Burger";
 import Menu from "./ui/Menu";
 import { useOnClickOutside } from "./ui/hooks/useOnClickOutside";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./map/hooks/qgisLayers";
+import type { PickingInfo } from "@deck.gl/core";
+
+// TODO: change this to backend API call to fetch available object types when db is added
+const OBJECT_TYPES = ['tree'];
 
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
+  const [showObjects, setShowObjects] = React.useState(false);
+  const [isEditingMode, setIsEditingMode] = React.useState(false);
+  const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
   const [showOverlay, setShowOverlay] = React.useState(false);
   const [overlayLayerId, setOverlayLayerId] = React.useState<QgisLayerId>("pet-version-1");
-
-  const { layers, error, featureInfo, handleMapClick } = useDeckLayers({
+  const {
+    layers,
+    error,
+    onViewStateClick,
+    saveObjects,
+    discardChanges,
+    hasUnsavedChanges,
+    featureInfo,
+    handleMapClick
+  } = useDeckLayers({
     showBuildings,
+    showObjects,
+    isEditingMode,
+    selectedObjectType,
     objPath: 'data/10-72-338-LoD22-3D.obj',
     showOverlay,
     overlayLayerId,
   });
+
+  const deckClickHandler = useCallback((info: PickingInfo) => {
+    const handledByInteraction = onViewStateClick(info);
+
+    handleMapClick(info);
+
+    return handledByInteraction;
+  }, [onViewStateClick, handleMapClick]);
 
   const [open, setOpen] = React.useState(false);
   const menuNode = React.useRef<HTMLDivElement>(null);
@@ -33,13 +59,46 @@ export default function App() {
           pitch: 45,
           bearing: 0,
         }}
-        onMapClick={handleMapClick}
+        onMapInteraction={deckClickHandler}
       />
 
-      <div
-        ref={menuNode}
-        style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
-      >
+      {isEditingMode && (
+        <div style={{
+          position: 'absolute',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          top: 10,
+          right: 10,
+          zIndex: 10
+        }}>
+          <select
+            value={selectedObjectType}
+            onChange={(e) => setSelectedObjectType(e.target.value)}
+            style={{ padding: '8px', marginRight: '10px' }}
+          >
+            {OBJECT_TYPES.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+          <button
+            onClick={saveObjects}
+            disabled={!hasUnsavedChanges}
+            style={{ padding: '8px 15px', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
+          >
+            Save Objects
+          </button>
+          <button
+            onClick={discardChanges}
+            disabled={!hasUnsavedChanges}
+            style={{ padding: '8px 15px', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
+          >
+            Discard Changes
+          </button>
+        </div>
+      )}
+
+      <div ref={menuNode} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
         <div style={{ pointerEvents: "auto" }}>
           <Burger open={open} setOpen={setOpen} aria-controls="main-menu" />
         </div>
@@ -50,7 +109,11 @@ export default function App() {
             open={open}
             onClose={() => setOpen(false)}
             showBuildings={showBuildings}
+            showObjects={showObjects}
             onToggleBuildings={setShowBuildings}
+            onToggleObjects={setShowObjects}
+            isEditingMode={isEditingMode}
+            onToggleEditingMode={setIsEditingMode}
             showOverlay={showOverlay}
             onToggleOverlay={setShowOverlay}
             overlayLayerId={overlayLayerId}

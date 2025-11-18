@@ -6,7 +6,11 @@ type Props = {
   onClose?: () => void;
   id?: string;
   showBuildings: boolean;
+  showObjects: boolean;
   onToggleBuildings: (v: boolean) => void;
+  onToggleObjects: (v: boolean) => void;
+  isEditingMode: boolean;
+  onToggleEditingMode: (v: boolean) => void;
 
   showOverlay: boolean;
   onToggleOverlay: (value: boolean) => void;
@@ -59,7 +63,11 @@ export default function Menu({
   open,
   id,
   showBuildings,
+  showObjects,
   onToggleBuildings,
+  onToggleObjects,
+  isEditingMode,
+  onToggleEditingMode,
   showOverlay,
   onToggleOverlay,
   overlayLayerId,
@@ -84,6 +92,24 @@ export default function Menu({
           onChange={(e) => onToggleBuildings(e.target.checked)}
         />
         Show buildings
+      </label>
+
+      <label style={{ display: "flex", alignItems: "center", gap: ".75rem", color: "#0d0c1d" }}>
+        <input
+          type="checkbox"
+          checked={showObjects}
+          onChange={(e) => onToggleObjects(e.target.checked)}
+        />
+        Show objects
+      </label>
+
+      <label style={{ display: "flex", alignItems: "center", gap: ".75rem", color: "#0d0c1d" }}>
+        <input
+          type="checkbox"
+          checked={isEditingMode}
+          onChange={(e) => onToggleEditingMode(e.target.checked)}
+        />
+        Editing Mode
       </label>
 
       {/* QGIS overlay toggle */}

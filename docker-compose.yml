@@ -54,6 +54,8 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+    networks:
+      - qgis-server-net
     volumes:
       - ./backend:/app
 

@@ -108,4 +108,3 @@ export function buildObjLayerFromMesh(
     pickable: true
   });
 }
-
