@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Layer } from '@deck.gl/core';
 import { makeScenegraphLayerForObjects, type ObjectFeature } from '../layers/objectLayer';
-import { rdToLonLat } from '../utils/crs';
+import { rdToLonLat } from '../../features/buildings-3d/lib/crs';
 import { BBOX, OBJECTS } from '../utils/deckUtils';
 
 export function useObjectLayers(showObjects: boolean, selectedObjectType: string) {

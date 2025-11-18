@@ -1,4 +1,4 @@
-import { rdToLonLat } from '../utils/crs';
+import { rdToLonLat } from './crs';
 
 type RDBBox = [minX: number, minY: number, maxX: number, maxY: number];
 export type LonLatBBox = [west: number, south: number, east: number, north: number];

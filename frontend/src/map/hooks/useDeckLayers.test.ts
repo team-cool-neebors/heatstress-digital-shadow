@@ -24,8 +24,8 @@ jest.mock('../utils/crs', () => ({
 import {useDeckLayers} from './useDeckLayers';
 import {makeOsmTileLayer} from '../layers/osmLayer';
 import {load} from '@loaders.gl/core';
-import {buildObjLayerFromMesh, computeCentroidRD} from '../layers/buildingsLayer';
-import {rdToLonLat} from '../utils/crs';
+import {buildObjLayerFromMesh, computeCentroidRD} from '../../features/buildings-3d/lib/buildingsLayer';
+import {rdToLonLat} from '../../features/buildings-3d/lib/crs';
 
 function meshWithPositions(arr: number[]): Mesh {
   const pos = Float32Array.from(arr);
