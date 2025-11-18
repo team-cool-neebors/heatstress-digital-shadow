@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { Layer } from '@deck.gl/core';
 import type { QgisLayerId } from './qgisLayers';
-import { makeOsmTileLayer } from '../layers/osmLayer';
+import { makeOsmTileLayer } from '../../features/basemap/lib/osmLayer';
 import { useBuildingsLayer } from '../../features/buildings-3d/useBuildingsLayer';
 import { useObjectLayers } from './useObjectLayers';
 import { useUserObjectLayers } from './useUserObjectLayers';
@@ -33,7 +33,7 @@ export function useDeckLayers({
     error: buildingError
   } = useBuildingsLayer({
     visible: showBuildings,
-    objPath: objPath ?? '/data/10-72-338-LoD22-3D.obj'
+    objPath: objPath,
   });
 
   const { objectLayer, error: objectError } = useObjectLayers(
