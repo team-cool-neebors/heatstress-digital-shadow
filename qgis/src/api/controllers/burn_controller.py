@@ -1,12 +1,12 @@
 from fastapi import APIRouter
-from src.api.requests import BurnRequest
+from src.api.requests import PlacedObjectsRequest
 from src.services.raster_service import RasterService
 
 router = APIRouter()
 raster_service = RasterService()
 
 @router.post("/points")
-def burn_point_to_raster(req: BurnRequest):
+def burn_point_to_raster(req: PlacedObjectsRequest):
     input_raster = "/app/data/bbox-test.tif"
     raster_service.burn_points_to_raster(input_raster, req.points)
 

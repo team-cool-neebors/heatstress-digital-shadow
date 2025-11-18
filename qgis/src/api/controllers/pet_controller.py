@@ -4,6 +4,7 @@ from src.services.raster_service import RasterService
 from src.services.shadow_service import ShadowService
 from src.services.geojson_service import GeoJSONService
 from datetime import datetime, timedelta
+from src.api.requests.placed_objects_request import PlacedObjectsRequest
 
 router = APIRouter()
 pet_service = PETService()
@@ -69,4 +70,20 @@ def get_uhi_zone():
     return {
         "status": "success",
         "message": "Map(s) generated successfully",
+    }
+
+
+@router.post("/update")
+def burn_point_to_raster(req: PlacedObjectsRequest):
+    input_raster = "/app/data/dsm.TIF"    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_raster = f"/app/data/dsm_{timestamp}.tif"
+    
+    raster_service.burn_points_to_raster(input_raster, req.points, output_path=output_raster)
+
+    return {
+        "status": "success",
+        "message": f"Burned {len(req.points)} point(s) into raster.",
+        "params": {"points": [p.dict() for p in req.points]},
+        "output": output_raster,
     }
