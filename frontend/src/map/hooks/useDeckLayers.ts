@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import type { Layer } from '@deck.gl/core';
-import type { QgisLayerId } from './qgisLayers';
+import type { QgisLayerId } from '../../features/wms-overlay/lib/qgisLayers';
 import { makeOsmTileLayer } from '../../features/basemap/lib/osmLayer';
 import { useBuildingsLayer } from '../../features/buildings-3d/useBuildingsLayer';
 import { useObjectLayers } from './useObjectLayers';
 import { useUserObjectLayers } from './useUserObjectLayers';
-import { useWMSLayers } from './useWMSLayers';
+import { useWMSLayers } from '../../features/wms-overlay/useWMSLayers';
 
 type UseDeckLayersOpts = {
   objPath?: string;

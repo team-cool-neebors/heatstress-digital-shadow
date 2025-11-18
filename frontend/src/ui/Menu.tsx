@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import type { QgisLayerId } from "../map/hooks/qgisLayers";
+import type { QgisLayerId } from "../features/wms-overlay/lib/qgisLayers";
 
 type Props = {
   open: boolean;

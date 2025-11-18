@@ -1,7 +1,7 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import type {Layer} from '@deck.gl/core';
 import type {Mesh, MeshAttribute} from '@loaders.gl/schema';
-import type {QgisLayerId} from './qgisLayers';
+import type {QgisLayerId} from '../../features/wms-overlay/lib/qgisLayers';
 
 jest.mock('../../features/basemap/lib/osmLayer', () => ({
   makeOsmTileLayer: jest.fn()
