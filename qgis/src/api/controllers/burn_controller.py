@@ -7,7 +7,7 @@ raster_service = RasterService()
 
 @router.post("/points")
 def burn_point_to_raster(req: PlacedObjectsRequest):
-    input_raster = "/app/data/bbox-test.tif"
+    input_raster = "/data/bbox-test.tif"
     raster_service.burn_points_to_raster(input_raster, req.points)
 
     return {
@@ -19,6 +19,6 @@ def burn_point_to_raster(req: PlacedObjectsRequest):
 
 @router.get('/clean')
 def clean_raster(): 
-    input_raster = "/app/data/bbox-dsm.tif"
+    input_raster = "/data/bbox-dsm.tif"
     input_raster = raster_service.load_raster_layer(input_raster, "bbox-dsm")
-    raster_service.fill_nodata_gdal(input_raster, '/app/data/cleaned.tif')
+    raster_service.fill_nodata_gdal(input_raster, '/data/cleaned.tif')
