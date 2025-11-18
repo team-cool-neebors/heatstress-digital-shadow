@@ -78,12 +78,29 @@ def burn_point_to_raster(req: PlacedObjectsRequest):
     input_raster = "/app/data/dsm.TIF"    
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_raster = f"/app/data/dsm_{timestamp}.tif"
+    pet_raster = f"/app/data/pet_{timestamp}.tif"
     
     raster_service.burn_points_to_raster(input_raster, req.points, output_path=output_raster)
+
+    output_folder = "/app/data/shadow-maps"
+    lat, lon = 51.498, 3.613
+    start_dt = datetime(2015, 7, 1, 15, 0, 0)
+    end_dt = datetime(2015, 7, 1, 15, 0, 0)
+
+    shadow_service.generate_hillshade_maps(
+        output_raster, output_folder, lat, lon, start_dt, end_dt
+    )
+    
+    pet_service.calculate_total_pet_map(
+        "/app/data/shadow-maps/hillshade_20150701_1500.tif",
+        "/app/data/uhi/sun-pet.tif",
+        "/app/data/uhi/shadow-pet.tif",
+        pet_raster,
+    )
 
     return {
         "status": "success",
         "message": f"Burned {len(req.points)} point(s) into raster.",
         "params": {"points": [p.dict() for p in req.points]},
-        "output": output_raster,
+        "output": pet_raster,
     }
