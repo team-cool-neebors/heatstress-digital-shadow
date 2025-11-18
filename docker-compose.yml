@@ -27,7 +27,7 @@ services:
     volumes:
      # Data should be mount RO when working
      # with GeoPackages and more than one QGIS container
-      - ./server/test/data:/io/data:ro
+      - ./data:/io/data:rw
       - ./plugins:/io/plugins
       - ./fonts:/usr/share/fonts
       - ./svg:/var/lib/qgis/.local/share/QGIS/QGIS3/profiles/default/svg
@@ -41,7 +41,7 @@ services:
       - "9000:8000"
     volumes:
       - ./qgis:/app
-      - data_volume:/data
+      - ./data:/data
     environment:
       - QT_QPA_PLATFORM=offscreen
       - QGIS_PREFIX_PATH=/usr
@@ -71,9 +71,6 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-
-volumes:
-  data_volume:
-
+    
 networks:
   qgis-server-net:
