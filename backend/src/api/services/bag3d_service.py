@@ -82,12 +82,27 @@ class Bag3DService:
                 
                 raw_pand_data = pand_response.json()
                 raw_vbo_data = vbo_response.json()
+                
 
             except httpx.HTTPStatusError as e:
-                # Handle specific HTTP status errors
-                if e.response.status_code == 404:
-                    raise HTTPException(status_code=404, detail=f"BAG data not found for ID: {bag_id}")
-                raise HTTPException(status_code=500, detail=f"External BAG API error: {e}")
+                status_code = e.response.status_code
+
+                if status_code >= 400 and status_code < 500:
+                    raise HTTPException(
+                        status_code=404, 
+                        detail=f"BAG data not found or ID is invalid: {bag_id} (Upstream code: {status_code})"
+                    )
+                
+                if status_code >= 500:
+                    raise HTTPException(
+                        status_code=500, 
+                        detail=f"External BAG API server error: {e}"
+                    )
+                
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"External BAG API returned unexpected code {status_code}: {e}"
+                )
             
             except httpx.RequestError as e:
                 # Handle network/connection errors (DNS, timeouts)
