@@ -5,6 +5,7 @@ from src.services.shadow_service import ShadowService
 from src.services.geojson_service import GeoJSONService
 from datetime import datetime, timedelta
 from src.api.requests.placed_objects_request import PlacedObjectsRequest
+from src.utils.update_qgis_project import update_pet_layer_in_project
 
 router = APIRouter()
 pet_service = PETService()
@@ -97,6 +98,8 @@ def burn_point_to_raster(req: PlacedObjectsRequest):
         "/data/uhi/shadow-pet.tif",
         pet_raster,
     )
+    
+    update_pet_layer_in_project("/data/server/map.qgz", pet_raster, f"pet_{timestamp}")
 
     return {
         "status": "success",
