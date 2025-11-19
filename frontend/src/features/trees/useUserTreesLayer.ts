@@ -119,9 +119,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
                 }),
             };
 
-            console.log('JSON payload:', JSON.stringify(payload));
-
-            const response = await fetch('/backend/update-pet', {
+             const response = await fetch('/backend/update-pet', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -133,9 +131,11 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
                 throw new Error(`Failed to update pet: ${response.status} ${response.statusText}`);
             }
 
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
+            await Promise.resolve().then(() => {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
+                setUserObjects(objectsToSave);
+            });
 
-            setUserObjects(objectsToSave);
         } catch (e) {
             console.error('Error saving objects to local storage:', e);
             setError(e instanceof Error ? e : new Error(String(e)));
