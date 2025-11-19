@@ -1,8 +1,8 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
-import {useQgisFeatureInfo} from './qgisFeatureInfo';
-import {buildGetFeatureInfoUrl, type LonLatBBox} from '../layers/wmsLayer';
+import { useQgisFeatureInfo } from './qgisFeatureInfo';
+import {buildGetFeatureInfoUrl, type LonLatBBox} from './wmsLayer';
 
-jest.mock('../layers/wmsLayer', () => ({
+jest.mock('./wmsLayer', () => ({
   buildGetFeatureInfoUrl: jest.fn()
 }));
 

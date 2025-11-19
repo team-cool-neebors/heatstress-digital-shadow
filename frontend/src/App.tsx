@@ -4,7 +4,7 @@ import { useDeckLayers } from "./map/hooks/useDeckLayers";
 import Burger from "./ui/Burger";
 import Menu from "./ui/Menu";
 import { useOnClickOutside } from "./ui/hooks/useOnClickOutside";
-import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./map/hooks/qgisLayers";
+import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
 import type { PickingInfo } from "@deck.gl/core";
 
 // TODO: change this to backend API call to fetch available object types when db is added

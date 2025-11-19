@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Layer, PickingInfo } from '@deck.gl/core';
-import { makeScenegraphLayerForObjects, type ObjectFeature } from '../layers/objectLayer';
-import { LOCAL_STORAGE_KEY, OBJECTS, DEFAULT_OBJECT_TYPE } from '../utils/deckUtils';
+import { makeTreesLayer, type TreeInstance } from './lib/treeLayer';
+import { LOCAL_STORAGE_KEY, OBJECTS, DEFAULT_OBJECT_TYPE } from '../../map/utils/deckUtils';
 
-export function useUserObjectLayers(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
+export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
 
-    const [userObjects, setUserObjects] = useState<ObjectFeature[]>(() => {
+    const [userObjects, setUserObjects] = useState<TreeInstance[]>(() => {
         try {
             const storedValue = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (!storedValue) return [];
@@ -17,7 +17,7 @@ export function useUserObjectLayers(showObjects: boolean, isEditingMode: boolean
         }
     });
 
-    const [objectsToSave, setObjectsToSave] = useState<ObjectFeature[]>(userObjects);
+    const [objectsToSave, setObjectsToSave] = useState<TreeInstance[]>(userObjects);
     const [nextClientId, setNextClientId] = useState(0);
     const [error, setError] = useState<Error | null>(null);
 
@@ -31,7 +31,7 @@ export function useUserObjectLayers(showObjects: boolean, isEditingMode: boolean
         if (!isEditingMode) return;
 
         if (info.object) {
-            const clickedObject = info.object as ObjectFeature;
+            const clickedObject = info.object as TreeInstance;
             const clickedLayerId = info.layer?.id;
             const objectIdToRemove = clickedObject.id;
 
@@ -53,7 +53,7 @@ export function useUserObjectLayers(showObjects: boolean, isEditingMode: boolean
         const newId = `CLIENT-${selectedObjectType}-${Date.now()}-${nextClientId}`;
         setNextClientId(prev => prev + 1);
 
-        const newObject: ObjectFeature = {
+        const newObject: TreeInstance = {
             id: newId,
             objectType: selectedObjectType,
             position: [lon, lat, 1],
@@ -71,7 +71,7 @@ export function useUserObjectLayers(showObjects: boolean, isEditingMode: boolean
 
         const typeConfig = OBJECTS[DEFAULT_OBJECT_TYPE];
 
-        return makeScenegraphLayerForObjects(
+        return makeTreesLayer(
             'user-objects',
             objectsToSave,
             typeConfig.url,

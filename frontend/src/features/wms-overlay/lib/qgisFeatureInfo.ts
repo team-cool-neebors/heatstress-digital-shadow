@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { buildGetFeatureInfoUrl, type LonLatBBox } from "../layers/wmsLayer";
+import { buildGetFeatureInfoUrl, type LonLatBBox } from "./wmsLayer";
 
 export interface PetFeatureInfo {
   lon: number;
