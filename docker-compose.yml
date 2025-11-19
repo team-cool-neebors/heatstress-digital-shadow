@@ -48,6 +48,8 @@ services:
       - PYTHONPATH=/usr/share/qgis/python
       - LD_LIBRARY_PATH=/usr/lib/qgis
       - DATA_PATH=/data
+    networks: 
+      - qgis-server-net
 
   backend:
     container_name: backend
