@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import type { Layer } from '@deck.gl/core';
-import type { QgisLayerId } from "./qgisLayers";
-import { makeOsmTileLayer } from '../layers/osmLayer';
-import { useBuildingLayers } from './useBuildingLayers';
-import { useObjectLayers } from './useObjectLayers';
-import { useUserObjectLayers } from './useUserObjectLayers';
-import { useWMSLayers } from './useWMSLayers';
+import type { QgisLayerId } from '../../features/wms-overlay/lib/qgisLayers';
+import { makeOsmTileLayer } from '../../features/basemap/lib/osmLayer';
+import { useBuildingsLayer } from '../../features/buildings-3d/useBuildingsLayer';
+import { useStaticTreesLayer } from '../../features/trees/useStaticTreesLayer';
+import { useUserTreesLayer } from '../../features/trees/useUserTreesLayer';
+import { useWMSLayers } from '../../features/wms-overlay/useWMSLayers';
 
 type UseDeckLayersOpts = {
   objPath?: string;
@@ -17,11 +17,35 @@ type UseDeckLayersOpts = {
   overlayLayerId: QgisLayerId;
 };
 
-export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMode, selectedObjectType, showOverlay, overlayLayerId }: UseDeckLayersOpts) {
+export function useDeckLayers({
+  objPath,
+  showBuildings,
+  showObjects,
+  isEditingMode,
+  selectedObjectType,
+  showOverlay,
+  overlayLayerId
+}: UseDeckLayersOpts) {
   const osmBase = useMemo<Layer>(() => makeOsmTileLayer(), []);
-  const { buildingsLayer, error: buildingError } = useBuildingLayers(objPath, showBuildings);
-  const { objectLayer, error: objectError } = useObjectLayers(showObjects, selectedObjectType);
-  const { wmsLayer, featureInfo, handleMapClick } = useWMSLayers({ showOverlay, overlayLayerId });
+
+  const {
+    layer: buildingsLayer,
+    error: buildingError
+  } = useBuildingsLayer({
+    visible: showBuildings,
+    objPath: objPath,
+  });
+
+  const { objectLayer, error: objectError } = useStaticTreesLayer(
+    showObjects,
+    selectedObjectType
+  );
+
+  const { wmsLayer, featureInfo, handleMapClick } = useWMSLayers({
+    showOverlay,
+    overlayLayerId
+  });
+
   const {
     userObjectLayer,
     handleInteraction,
@@ -29,16 +53,15 @@ export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMo
     discardChanges,
     error: userObjectError,
     hasUnsavedChanges
-  } = useUserObjectLayers(showObjects, isEditingMode, selectedObjectType);
+  } = useUserTreesLayer(showObjects, isEditingMode, selectedObjectType);
 
-  // Combine all errors for display
   const error = buildingError || objectError || userObjectError || null;
 
   const layers: Layer[] = useMemo(() => {
     const arr: Layer[] = [osmBase];
 
     if (buildingsLayer) arr.push(buildingsLayer);
-    if (objectLayer) arr.push(objectLayer)
+    if (objectLayer) arr.push(objectLayer);
     if (userObjectLayer) arr.push(userObjectLayer);
     if (wmsLayer) arr.push(wmsLayer);
 
@@ -49,8 +72,8 @@ export function useDeckLayers({ objPath, showBuildings, showObjects, isEditingMo
     layers,
     error,
     onViewStateClick: handleInteraction,
-    saveObjects: saveObjects,
-    discardChanges: discardChanges,
+    saveObjects,
+    discardChanges,
     hasUnsavedChanges,
     featureInfo,
     handleMapClick

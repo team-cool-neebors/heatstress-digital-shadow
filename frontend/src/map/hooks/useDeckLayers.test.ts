@@ -1,9 +1,9 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import type {Layer} from '@deck.gl/core';
 import type {Mesh, MeshAttribute} from '@loaders.gl/schema';
-import type {QgisLayerId} from './qgisLayers';
+import type {QgisLayerId} from '../../features/wms-overlay/lib/qgisLayers';
 
-jest.mock('../layers/osmLayer', () => ({
+jest.mock('../../features/basemap/lib/osmLayer', () => ({
   makeOsmTileLayer: jest.fn()
 }));
 jest.mock('@loaders.gl/core', () => ({
@@ -13,7 +13,7 @@ jest.mock('@loaders.gl/core', () => ({
 jest.mock('@loaders.gl/obj', () => ({
   OBJLoader: {name: 'OBJLoader'}
 }));
-jest.mock('../layers/buildingsLayer', () => ({
+jest.mock('../../features/buildings-3d/lib/buildingsLayer', () => ({
   buildObjLayerFromMesh: jest.fn(),
   computeCentroidRD: jest.fn()
 }));
@@ -22,9 +22,9 @@ jest.mock('../utils/crs', () => ({
 }));
 
 import {useDeckLayers} from './useDeckLayers';
-import {makeOsmTileLayer} from '../layers/osmLayer';
+import {makeOsmTileLayer} from '../../features/basemap/lib/osmLayer';
 import {load} from '@loaders.gl/core';
-import {buildObjLayerFromMesh, computeCentroidRD} from '../layers/buildingsLayer';
+import {buildObjLayerFromMesh, computeCentroidRD} from '../../features/buildings-3d/lib/buildingsLayer';
 import {rdToLonLat} from '../utils/crs';
 
 function meshWithPositions(arr: number[]): Mesh {
@@ -35,7 +35,6 @@ function meshWithPositions(arr: number[]): Mesh {
 
 const osmLayerMock: Layer = {id: 'raster-tiles'} as unknown as Layer;
 
-// default overlay layer id for tests (doesn't really matter because showOverlay=false)
 const DEFAULT_LAYER_ID: QgisLayerId = 'pet-version-1';
 
 describe('useDeckLayers (Option A: objPath inside hook)', () => {
@@ -50,7 +49,10 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         objPath: 'data/foo.obj',
         showBuildings: false,
         showOverlay: false,
-        overlayLayerId: DEFAULT_LAYER_ID
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
       })
     );
     expect(result.current.layers).toHaveLength(1);
@@ -64,7 +66,10 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
       useDeckLayers({
         showBuildings: true,
         showOverlay: false,
-        overlayLayerId: DEFAULT_LAYER_ID
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
       })
     );
     expect(result.current.layers).toHaveLength(1);
@@ -85,7 +90,10 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         objPath: 'data/10-72-338-LoD22-3D.obj',
         showBuildings: true,
         showOverlay: false,
-        overlayLayerId: DEFAULT_LAYER_ID
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
       })
     );
 
@@ -128,7 +136,10 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         objPath: 'data/another.obj',
         showBuildings: true,
         showOverlay: false,
-        overlayLayerId: DEFAULT_LAYER_ID
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
       })
     );
 
@@ -150,7 +161,10 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         objPath: 'data/bad.obj',
         showBuildings: true,
         showOverlay: false,
-        overlayLayerId: DEFAULT_LAYER_ID
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
       })
     );
 
@@ -172,6 +186,9 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
       showBuildings?: boolean;
       showOverlay: boolean;
       overlayLayerId: QgisLayerId;
+      showObjects: boolean,
+      isEditingMode: boolean,
+      selectedObjectType: string,
     };
 
     const {result, rerender} = renderHook(
@@ -181,7 +198,10 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
           objPath: 'data/foo.obj',
           showBuildings: true,
           showOverlay: true,
-          overlayLayerId: DEFAULT_LAYER_ID
+          overlayLayerId: DEFAULT_LAYER_ID,
+          showObjects: false,
+          isEditingMode: false,
+          selectedObjectType: 'trees'
         }
       }
     );
@@ -193,7 +213,10 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         objPath: 'data/foo.obj',
         showBuildings: false,
         showOverlay: false,
-        overlayLayerId: DEFAULT_LAYER_ID
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
       })
     );
 

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import type { QgisLayerId } from "../map/hooks/qgisLayers";
+import type { QgisLayerId } from "../features/wms-overlay/lib/qgisLayers";
 
 type Props = {
   open: boolean;
@@ -11,7 +11,6 @@ type Props = {
   onToggleObjects: (v: boolean) => void;
   isEditingMode: boolean;
   onToggleEditingMode: (v: boolean) => void;
-
   showOverlay: boolean;
   onToggleOverlay: (value: boolean) => void;
   overlayLayerId: QgisLayerId;
@@ -83,7 +82,6 @@ export default function Menu({
           alignItems: "center",
           gap: ".75rem",
           color: "#0d0c1d",
-          marginBottom: "1rem",
         }}
       >
         <input
