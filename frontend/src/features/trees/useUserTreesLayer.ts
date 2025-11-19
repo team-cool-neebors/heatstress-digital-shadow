@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Layer, PickingInfo } from '@deck.gl/core';
 import { makeTreesLayer, type TreeInstance } from './lib/treeLayer';
 import { LOCAL_STORAGE_KEY, OBJECTS, DEFAULT_OBJECT_TYPE } from '../../map/utils/deckUtils';
+import { lonLatToRd } from '../../map/utils/crs';
 
 export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
 
@@ -104,6 +105,34 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
 
     const saveObjects = useCallback(async () => {
         try {
+            const payload = {
+                points: objectsToSave.map(obj => {
+                    const [lon, lat] = obj.position;
+
+                    const [x, y] = lonLatToRd(lon, lat);
+
+                    return {
+                        x,
+                        y,
+                        geometry: 'circle', // currently qgis only accepts the geometry as circle, should be changed later
+                    };
+                }),
+            };
+
+            console.log('JSON payload:', JSON.stringify(payload));
+
+            const response = await fetch('/backend/update-pet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to update pet: ${response.status} ${response.statusText}`);
+            }
+
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
 
             setUserObjects(objectsToSave);
