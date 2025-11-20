@@ -1,5 +1,5 @@
-import { makeOsmTileLayer } from './osmLayer';
-import type { ImageLike, RenderSubLayerProps } from './osmLayer';
+import { makeOsmTileLayer } from './lib/osmLayer';
+import type { ImageLike, RenderSubLayerProps } from './lib/osmLayer';
 import { TileLayer } from '@deck.gl/geo-layers';
 import { BitmapLayer } from '@deck.gl/layers';
 import type { Layer, LayersList } from '@deck.gl/core';

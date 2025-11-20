@@ -5,11 +5,14 @@ from .bag3d_model import (
     VboData,
     AggregatedBagResponse,
 )
+from .point import Point
 
 __all__ = [
     "WFSParams",
     "RecordMetadata",
     "PandData",
     "VboData",
-    "AggregatedBagResponse",
+    "AggregatedBagResponse"
+    "WFSParams",
+    "Point"
 ]

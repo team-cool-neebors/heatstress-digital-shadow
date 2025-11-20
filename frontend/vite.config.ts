@@ -6,22 +6,23 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/3dbag': {
-        target: 'https://api.3dbag.nl',
-        changeOrigin: true,
-        secure: true,
-        rewrite: path => path.replace(/^\/3dbag/, '')
-      },
-      '/qgis': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        rewrite: p => p.replace(/^\/qgis/, '')
-      },
       '/backend': {
         target: 'http://backend:8000',
         changeOrigin: true,
         rewrite: p => p.replace(/^\/backend/, '')
-      }
+      },
+      '/nginx': {
+        target: 'http://nginx:80',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/nginx/, ''),
+        configure: (proxy) => {
+          // add permissive CORS headers on the fly (dev only)
+          proxy.on('proxyRes', (proxyRes) => {
+            proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+            proxyRes.headers['Access-Control-Allow-Headers'] = '*';
+          });
+        }
+      },
     }
   }
 });
