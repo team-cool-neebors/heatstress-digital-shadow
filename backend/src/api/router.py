@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Depends, Response, Cookie
+from fastapi import APIRouter, Depends, Response, Cookie, Request
 from typing import Optional
-
 from src.api.controllers import WFSController, DataProcessingController, SessionController
+from src.api.controllers import WFSController, WMSController
 from src.api.models import WFSParams
 from src.api.requests import PlacedObjectsRequest
 
 wfs_controller = WFSController()
 dpc_controller = DataProcessingController()
 session_controller = SessionController()
-
+wms_controller = WMSController()
 api_router = APIRouter()
 
 
@@ -40,3 +40,10 @@ async def get_session(
         response=response,
         session_id=session_id,
     )
+    
+@api_router.api_route("/qgis/wms", methods=["GET"])
+async def proxy_qgis_wms(request: Request):
+    """
+    Generic WMS proxy. Forwards GetMap / GetFeatureInfo to QGIS WMS.
+    """
+    return await wms_controller.proxy(request)

@@ -25,3 +25,4 @@ dist-ssr
 
 # Data
 public/data/**/*.obj*
+!public/data
