@@ -68,6 +68,7 @@ export default function App() {
           bearing: 0,
         }}
         onMapInteraction={deckClickHandler}
+        isEditingMode={isEditingMode}
       />
 
       {isEditingMode && (
