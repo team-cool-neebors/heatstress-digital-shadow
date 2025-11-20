@@ -14,9 +14,10 @@ type Props = {
     pitch?: number;
     bearing?: number;
   };
+  isEditingMode?: boolean;
 };
 
-export default function DeckMap({ layers, initialViewState, onMapInteraction }: Props) {
+export default function DeckMap({ layers, initialViewState, onMapInteraction, isEditingMode = false }: Props) {
   return (
     <div onContextMenu={(evt) => { evt.preventDefault(); }} style={{ position: 'absolute', inset: 0 }}>
       <DeckGL
@@ -25,7 +26,11 @@ export default function DeckMap({ layers, initialViewState, onMapInteraction }: 
         layers={layers}
         initialViewState={initialViewState}
         onClick={onMapInteraction}
-        getCursor={({ isDragging }) => (isDragging ? "grabbing" : "default")}
+        getCursor={({ isDragging }) => {
+          if (isDragging) return "grabbing";
+          if (isEditingMode) return "crosshair";
+          return "default";
+        }}
       />
       <div
         style={{
