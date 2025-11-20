@@ -17,7 +17,7 @@ type Props = {
   showOverlay: boolean;
   onToggleOverlay: (value: boolean) => void;
   overlayLayerId: QgisLayerIdOrEmpty;
-onChangeOverlayLayer: (value: QgisLayerIdOrEmpty) => void;
+  onChangeOverlayLayer: (value: QgisLayerIdOrEmpty) => void;
   overlayLayerOptions: ReadonlyArray<{ id: QgisLayerId; label: string }>;
 };
 
@@ -54,22 +54,26 @@ export default function Menu({
           checked={showObjects}
           onChange={onToggleObjects}
         />
+        {showObjects && (
+          <div className={styles.menuItem}>
+          <label className={styles.menuItemLabel}>
+            <input
+              type="checkbox"
+              checked={isEditingMode}
+              onChange={(e) => onToggleEditingMode(e.target.checked)}
+            />
+            Editing Mode
+          </label>
+          </div>
+        )}
         <OverlayMenuItem
-  label="Map Overlay View"
-  checked={showOverlay}
-  onToggle={onToggleOverlay}
-  value={overlayLayerId}
-  onChange={onChangeOverlayLayer}
-  options={overlayLayerOptions}
-/>
-        <label style={{ display: "flex", alignItems: "center", gap: ".75rem", color: "#0d0c1d" }}>
-          <input
-            type="checkbox"
-            checked={isEditingMode}
-            onChange={(e) => onToggleEditingMode(e.target.checked)}
-          />
-          Editing Mode
-        </label>
+          label="Map Overlay View"
+          checked={showOverlay}
+          onToggle={onToggleOverlay}
+          value={overlayLayerId}
+          onChange={onChangeOverlayLayer}
+          options={overlayLayerOptions}
+        />
         <MenuUploadItem
           label="Import Your Own Map"
           categories={["Wind Map", "PET Map", "Weather Map"]}

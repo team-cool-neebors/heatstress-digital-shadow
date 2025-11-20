@@ -14,6 +14,13 @@ const OBJECT_TYPES = ['tree'];
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
   const [showObjects, setShowObjects] = React.useState(false);
+  const handleToggleObjects = (value: boolean) => {
+  setShowObjects(value);
+
+  if (!value) {
+    setIsEditingMode(false);
+  }
+};
   const [isEditingMode, setIsEditingMode] = React.useState(false);
   const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
   const [showOverlay, setShowOverlay] = React.useState(false);
@@ -112,7 +119,7 @@ export default function App() {
             showBuildings={showBuildings}
             showObjects={showObjects}
             onToggleBuildings={setShowBuildings}
-            onToggleObjects={setShowObjects}
+            onToggleObjects={handleToggleObjects}
             isEditingMode={isEditingMode}
             onToggleEditingMode={setIsEditingMode}
             showOverlay={showOverlay}

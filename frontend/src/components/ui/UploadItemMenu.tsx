@@ -54,7 +54,6 @@ export default function MenuUploadItem({
     <div className={styles.menuItem}>
       <div className={styles.menuItemLabel}>{label}</div>
 
-      {/* Dropdown + custom upload button */}
       <div className={styles.menuUploadRowHorizontal}>
         <select
           className={styles.menuSelect}
@@ -69,7 +68,6 @@ export default function MenuUploadItem({
           ))}
         </select>
 
-        {/* Hidden native file input */}
         <input
           id="fileUpload"
           type="file"
@@ -79,7 +77,6 @@ export default function MenuUploadItem({
           disabled={!selectedCategory}
         />
 
-        {/* Custom styled button triggers input click */}
         <label
           htmlFor="fileUpload"
           className={`${styles.customFileButton} ${!selectedCategory ? styles.disabledButton : ""}`}
