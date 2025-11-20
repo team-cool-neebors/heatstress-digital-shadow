@@ -24,8 +24,11 @@ async def get_objects_by_type(
 
 
 @api_router.post("/update-pet")
-async def update_pet_map_based_on_objects(req: PlacedObjectsRequest):
-    return await dpc_controller.update_map_placed_objects(req)
+async def update_pet_map_based_on_objects(
+    req: PlacedObjectsRequest,
+    session_id: Optional[str] = Cookie(default=None),
+):
+    return await dpc_controller.update_map_placed_objects(req, session_id)
 
 
 @api_router.get("/session/init")

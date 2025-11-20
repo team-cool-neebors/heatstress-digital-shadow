@@ -48,6 +48,21 @@ export default function App() {
   const menuNode = React.useRef<HTMLDivElement>(null);
   useOnClickOutside(menuNode.current, () => setOpen(false));
 
+  //TODO: Dom pls
+  React.useEffect(() => {
+    fetch("/backend/session/init", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Session initialized:", data);
+      })
+      .catch((err) => {
+        console.error("Failed to init session", err);
+      });
+  }, []);
+
   return (
     <div style={{ position: "relative", height: "100dvh", width: "100%" }}>
       <DeckMap
