@@ -1,17 +1,19 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import type {Layer} from '@deck.gl/core';
 import type {Mesh, MeshAttribute} from '@loaders.gl/schema';
+import type {QgisLayerId} from '../../features/wms-overlay/lib/qgisLayers';
 
-jest.mock('../layers/osmLayer', () => ({
+jest.mock('../../features/basemap/lib/osmLayer', () => ({
   makeOsmTileLayer: jest.fn()
 }));
 jest.mock('@loaders.gl/core', () => ({
-  load: jest.fn()
+  load: jest.fn(),
+  registerLoaders: jest.fn()
 }));
 jest.mock('@loaders.gl/obj', () => ({
   OBJLoader: {name: 'OBJLoader'}
 }));
-jest.mock('../layers/buildingsLayer', () => ({
+jest.mock('../../features/buildings-3d/lib/buildingsLayer', () => ({
   buildObjLayerFromMesh: jest.fn(),
   computeCentroidRD: jest.fn()
 }));
@@ -20,9 +22,9 @@ jest.mock('../utils/crs', () => ({
 }));
 
 import {useDeckLayers} from './useDeckLayers';
-import {makeOsmTileLayer} from '../layers/osmLayer';
+import {makeOsmTileLayer} from '../../features/basemap/lib/osmLayer';
 import {load} from '@loaders.gl/core';
-import {buildObjLayerFromMesh, computeCentroidRD} from '../layers/buildingsLayer';
+import {buildObjLayerFromMesh, computeCentroidRD} from '../../features/buildings-3d/lib/buildingsLayer';
 import {rdToLonLat} from '../utils/crs';
 
 function meshWithPositions(arr: number[]): Mesh {
@@ -33,6 +35,8 @@ function meshWithPositions(arr: number[]): Mesh {
 
 const osmLayerMock: Layer = {id: 'raster-tiles'} as unknown as Layer;
 
+const DEFAULT_LAYER_ID: QgisLayerId = 'pet-version-1';
+
 describe('useDeckLayers (Option A: objPath inside hook)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,7 +45,15 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
 
   test('returns only base layer when showBuildings is false', () => {
     const {result} = renderHook(() =>
-      useDeckLayers({objPath: 'data/foo.obj', showBuildings: false})
+      useDeckLayers({
+        objPath: 'data/foo.obj',
+        showBuildings: false,
+        showOverlay: false,
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
+      })
     );
     expect(result.current.layers).toHaveLength(1);
     expect(result.current.layers[0]).toBe(osmLayerMock);
@@ -51,7 +63,14 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
 
   test('returns only base layer when objPath is missing', () => {
     const {result} = renderHook(() =>
-      useDeckLayers({showBuildings: true})
+      useDeckLayers({
+        showBuildings: true,
+        showOverlay: false,
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
+      })
     );
     expect(result.current.layers).toHaveLength(1);
     expect(result.current.layers[0]).toBe(osmLayerMock);
@@ -67,12 +86,19 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
     (buildObjLayerFromMesh as jest.Mock).mockReturnValue(buildingsLayer);
 
     const {result} = renderHook(() =>
-      useDeckLayers({objPath: 'data/10-72-338-LoD22-3D.obj', showBuildings: true})
+      useDeckLayers({
+        objPath: 'data/10-72-338-LoD22-3D.obj',
+        showBuildings: true,
+        showOverlay: false,
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
+      })
     );
 
     await waitFor(() => expect(result.current.layers).toHaveLength(2));
 
-    // don’t assert the exact URL; just that a string URL was passed and it ends with the path
     expect(load).toHaveBeenCalledWith(
       expect.stringMatching(/data\/10-72-338-LoD22-3D\.obj$/),
       {name: 'OBJLoader'}
@@ -106,7 +132,15 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
     (buildObjLayerFromMesh as jest.Mock).mockReturnValue(buildingsLayer);
 
     const {result} = renderHook(() =>
-      useDeckLayers({objPath: 'data/another.obj', showBuildings: true})
+      useDeckLayers({
+        objPath: 'data/another.obj',
+        showBuildings: true,
+        showOverlay: false,
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
+      })
     );
 
     await waitFor(() => expect(result.current.layers).toHaveLength(2));
@@ -123,7 +157,15 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
     (load as jest.Mock).mockRejectedValue(new Error('boom'));
 
     const {result} = renderHook(() =>
-      useDeckLayers({objPath: 'data/bad.obj', showBuildings: true})
+      useDeckLayers({
+        objPath: 'data/bad.obj',
+        showBuildings: true,
+        showOverlay: false,
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
+      })
     );
 
     await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
@@ -139,13 +181,45 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
     const buildingsLayer: Layer = {id: 'buildings-obj'} as unknown as Layer;
     (buildObjLayerFromMesh as jest.Mock).mockReturnValue(buildingsLayer);
 
+    type Props = {
+      objPath?: string;
+      showBuildings?: boolean;
+      showOverlay: boolean;
+      overlayLayerId: QgisLayerId;
+      showObjects: boolean,
+      isEditingMode: boolean,
+      selectedObjectType: string,
+    };
+
     const {result, rerender} = renderHook(
-      (p: {objPath?: string; showBuildings?: boolean}) => useDeckLayers(p),
-      {initialProps: {objPath: 'data/foo.obj', showBuildings: true}}
+      (p: Props) => useDeckLayers(p),
+      {
+        initialProps: {
+          objPath: 'data/foo.obj',
+          showBuildings: true,
+          showOverlay: true,
+          overlayLayerId: DEFAULT_LAYER_ID,
+          showObjects: false,
+          isEditingMode: false,
+          selectedObjectType: 'trees'
+        }
+      }
     );
 
     await waitFor(() => expect(result.current.layers).toHaveLength(2));
-    act(() => rerender({objPath: 'data/foo.obj', showBuildings: false}));
+
+    act(() =>
+      rerender({
+        objPath: 'data/foo.obj',
+        showBuildings: false,
+        showOverlay: false,
+        overlayLayerId: DEFAULT_LAYER_ID,
+        showObjects: false,
+        isEditingMode: false,
+        selectedObjectType: 'trees'
+      })
+    );
+
     expect(result.current.layers).toHaveLength(1);
     expect(result.current.layers[0]).toBe(osmLayerMock);
   });

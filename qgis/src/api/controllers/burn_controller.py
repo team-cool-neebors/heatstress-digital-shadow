@@ -16,3 +16,9 @@ def burn_point_to_raster(req: BurnRequest):
         "params": {"points": [p.dict() for p in req.points]},
         "output": input_raster,
     }
+
+@router.get('/clean')
+def clean_raster(): 
+    input_raster = "/app/data/bbox-dsm.tif"
+    input_raster = raster_service.load_raster_layer(input_raster, "bbox-dsm")
+    raster_service.fill_nodata_gdal(input_raster, '/app/data/cleaned.tif')

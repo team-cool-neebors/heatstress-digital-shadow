@@ -1,17 +1,109 @@
 import os
 import math
+from datetime import datetime
 from qgis.PyQt.QtCore import QVariant
 from qgis.core import (
     QgsVectorLayer, QgsField, QgsRasterLayer, QgsProcessingFeedback
 )
+from qgis.analysis import QgsZonalStatistics
 from src.services.raster_service import RasterService
-
+from src.utils.uhi_lookup_tables import UHILookupTables
 
 class PETService:
     def __init__(self):
         self.raster_service = RasterService()
     def load_zonal_layer(self, path: str) -> QgsVectorLayer:
         return QgsVectorLayer(path, "zonal_layer", "ogr")
+    
+    def calculate_t_a_temperature(
+        self,
+        zonal_layer: QgsVectorLayer,
+        uhi_field = 'uhi',
+        base_temperature = 28.3,
+        date_time = datetime(2017, 7, 1, 18, 0)
+    ): 
+        field_name = "t_a"
+        if field_name not in [field.name() for field in zonal_layer.fields()]:
+            zonal_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Double)])
+            zonal_layer.updateFields()
+        
+        uhi_factor = UHILookupTables.get_uhi_factor(date_time)
+        print(uhi_factor)
+        zonal_layer.startEditing()
+        for feature in zonal_layer.getFeatures():
+            uhi = feature[uhi_field]
+            if uhi is None:
+                t_a = None
+            else:  
+                t_a = base_temperature + uhi * uhi_factor
+            feature[field_name] = t_a
+            zonal_layer.updateFeature(feature)
+        
+        zonal_layer.commitChanges()
+        return zonal_layer
+    
+    def calculate_zonal_uhi(
+        self,
+        zonal_layer: QgsVectorLayer,
+        bowen_ratio_layer: str|QgsRasterLayer,
+        svf_layer: str|QgsRasterLayer,
+        t_min = 27.2,
+        t_max = 29.1,
+        average_wind_speed = 7.5
+    ) -> QgsVectorLayer:
+        """
+        Calculates UHI directly on the ORIGINAL zonal_layer.
+        """
+        svf_obj, _ = self.convert_raster_layer_to_qgs_and_path(svf_layer)
+        br_obj,  _ = self.convert_raster_layer_to_qgs_and_path(bowen_ratio_layer)
+
+        if not svf_obj.isValid():
+            raise Exception("SVF raster is invalid")
+        if not br_obj.isValid():
+            raise Exception("Bowen ratio raster is invalid")
+        
+        zs_svf = QgsZonalStatistics(
+            zonal_layer,
+            svf_obj,
+            attributePrefix='svf_',
+            stats=QgsZonalStatistics.Mean
+        )
+        zs_svf.calculateStatistics(None)
+
+        zs_br = QgsZonalStatistics(
+            zonal_layer,
+            svf_obj,
+            attributePrefix='veg_',
+            stats=QgsZonalStatistics.Mean
+        )
+        zs_br.calculateStatistics(None)
+        
+        field_name = "uhi"
+        if field_name not in [f.name() for f in zonal_layer.fields()]:
+            zonal_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Double)])
+            zonal_layer.updateFields()
+
+        zonal_layer.startEditing()
+        temp_diff = t_max - t_min
+        base_value = (663 * (temp_diff ** 3)) / average_wind_speed
+        base_value = base_value ** 0.25
+
+        for feature in zonal_layer.getFeatures():
+
+            svf_mean = feature["svf_mean"]
+            veg_mean = feature["veg_mean"]
+
+            if svf_mean is None or veg_mean is None:
+                uhi = None
+            else:
+                uhi = (2 - svf_mean - veg_mean) * base_value
+
+            feature[field_name] = uhi
+            zonal_layer.updateFeature(feature)
+
+        zonal_layer.commitChanges()
+
+        return zonal_layer
 
     def calculate_wet_bulb_temp(self, zonal_layer: QgsVectorLayer, t_a_field = "t_a", r_h = 44.0) -> QgsVectorLayer:
         """
