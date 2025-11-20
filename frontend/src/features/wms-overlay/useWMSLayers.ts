@@ -1,8 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import type { Layer, PickingInfo } from '@deck.gl/core';
-import { makeWmsLayer } from '../layers/wmsLayer';
-import { useQgisFeatureInfo } from "./qgisFeatureInfo";
-import type { QgisLayerId } from "./qgisLayers";
+import { makeWmsLayer } from './lib/wmsLayer';
+import { useQgisFeatureInfo } from "./lib/qgisFeatureInfo";
+import type { QgisLayerId } from "./lib/qgisLayers";
 
 export const WMS_BOUNDS: [number, number, number, number] = [
     3.609725,     // west
