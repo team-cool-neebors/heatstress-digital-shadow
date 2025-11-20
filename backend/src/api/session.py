@@ -1,5 +1,6 @@
 import uuid
 from pathlib import Path
+import shutil
 
 SESSIONS_DIR = Path("/data/sessions")
 
@@ -9,7 +10,7 @@ def create_session() -> str:
     session_folder = SESSIONS_DIR / session_id
     session_folder.mkdir(parents=True, exist_ok=True)
     
-    # shutil.copy("/base/project.qgz", session_folder / "project.qgz")
+    shutil.copy("/data/starting-map.qgz", session_folder / "map.qgz")
 
     return session_id
 
