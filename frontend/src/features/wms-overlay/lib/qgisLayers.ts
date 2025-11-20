@@ -9,3 +9,4 @@ export const QGIS_OVERLAY_LAYERS = [
 ] as const;
 
 export type QgisLayerId = (typeof QGIS_OVERLAY_LAYERS)[number]["id"];
+export type QgisLayerIdOrEmpty = QgisLayerId | "";

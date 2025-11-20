@@ -1,10 +1,10 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import DeckMap from "./map/DeckMap";
 import { useDeckLayers } from "./map/hooks/useDeckLayers";
 import Burger from "./components/ui/Burger";
 import Menu from "./components/ui/Menu";
 import { useOnClickOutside } from "./components/ui/hooks/useOnClickOutside";
-import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
+import { QGIS_OVERLAY_LAYERS, type QgisLayerIdOrEmpty } from "./features/wms-overlay/lib/qgisLayers";
 import type { PickingInfo } from "@deck.gl/core";
 
 
@@ -17,7 +17,7 @@ export default function App() {
   const [isEditingMode, setIsEditingMode] = React.useState(false);
   const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
   const [showOverlay, setShowOverlay] = React.useState(false);
-  const [overlayLayerId, setOverlayLayerId] = React.useState<QgisLayerId>("pet-version-1");
+  const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerIdOrEmpty>("");
   const {
     layers,
     error,

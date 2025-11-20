@@ -71,3 +71,13 @@
   height: 1rem;
   cursor: pointer;
 }
+
+.menuItemDropdown {
+  margin-top: 0.75rem;
+}
+
+.menuSelect {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+}

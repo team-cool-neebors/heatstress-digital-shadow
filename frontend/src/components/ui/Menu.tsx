@@ -1,7 +1,8 @@
 import styles from "../../styles/ui/Menu.module.css";
 import MenuItem from "./ItemMenu";
 import MenuUploadItem from "./UploadItemMenu";
-import type { QgisLayerId } from "../../features/wms-overlay/lib/qgisLayers";
+import type { QgisLayerId, QgisLayerIdOrEmpty } from "../../features/wms-overlay/lib/qgisLayers";
+import OverlayMenuItem from "./OverlayMenuItem";
 
 type Props = {
   open: boolean;
@@ -15,8 +16,8 @@ type Props = {
   onToggleEditingMode: (v: boolean) => void;
   showOverlay: boolean;
   onToggleOverlay: (value: boolean) => void;
-  overlayLayerId: QgisLayerId;
-  onChangeOverlayLayer: (value: QgisLayerId) => void;
+  overlayLayerId: QgisLayerIdOrEmpty;
+onChangeOverlayLayer: (value: QgisLayerIdOrEmpty) => void;
   overlayLayerOptions: ReadonlyArray<{ id: QgisLayerId; label: string }>;
 };
 
@@ -34,7 +35,8 @@ export default function Menu({
   overlayLayerId,
   onChangeOverlayLayer,
   overlayLayerOptions,
-}: Props) {  return (
+}: Props) {
+  return (
     <nav
       id={id}
       className={`${styles.menu} ${open ? styles.open : styles.closed}`}
@@ -52,63 +54,22 @@ export default function Menu({
           checked={showObjects}
           onChange={onToggleObjects}
         />
-         <label style={{ display: "flex", alignItems: "center", gap: ".75rem", color: "#0d0c1d" }}>
-        <input
-          type="checkbox"
-          checked={isEditingMode}
-          onChange={(e) => onToggleEditingMode(e.target.checked)}
-        />
-        Editing Mode
-      </label>
-       {/* QGIS overlay toggle */}
-      <label
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: ".75rem",
-          color: "#0d0c1d",
-        }}
-      >
-        <input
-          type="checkbox"
-          checked={showOverlay}
-          onChange={(e) => onToggleOverlay(e.target.checked)}
-        />
-        Map Overlay View
-      </label>
-
-      {/* Overlay layer dropdown (only when enabled) */}
-      {showOverlay && (
-        <div style={{ marginTop: ".75rem" }}>
-          <label
-            style={{
-              display: "block",
-              fontSize: ".85rem",
-              color: "#555",
-              marginBottom: ".25rem",
-            }}
-          >
-            Overlay layer
-          </label>
-          <select
-            value={overlayLayerId}
-            onChange={(e) =>
-              onChangeOverlayLayer(e.target.value as QgisLayerId)
-            }
-            style={{
-              width: "100%",
-              padding: ".35rem .5rem",
-              fontSize: ".9rem",
-            }}
-          >
-            {overlayLayerOptions.map((opt) => (
-              <option key={opt.id} value={opt.id}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+        <OverlayMenuItem
+  label="Map Overlay View"
+  checked={showOverlay}
+  onToggle={onToggleOverlay}
+  value={overlayLayerId}
+  onChange={onChangeOverlayLayer}
+  options={overlayLayerOptions}
+/>
+        <label style={{ display: "flex", alignItems: "center", gap: ".75rem", color: "#0d0c1d" }}>
+          <input
+            type="checkbox"
+            checked={isEditingMode}
+            onChange={(e) => onToggleEditingMode(e.target.checked)}
+          />
+          Editing Mode
+        </label>
         <MenuUploadItem
           label="Import Your Own Map"
           categories={["Wind Map", "PET Map", "Weather Map"]}
