@@ -41,19 +41,21 @@ export function useDeckLayers({
     selectedObjectType
   );
 
-  const { wmsLayer, featureInfo, handleMapClick } = useWMSLayers({
-    showOverlay,
-    overlayLayerId
-  });
-
   const {
     userObjectLayer,
     handleInteraction,
     saveObjects,
     discardChanges,
     error: userObjectError,
-    hasUnsavedChanges
+    hasUnsavedChanges,
+    objectsVersion
   } = useUserTreesLayer(showObjects, isEditingMode, selectedObjectType);
+
+  const { wmsLayer, featureInfo, handleMapClick } = useWMSLayers({
+    showOverlay,
+    overlayLayerId,
+    objectsVersion,
+  });
 
   const error = buildingError || objectError || userObjectError || null;
 

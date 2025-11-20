@@ -17,13 +17,15 @@ export const WMS_HEIGHT = 2048;
 type UseWMSLayersOpts = {
     showOverlay: boolean;
     overlayLayerId: QgisLayerId;
+    objectsVersion: number;
 };
 
-export function useWMSLayers({ showOverlay, overlayLayerId }: UseWMSLayersOpts) {
+export function useWMSLayers({ showOverlay, overlayLayerId, objectsVersion }: UseWMSLayersOpts) {
     const wmsLayer = useMemo<Layer | null>(() => {
         if (!showOverlay) return null;
 
         return makeWmsLayer({
+            id: `wms-${overlayLayerId}-${objectsVersion}`,
             baseUrl: "/nginx",
             layerName: overlayLayerId,
             bounds: WMS_BOUNDS,
@@ -31,8 +33,9 @@ export function useWMSLayers({ showOverlay, overlayLayerId }: UseWMSLayersOpts) 
             height: WMS_HEIGHT,
             transparent: true,
             opacity: 1,
+            cacheBuster: objectsVersion,
         });
-    }, [showOverlay, overlayLayerId]);
+    }, [showOverlay, overlayLayerId, objectsVersion]);
 
     const { featureInfo, request, clear } = useQgisFeatureInfo({
         bounds: WMS_BOUNDS,

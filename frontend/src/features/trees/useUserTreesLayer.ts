@@ -20,6 +20,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
 
     const [objectsToSave, setObjectsToSave] = useState<TreeInstance[]>(userObjects);
     const [nextClientId, setNextClientId] = useState(0);
+    const [objectsVersion, setObjectsVersion] = useState(0);
     const [error, setError] = useState<Error | null>(null);
 
     // Sync objectsToSave when userObjects changes (on initial load/save commit)
@@ -134,6 +135,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
             await Promise.resolve().then(() => {
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
                 setUserObjects(objectsToSave);
+                setObjectsVersion(v => v + 1);
             });
 
         } catch (e) {
@@ -152,6 +154,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         saveObjects,
         discardChanges,
         error,
-        hasUnsavedChanges
+        hasUnsavedChanges,
+        objectsVersion,
     };
 }
