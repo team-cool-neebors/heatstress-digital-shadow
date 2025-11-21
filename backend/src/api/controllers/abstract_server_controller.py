@@ -2,6 +2,7 @@ from abc import ABC
 from fastapi import Response
 from src.api.exceptions import QgisServerException
 from src.api.requests import ServerRequest
+from typing import Optional
 import httpx
 import os
 import re
@@ -17,7 +18,7 @@ class AbstractServerController(ABC):
     TARGET_CRS: str = "EPSG:28992"
     BBOX_REGEX: re.Pattern = re.compile(r"^\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*$")
 
-    async def get_resource(self, request_data: ServerRequest, path: str = '') -> Response:
+    async def get_resource(self, request_data: ServerRequest, session_id: Optional[str], path: str = '') -> Response:
         """
         Makes an asynchronous GET request to the QGIS Server using the
         parameters derived from any ServerRequest model.
@@ -33,8 +34,7 @@ class AbstractServerController(ABC):
         if request_data.__pydantic_extra__:
              params_dict.update(request_data.__pydantic_extra__)
         
-        full_url = f"{self.QGIS_SERVER_BASE_URL}{path}"
-        
+        full_url = f"{self.QGIS_SERVER_BASE_URL}nginx/{session_id}/wfs{path}"
         async with httpx.AsyncClient() as client:
             try:
                 qgis_response = await client.get(full_url, params=params_dict, timeout=self.QGIS_TIMEOUT)

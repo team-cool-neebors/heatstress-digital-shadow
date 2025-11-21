@@ -1,15 +1,19 @@
 from fastapi import Request, Response
 import httpx
+from typing import Optional
 
 from src.api.exceptions import QgisServerException
 from src.settings import QGIS_WMS_BASE_URL
-
 
 class WMSController:
     def __init__(self, base_url: str = QGIS_WMS_BASE_URL):
         self.base_url = base_url
 
-    async def proxy(self, request: Request) -> Response:
+    async def proxy(
+        self,
+        request: Request,
+        session_id: Optional[str] 
+    ) -> Response:
         """
         Proxies any WMS request (GetMap, GetFeatureInfo, etc.)
         to the QGIS server, preserving query parameters.
@@ -17,7 +21,7 @@ class WMSController:
         query_string = request.url.query
 
         if query_string:
-            upstream_url = f"{self.base_url}?{query_string}"
+            upstream_url = f"{self.base_url}/{session_id}/wms?{query_string}"
         else:
             upstream_url = self.base_url
 

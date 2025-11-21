@@ -16,10 +16,12 @@ api_router = APIRouter()
 async def get_objects_by_type(
     type: str,
     params: WFSParams = Depends(),
+    session_id: Optional[str] = Cookie(default=None),
 ):
     return await wfs_controller.get_features(
         type=type,
         params=params,
+        session_id=session_id,
     )
 
 
@@ -42,8 +44,11 @@ async def get_session(
     )
     
 @api_router.api_route("/qgis/wms", methods=["GET"])
-async def proxy_qgis_wms(request: Request):
+async def proxy_qgis_wms(
+    request: Request,
+    session_id: Optional[str] = Cookie(default=None)
+):
     """
     Generic WMS proxy. Forwards GetMap / GetFeatureInfo to QGIS WMS.
     """
-    return await wms_controller.proxy(request)
+    return await wms_controller.proxy(request, session_id)

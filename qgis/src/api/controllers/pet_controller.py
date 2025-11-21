@@ -79,8 +79,8 @@ def get_uhi_zone():
 def burn_point_to_raster(req: PlacedObjectsRequest, session_id: Optional[str] = None):
     input_raster = "/data/dsm.TIF"    
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_raster = f"/data/sessions/{session_id}/dsm_{timestamp}.tif"
-    pet_raster = f"/data/sessions/{session_id}/pet_{timestamp}.tif"
+    output_raster = f"/data/server/sessions/{session_id}/dsm_{timestamp}.tif"
+    pet_raster = f"/data/server/sessions/{session_id}/pet_{timestamp}.tif"
     
     raster_service.burn_points_to_raster(input_raster, req.points, output_path=output_raster)
 
@@ -100,7 +100,7 @@ def burn_point_to_raster(req: PlacedObjectsRequest, session_id: Optional[str] = 
         pet_raster,
     )
     
-    update_pet_layer_in_project("/data/server/map.qgz", pet_raster, f"pet_{timestamp}")
+    update_pet_layer_in_project(f"/data/server/sessions/{session_id}/map.qgz", pet_raster, f"pet_{timestamp}")
 
     return {
         "status": "success",
