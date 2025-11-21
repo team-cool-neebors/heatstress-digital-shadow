@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Response, Cookie, Request
 from typing import Optional
-from src.api.controllers import WFSController, DataProcessingController, SessionController
-from src.api.controllers import WFSController, WMSController
+from src.api.controllers import WMSController, DataProcessingController, SessionController, WFSController
 from src.api.models import WFSParams
 from src.api.requests import PlacedObjectsRequest
 
@@ -52,3 +51,13 @@ async def proxy_qgis_wms(
     Generic WMS proxy. Forwards GetMap / GetFeatureInfo to QGIS WMS.
     """
     return await wms_controller.proxy(request, session_id)
+
+@api_router.post("/update-pet")
+async def update_pet_map_based_on_objects(
+    req: PlacedObjectsRequest,
+    session_id: Optional[str] = Cookie(default=None)
+):
+    return await dpc_controller.update_map_placed_objects(
+        req,
+        session_id=session_id
+    )
