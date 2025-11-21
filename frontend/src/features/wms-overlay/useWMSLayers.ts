@@ -21,12 +21,12 @@ type UseWMSLayersOpts = {
 };
 
 export function useWMSLayers({ showOverlay, overlayLayerId, objectsVersion }: UseWMSLayersOpts) {
+    const WMS_BASE_URL = "/backend/qgis/wms"; 
     const wmsLayer = useMemo<Layer | null>(() => {
         if (!showOverlay) return null;
 
         return makeWmsLayer({
-            id: `wms-${overlayLayerId}-${objectsVersion}`,
-            baseUrl: "/nginx",
+            baseUrl: WMS_BASE_URL,
             layerName: overlayLayerId,
             bounds: WMS_BOUNDS,
             width: WMS_WIDTH,
@@ -41,7 +41,7 @@ export function useWMSLayers({ showOverlay, overlayLayerId, objectsVersion }: Us
         bounds: WMS_BOUNDS,
         width: WMS_WIDTH,
         height: WMS_HEIGHT,
-        baseUrl: "/nginx",
+        baseUrl: WMS_BASE_URL,
         layerName: overlayLayerId,
     });
 
