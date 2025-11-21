@@ -12,7 +12,7 @@ class AbstractServerController(ABC):
     Handles shared configuration and the generic HTTP request logic.
     """
     # Shared Configuration
-    QGIS_SERVER_BASE_URL: str = os.getenv('QGIS_SERVER_URL', 'http://nginx/')
+    QGIS_SERVER_BASE_URL: str = os.getenv('QGIS_SERVER_URL', 'http://nginx/nginx')
     QGIS_TIMEOUT: float = 30.0
     TARGET_CRS: str = "EPSG:28992"
     BBOX_REGEX: re.Pattern = re.compile(r"^\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*$")

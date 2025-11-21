@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, Request
-from src.api.controllers import WFSController, WMSController
+from src.api.controllers import WFSController, DataProcessingController, WMSController
 from src.api.models import WFSParams
 from src.api.requests import PlacedObjectsRequest
 
 wfs_controller = WFSController()
+dpc_controller = DataProcessingController()
 wms_controller = WMSController()
 api_router = APIRouter()
 
@@ -30,4 +31,6 @@ async def proxy_qgis_wms(request: Request):
 
 @api_router.post("/update-pet")
 async def update_pet_map_based_on_objects(req: PlacedObjectsRequest):
-    return ''
+    return await dpc_controller.update_map_placed_objects(
+        req
+    )

@@ -7,12 +7,21 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 from typing import List
 from src.api.models import Point
+import shutil
 
 class RasterService:
     def load_raster_layer(self, path: str, layer: str) -> QgsRasterLayer:
         return QgsRasterLayer(path, layer)
 
-    def burn_points_to_raster(self, raster: str, points: List[Point], crs="EPSG:28992", height=15, buffer_distance = 3) -> str:
+    def burn_points_to_raster(
+        self,
+        raster: str,
+        points: List[Point], 
+        crs="EPSG:28992",
+        height=15,
+        buffer_distance = 3,
+        output_path: str | None = None,
+    ) -> str:
         import processing
 
         # Creating a vector layer
@@ -46,21 +55,38 @@ class RasterService:
             },
         )
 
-        # Rasterize the point into the layer (it's inplace)
-        processing.run(
-            "gdal:rasterize_over",
-            {
-                "INPUT": buffer_layer_path,
-                "INPUT_RASTER": raster,
-                "FIELD": "value",
-                "ADD": False,
-                "EXTRA": "",
-                "OPTIONS": "",
-            },
-            feedback=QgsProcessingFeedback(),
-        )
+        if output_path:
+            shutil.copyfile(raster, output_path)
 
-        return raster
+            processing.run(
+                "gdal:rasterize_over",
+                {
+                    "INPUT": buffer_layer_path,
+                    "INPUT_RASTER": output_path,
+                    "FIELD": "value",
+                    "ADD": False,
+                    "EXTRA": "",
+                    "OPTIONS": "",
+                },
+                feedback=QgsProcessingFeedback(),
+            )
+
+            return output_path
+
+        else:
+            processing.run(
+                "gdal:rasterize_over",
+                {
+                    "INPUT": buffer_layer_path,
+                    "INPUT_RASTER": raster,
+                    "FIELD": "value",
+                    "ADD": False,
+                    "EXTRA": "",
+                    "OPTIONS": "",
+                },
+                feedback=QgsProcessingFeedback(),
+            )
+            return raster
 
     def rasterize_vector_layer(
         self,
