@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useCallback } from "react";
 import DeckMap from "./map/DeckMap";
 import { useDeckLayers } from "./map/hooks/useDeckLayers";
 import Burger from "./ui/Burger";
 import Menu from "./ui/Menu";
 import { useOnClickOutside } from "./ui/hooks/useOnClickOutside";
+import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
+import type { PickingInfo } from "@deck.gl/core";
 
 // TODO: change this to backend API call to fetch available object types when db is added
 const OBJECT_TYPES = ['tree'];
@@ -13,18 +15,34 @@ export default function App() {
   const [showObjects, setShowObjects] = React.useState(false);
   const [isEditingMode, setIsEditingMode] = React.useState(false);
   const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
+  const [showOverlay, setShowOverlay] = React.useState(false);
+  const [overlayLayerId, setOverlayLayerId] = React.useState<QgisLayerId>("pet-version-1");
   const {
     layers,
     error,
     onViewStateClick,
     saveObjects,
+    discardChanges,
+    hasUnsavedChanges,
+    featureInfo,
+    handleMapClick
   } = useDeckLayers({
     showBuildings,
     showObjects,
     isEditingMode,
     selectedObjectType,
     objPath: 'data/10-72-338-LoD22-3D.obj',
+    showOverlay,
+    overlayLayerId,
   });
+
+  const deckClickHandler = useCallback((info: PickingInfo) => {
+    const handledByInteraction = onViewStateClick(info);
+
+    handleMapClick(info);
+
+    return handledByInteraction;
+  }, [onViewStateClick, handleMapClick]);
 
   const [open, setOpen] = React.useState(false);
   const menuNode = React.useRef<HTMLDivElement>(null);
@@ -41,7 +59,7 @@ export default function App() {
           pitch: 45,
           bearing: 0,
         }}
-        onClick={onViewStateClick}
+        onMapInteraction={deckClickHandler}
       />
 
       {isEditingMode && (
@@ -65,9 +83,17 @@ export default function App() {
           </select>
           <button
             onClick={saveObjects}
-            style={{ padding: '8px 15px', cursor: 'pointer' }}
+            disabled={!hasUnsavedChanges}
+            style={{ padding: '8px 15px', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
           >
             Save Objects
+          </button>
+          <button
+            onClick={discardChanges}
+            disabled={!hasUnsavedChanges}
+            style={{ padding: '8px 15px', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
+          >
+            Discard Changes
           </button>
         </div>
       )}
@@ -88,13 +114,59 @@ export default function App() {
             onToggleObjects={setShowObjects}
             isEditingMode={isEditingMode}
             onToggleEditingMode={setIsEditingMode}
+            showOverlay={showOverlay}
+            onToggleOverlay={setShowOverlay}
+            overlayLayerId={overlayLayerId}
+            onChangeOverlayLayer={setOverlayLayerId}
+            overlayLayerOptions={QGIS_OVERLAY_LAYERS}
           />
           {error && showBuildings && (
-            <div style={{ margin: 8, padding: 8, background: '#ffecec', color: '#a00', borderRadius: 8 }}>
+            <div
+              style={{
+                margin: 8,
+                padding: 8,
+                background: "#ffecec",
+                color: "#a00",
+                borderRadius: 8,
+              }}
+            >
               Failed to load OBJ: {String(error.message || error)}
             </div>
           )}
         </div>
+
+        {featureInfo && (
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: 24,
+              transform: "translateX(-50%)",
+              padding: "10px 18px",
+              background: "#ffffff",
+              color: "#222222",
+              borderRadius: 999,
+              fontSize: 13,
+              display: "flex",
+              gap: 16,
+              alignItems: "center",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
+              border: "1px solid rgba(0,0,0,0.08)",
+              pointerEvents: "auto",
+            }}
+          >
+            <div>
+              <strong>Band 1:</strong>{" "}
+              {featureInfo.band != null ? featureInfo.band.toFixed(4) : "n/a"}
+            </div>
+            <div>
+              <strong>Lon:</strong> {featureInfo.lon.toFixed(6)}
+            </div>
+            <div>
+              <strong>Lat:</strong> {featureInfo.lat.toFixed(6)}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

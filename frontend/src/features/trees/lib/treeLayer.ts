@@ -2,7 +2,7 @@ import { ScenegraphLayer } from '@deck.gl/mesh-layers';
 import { GLTFLoader } from '@loaders.gl/gltf';
 import type { Layer } from '@deck.gl/core';
 
-export type ObjectFeature = {
+export type TreeInstance = {
     id: string;
     objectType: string; // (e.g., 'tree', 'bench')
     position: [number, number, number]; // [longitude, latitude, elevation]
@@ -20,16 +20,16 @@ const SCENEGRAPH_SIZE_SCALE = 0.5;
  * @param options Optional: color and orientation overrides.
  * @returns A configured ScenegraphLayer.
  */
-export function makeScenegraphLayerForObjects(
+export function makeTreesLayer(
     id: string,
-    data: ObjectFeature[],
+    data: TreeInstance[],
     modelUrl: string,
     options?: {
         color?: [number, number, number, number];
         orientation?: [number, number, number];
     }
 ): Layer {
-    return new ScenegraphLayer<ObjectFeature>({
+    return new ScenegraphLayer<TreeInstance>({
         id: id,
         data,
         scenegraph: modelUrl,

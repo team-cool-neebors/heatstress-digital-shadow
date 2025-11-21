@@ -2,9 +2,10 @@ from .wfs_params import WFSParams
 from .metadata_3dbag_model import (
     RecordMetadata,
     PandData,
-    VboData,
+    VboData,    
     AggregatedBagResponse,
 )
+from .point import Point
 
 __all__ = [
     "WFSParams",
@@ -12,4 +13,6 @@ __all__ = [
     "PandData",
     "VboData",
     "AggregatedBagResponse",
+    "WFSParams",
+    "Point"
 ]

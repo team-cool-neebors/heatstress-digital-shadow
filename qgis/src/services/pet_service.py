@@ -1,13 +1,109 @@
 import os
 import math
+from datetime import datetime
 from qgis.PyQt.QtCore import QVariant
 from qgis.core import (
     QgsVectorLayer, QgsField, QgsRasterLayer, QgsProcessingFeedback
 )
+from qgis.analysis import QgsZonalStatistics
+from src.services.raster_service import RasterService
+from src.utils.uhi_lookup_tables import UHILookupTables
 
 class PETService:
+    def __init__(self):
+        self.raster_service = RasterService()
     def load_zonal_layer(self, path: str) -> QgsVectorLayer:
         return QgsVectorLayer(path, "zonal_layer", "ogr")
+    
+    def calculate_t_a_temperature(
+        self,
+        zonal_layer: QgsVectorLayer,
+        uhi_field = 'uhi',
+        base_temperature = 28.3,
+        date_time = datetime(2017, 7, 1, 18, 0)
+    ): 
+        field_name = "t_a"
+        if field_name not in [field.name() for field in zonal_layer.fields()]:
+            zonal_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Double)])
+            zonal_layer.updateFields()
+        
+        uhi_factor = UHILookupTables.get_uhi_factor(date_time)
+        print(uhi_factor)
+        zonal_layer.startEditing()
+        for feature in zonal_layer.getFeatures():
+            uhi = feature[uhi_field]
+            if uhi is None:
+                t_a = None
+            else:  
+                t_a = base_temperature + uhi * uhi_factor
+            feature[field_name] = t_a
+            zonal_layer.updateFeature(feature)
+        
+        zonal_layer.commitChanges()
+        return zonal_layer
+    
+    def calculate_zonal_uhi(
+        self,
+        zonal_layer: QgsVectorLayer,
+        bowen_ratio_layer: str|QgsRasterLayer,
+        svf_layer: str|QgsRasterLayer,
+        t_min = 27.2,
+        t_max = 29.1,
+        average_wind_speed = 7.5
+    ) -> QgsVectorLayer:
+        """
+        Calculates UHI directly on the ORIGINAL zonal_layer.
+        """
+        svf_obj, _ = self.convert_raster_layer_to_qgs_and_path(svf_layer)
+        br_obj,  _ = self.convert_raster_layer_to_qgs_and_path(bowen_ratio_layer)
+
+        if not svf_obj.isValid():
+            raise Exception("SVF raster is invalid")
+        if not br_obj.isValid():
+            raise Exception("Bowen ratio raster is invalid")
+        
+        zs_svf = QgsZonalStatistics(
+            zonal_layer,
+            svf_obj,
+            attributePrefix='svf_',
+            stats=QgsZonalStatistics.Mean
+        )
+        zs_svf.calculateStatistics(None)
+
+        zs_br = QgsZonalStatistics(
+            zonal_layer,
+            svf_obj,
+            attributePrefix='veg_',
+            stats=QgsZonalStatistics.Mean
+        )
+        zs_br.calculateStatistics(None)
+        
+        field_name = "uhi"
+        if field_name not in [f.name() for f in zonal_layer.fields()]:
+            zonal_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Double)])
+            zonal_layer.updateFields()
+
+        zonal_layer.startEditing()
+        temp_diff = t_max - t_min
+        base_value = (663 * (temp_diff ** 3)) / average_wind_speed
+        base_value = base_value ** 0.25
+
+        for feature in zonal_layer.getFeatures():
+
+            svf_mean = feature["svf_mean"]
+            veg_mean = feature["veg_mean"]
+
+            if svf_mean is None or veg_mean is None:
+                uhi = None
+            else:
+                uhi = (2 - svf_mean - veg_mean) * base_value
+
+            feature[field_name] = uhi
+            zonal_layer.updateFeature(feature)
+
+        zonal_layer.commitChanges()
+
+        return zonal_layer
 
     def calculate_wet_bulb_temp(self, zonal_layer: QgsVectorLayer, t_a_field = "t_a", r_h = 44.0) -> QgsVectorLayer:
         """
@@ -245,3 +341,57 @@ class PETService:
             raise Exception(f"Raster layer is invalid: {layer_obj.name()}")
         
         return layer_obj, layer_path
+
+    def calculate_total_pet_map(
+        self,
+        shadow_map: str|QgsRasterLayer,
+        sun_pet: str|QgsRasterLayer,
+        shadow_pet: str|QgsRasterLayer,
+        output_path: str,
+        shadow_threshold: float = 127,
+        ) :
+        """
+        Calculates and returns the total PET map
+        
+        :param shadow_map: a file path string or QgsRasterLayer object that contains the shadow map
+        :param sun_pet: a file path string or QgsRasterLayer object that contains the sun PET
+        :param shadow_pet: a file path string or QgsRasterLayer object that contains the shadow PET
+        :param output_path: the output path
+        :param shadow_threshold: a number between 0-255 that determines which values are shadow and which sun
+        """
+        import processing
+        feedback = QgsProcessingFeedback()
+        
+        shadow_map_obj, shadow_map_path = self.convert_raster_layer_to_qgs_and_path(shadow_map)
+        sun_pet_obj, sun_pet_path = self.convert_raster_layer_to_qgs_and_path(sun_pet)
+        shadow_pet_obj, shadow_pet_path = self.convert_raster_layer_to_qgs_and_path(shadow_pet)
+                
+        for layer in [shadow_map_obj, sun_pet_obj, shadow_pet_obj]:
+            if not layer.isValid():
+                raise Exception(f"Raster layer is invalid: {layer.name()}")
+        
+        shadow_maps_folder_path = "/app/data/shadow-maps"
+        aligned_shadow_map_path = os.path.join(shadow_maps_folder_path, "shadow_map_aligned.tif")
+
+        self.raster_service.adjust_raster_pixel_resolution(shadow_map_path, sun_pet_obj, aligned_shadow_map_path)
+
+        params = {
+            'INPUT_A': sun_pet_path,
+            'BAND_A': 1,
+            'INPUT_B': aligned_shadow_map_path,
+            'BAND_B': 1,
+            'INPUT_C': shadow_pet_path,
+            'BAND_C': 1,
+            'FORMULA': f'(A * (B > {shadow_threshold})) + (C * (B <= {shadow_threshold}))',
+            'NO_DATA': None,
+            'EXTENT_OPT': 0,  # 0 = intersect
+            'PROJWIN': shadow_map_obj.extent(),
+            'RTYPE': 5,  # Float32
+            'OUTPUT': output_path
+        }
+
+        result = processing.run("gdal:rastercalculator", params, feedback=feedback)
+
+        total_pet_layer = QgsRasterLayer(result['OUTPUT'], os.path.basename(output_path))
+
+        return total_pet_layer

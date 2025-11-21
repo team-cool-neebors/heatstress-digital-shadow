@@ -151,3 +151,88 @@ class RasterService:
             raise Exception("Raster clipping failed — could not load output raster.")
         
         return clipped_raster
+
+    def fill_nodata_gdal(
+        self,
+        input_raster: QgsRasterLayer,
+        output_path: str,
+        band: int = 1,
+        distance: float = 10,
+        iterations: int = 0,
+    ) -> QgsRasterLayer:
+        """
+        Fills NoData pixels in a raster using GDAL's Fill NoData algorithm.
+
+        Equivalent to running:
+        gdal_fillnodata.bat <input> <output> -md <distance> -b <band>
+
+        :param QgsRasterLayer input_raster: Input raster layer with gaps (NoData)
+        :param str output_path: Path to save the filled raster (e.g. '/tmp/filled.tif')
+        :param int band: Band number to process (default: 1)
+        :param float distance: Maximum distance (in pixels) to search for values (default: 10)
+        :param int iterations: Number of smoothing iterations (default: 0)
+        :return: QgsRasterLayer of the filled raster
+        :rtype: QgsRasterLayer
+        """
+        import processing
+        from qgis.core import QgsProcessingFeedback
+        import os
+
+        feedback = QgsProcessingFeedback()
+
+        params = {
+            'INPUT': input_raster,
+            'BAND': band,
+            'DISTANCE': distance,
+            'ITERATIONS': iterations,
+            'MASK_LAYER': None,
+            'OPTIONS': '',
+            'EXTRA': '',
+            'OUTPUT': output_path
+        }
+
+        result = processing.run("gdal:fillnodata", params, feedback=feedback)
+        filled_raster = QgsRasterLayer(result['OUTPUT'], os.path.basename(output_path))
+
+        if not filled_raster.isValid():
+            raise Exception("NoData filling failed — could not load output raster.")
+
+        return filled_raster
+      
+    def adjust_raster_pixel_resolution(
+        self,
+        input_raster: str | QgsRasterLayer,
+        target_layer_obj: QgsRasterLayer,
+        resampled_output_path: str,
+        resampling: int = 0,
+        target_resolution: float = 1,
+    )-> str:
+        import processing
+        feedback = QgsProcessingFeedback()
+        """
+        Reprojects and resamples a raster to match the CRS and alignment of a target layer.
+
+        :param input_raster_path: file path or QgsRasterLayer to warp
+        :param target_layer_objr: QgsRasterLayer whose CRS/resolution/alignment will be matched
+        :param resampled_output_path: output file path for the warped raster
+        :param resampling: resampling method index (0=nearest, 1=bilinear, etc.)
+        :param target_resolution: target resolution in map units
+        """
+
+        warp_params = {
+            'INPUT': input_raster,
+            'TARGET_CRS': target_layer_obj.crs().authid(),
+            'RESAMPLING': resampling,  
+            'TARGET_RESOLUTION': target_resolution,
+            'OPTIONS': '',     
+            'DATA_TYPE': 5,     
+            'TARGET_ALIGN': True, 
+            'OUTPUT': resampled_output_path
+        }
+        
+        processing.run("gdal:warpreproject", warp_params, feedback=feedback)
+
+        if not os.path.exists(resampled_output_path):
+            raise Exception(f"Warped raster was not created at: {resampled_output_path}")
+
+        return resampled_output_path

@@ -3,6 +3,7 @@ from src.api.controllers import WFSController
 from src.api.models import WFSParams
 from src.api.services import Metadata3DBagService, get_metadata_bag3d_service
 from src.api.models import AggregatedBagResponse
+from src.api.requests import PlacedObjectsRequest
 
 wfs_controller = WFSController()
 api_router = APIRouter()
@@ -37,3 +38,6 @@ async def read_3dbag(
     ):
 
     return await service.fetch_and_aggregate(bag_id)
+@api_router.post("/update-pet")
+async def update_pet_map_based_on_objects(req: PlacedObjectsRequest):
+    
