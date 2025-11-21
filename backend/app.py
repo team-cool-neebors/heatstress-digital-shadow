@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from src.api.exceptions import QgisServerException
-from src.api.router import api_router
-from src.api.bag3d_router import bag3d_router as bag3d_router
+from src.api.router import api_router, metadata_3dbag_router 
 
 app = FastAPI()
 
@@ -45,4 +44,4 @@ async def unexpected_exception_handler(request: Request, exc: Exception):
     )
 
 app.include_router(api_router)
-app.include_router(bag3d_router, prefix="/3dbag")
+app.include_router(metadata_3dbag_router, prefix="/3dbag")

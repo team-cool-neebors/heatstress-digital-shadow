@@ -1,5 +1,5 @@
 from .wfs_params import WFSParams
-from .bag3d_model import (
+from .metadata_3dbag_model import (
     RecordMetadata,
     PandData,
     VboData,

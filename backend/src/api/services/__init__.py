@@ -1,7 +1,9 @@
-from .bag3d_service import Bag3DService
-from .bag3d_client import Bag3DClient
+from .metadata_3dbag_service import Metadata3DBagService, get_metadata_bag3d_service
+from .metadata_3dbag_client import Metadata3DBagClient, get_metadata_bag3d_client
 
 __all__ = [
-    "Bag3DService",
-    "Bag3DClient",
+    "Metadata3DBagService",
+    "get_metadata_bag3d_service",
+    "Metadata3DBagClient",
+    "get_metadata_bag3d_client",
 ]
