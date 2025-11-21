@@ -9,3 +9,8 @@ export function rdToLonLat(x: number, y: number): [number, number] {
   const [lon, lat] = proj4(RD, 'WGS84', [x, y]);
   return [lon, lat];
 }
+
+export function lonLatToRd(lon: number, lat: number): [number, number] {
+  const [x, y] = proj4('WGS84', RD, [lon, lat]);
+  return [x, y];
+}

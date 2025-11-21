@@ -5,13 +5,14 @@ from src.api.requests import (
     ServerRequest,
     WFSRequest,
 )
+from typing import Optional
 
 class WFSController(AbstractServerController):
     """
     Controller specialized for WFS GetFeature requests (e.g., fetching GeoJSON).
     """
     
-    async def get_features(self, type: str, params: WFSParams) -> Response:
+    async def get_features(self, type: str, params: WFSParams, session_id: Optional[str]) -> Response:
         """
         Constructs the necessary WFS ServerRequest based on user input and fetches the data.
         """
@@ -31,4 +32,4 @@ class WFSController(AbstractServerController):
             OUTPUTFORMAT='application/json',
         )
         
-        return await self.get_resource(request_data=wfs_request)
+        return await self.get_resource(request_data=wfs_request, session_id=session_id)
