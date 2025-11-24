@@ -13,7 +13,6 @@ wms_controller = WMSController()
 api_router = APIRouter()
 metadata_3dbag_router = APIRouter() 
 
-
 @api_router.get("/objects/{type}")
 async def get_objects_by_type(
     type: str,
@@ -49,7 +48,7 @@ async def read_3dbag(
 
     return await service.fetch_and_aggregate(bag_id)
 
-@api_router.api_route("/qgis/wms", methods=["GET"])
+@api_router.get("/qgis/wms")
 async def proxy_qgis_wms(
     request: Request,
     session_id: Optional[str] = Cookie(default=None)

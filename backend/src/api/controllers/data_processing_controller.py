@@ -26,4 +26,3 @@ class DataProcessingController(ABC):
             return response.json()
         except ValueError:
             return response.text
-
