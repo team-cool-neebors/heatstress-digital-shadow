@@ -4,7 +4,7 @@ import { useDeckLayers } from "./map/hooks/useDeckLayers";
 import Burger from "./components/ui/Burger";
 import Menu from "./components/ui/Menu";
 import { useOnClickOutside } from "./components/ui/hooks/useOnClickOutside";
-import { QGIS_OVERLAY_LAYERS, type QgisLayerIdOrEmpty } from "./features/wms-overlay/lib/qgisLayers";
+import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
 import type { PickingInfo } from "@deck.gl/core";
 
 
@@ -15,16 +15,16 @@ export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
   const [showObjects, setShowObjects] = React.useState(false);
   const handleToggleObjects = (value: boolean) => {
-  setShowObjects(value);
+    setShowObjects(value);
 
-  if (!value) {
-    setIsEditingMode(false);
-  }
-};
+    if (!value) {
+      setIsEditingMode(false);
+    }
+  };
   const [isEditingMode, setIsEditingMode] = React.useState(false);
   const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
   const [showOverlay, setShowOverlay] = React.useState(false);
-  const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerIdOrEmpty>("");
+  const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>("");
   const {
     layers,
     error,

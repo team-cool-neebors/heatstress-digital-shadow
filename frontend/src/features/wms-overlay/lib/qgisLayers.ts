@@ -6,7 +6,7 @@ export const QGIS_OVERLAY_LAYERS = [
   { id: "SVF_r65dn1", label: "SVF (Sky View Factor)" },
   { id: "bowen-ratio-middelburg", label: "Bowen ratio" },
   { id: "ndvi-middelburg", label: "NDVI" },
+  { id: "", label: "" }, //when the map dropdown appears, no initial map is set
 ] as const;
 
 export type QgisLayerId = (typeof QGIS_OVERLAY_LAYERS)[number]["id"];
-export type QgisLayerIdOrEmpty = QgisLayerId | "";

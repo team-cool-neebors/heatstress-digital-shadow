@@ -24,6 +24,9 @@ export function useWMSLayers({ showOverlay, overlayLayerId, objectsVersion }: Us
     const WMS_BASE_URL = "/backend/qgis/wms"; 
     const wmsLayer = useMemo<Layer | null>(() => {
         if (!showOverlay) return null;
+        if (overlayLayerId === "") return null;
+
+        console.log(overlayLayerId)
 
         return makeWmsLayer({
             baseUrl: WMS_BASE_URL,

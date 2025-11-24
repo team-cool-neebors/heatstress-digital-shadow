@@ -5,7 +5,7 @@ import { useBuildingsLayer } from '../../features/buildings-3d/useBuildingsLayer
 import { useStaticTreesLayer } from '../../features/trees/useStaticTreesLayer';
 import { useUserTreesLayer } from '../../features/trees/useUserTreesLayer';
 import { useWMSLayers } from '../../features/wms-overlay/useWMSLayers';
-import type { QgisLayerIdOrEmpty } from '../../features/wms-overlay/lib/qgisLayers';
+import type { QgisLayerId } from '../../features/wms-overlay/lib/qgisLayers';
 
 type UseDeckLayersOpts = {
   objPath?: string;
@@ -14,7 +14,7 @@ type UseDeckLayersOpts = {
   isEditingMode: boolean;
   selectedObjectType: string;
   showOverlay: boolean;
-  overlayLayerId: QgisLayerIdOrEmpty;
+  overlayLayerId: QgisLayerId;
 };
 
 export function useDeckLayers({

@@ -1,7 +1,7 @@
 import styles from "../../styles/ui/Menu.module.css";
 import MenuItem from "./ItemMenu";
 import MenuUploadItem from "./UploadItemMenu";
-import type { QgisLayerId, QgisLayerIdOrEmpty } from "../../features/wms-overlay/lib/qgisLayers";
+import type { QgisLayerId } from "../../features/wms-overlay/lib/qgisLayers";
 import OverlayMenuItem from "./OverlayMenuItem";
 
 type Props = {
@@ -16,8 +16,8 @@ type Props = {
   onToggleEditingMode: (v: boolean) => void;
   showOverlay: boolean;
   onToggleOverlay: (value: boolean) => void;
-  overlayLayerId: QgisLayerIdOrEmpty;
-  onChangeOverlayLayer: (value: QgisLayerIdOrEmpty) => void;
+  overlayLayerId: QgisLayerId;
+  onChangeOverlayLayer: (value: QgisLayerId) => void;
   overlayLayerOptions: ReadonlyArray<{ id: QgisLayerId; label: string }>;
 };
 
