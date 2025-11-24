@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Layer, PickingInfo } from '@deck.gl/core';
 import { makeTreesLayer, type TreeInstance } from './lib/treeLayer';
 import { LOCAL_STORAGE_KEY, OBJECTS, DEFAULT_OBJECT_TYPE } from '../../map/utils/deckUtils';
+import { lonLatToRd } from '../../map/utils/crs';
 
 export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
 
@@ -19,6 +20,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
 
     const [objectsToSave, setObjectsToSave] = useState<TreeInstance[]>(userObjects);
     const [nextClientId, setNextClientId] = useState(0);
+    const [objectsVersion, setObjectsVersion] = useState(0);
     const [error, setError] = useState<Error | null>(null);
 
     // Sync objectsToSave when userObjects changes (on initial load/save commit)
@@ -104,9 +106,38 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
 
     const saveObjects = useCallback(async () => {
         try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
+            const payload = {
+                points: objectsToSave.map(obj => {
+                    const [lon, lat] = obj.position;
 
-            setUserObjects(objectsToSave);
+                    const [x, y] = lonLatToRd(lon, lat);
+
+                    return {
+                        x,
+                        y,
+                        geometry: 'circle', // currently qgis only accepts the geometry as circle, should be changed later
+                    };
+                }),
+            };
+
+             const response = await fetch('/backend/update-pet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to update pet: ${response.status} ${response.statusText}`);
+            }
+
+            await Promise.resolve().then(() => {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
+                setUserObjects(objectsToSave);
+                setObjectsVersion(v => v + 1);
+            });
+
         } catch (e) {
             console.error('Error saving objects to local storage:', e);
             setError(e instanceof Error ? e : new Error(String(e)));
@@ -123,6 +154,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         saveObjects,
         discardChanges,
         error,
-        hasUnsavedChanges
+        hasUnsavedChanges,
+        objectsVersion,
     };
 }

@@ -14,6 +14,7 @@ type MakeOpts = {
   format?: 'image/png' | 'image/jpeg';
   transparent?: boolean;
   opacity?: number;
+  cacheBuster?: number;
 };
 
 function buildGetMapUrl({
@@ -24,7 +25,8 @@ function buildGetMapUrl({
   height = 2048,
   style = 'default',
   format = 'image/png',
-  transparent = true
+  transparent = true,
+  cacheBuster,
 }: MakeOpts) {
   const [west, south, east, north] = bounds;
   const bboxParam = `${south},${west},${north},${east}`;
@@ -42,6 +44,10 @@ function buildGetMapUrl({
     WIDTH: String(width),
     HEIGHT: String(height)
   });
+
+  if (cacheBuster !== undefined) {
+    p.set('_ts', String(cacheBuster));
+  }
 
   return `${baseUrl}${baseUrl.endsWith('?') ? '' : '?'}${p.toString()}`;
 }

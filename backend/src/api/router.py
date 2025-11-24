@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, Path, Request
-from src.api.controllers import WFSController, WMSController
+from fastapi import APIRouter, Depends, Request, Path
+from src.api.controllers import WFSController, DataProcessingController, WMSController
 from src.api.models import WFSParams
 from src.api.services import Metadata3DBagService, get_metadata_bag3d_service
 from src.api.models import AggregatedBagResponse
 from src.api.requests import PlacedObjectsRequest
 
 wfs_controller = WFSController()
+dpc_controller = DataProcessingController()
 wms_controller = WMSController()
 api_router = APIRouter()
 metadata_3dbag_router = APIRouter() 
@@ -44,3 +45,9 @@ async def proxy_qgis_wms(request: Request):
     Generic WMS proxy. Forwards GetMap / GetFeatureInfo to QGIS WMS.
     """
     return await wms_controller.proxy(request)
+
+@api_router.post("/update-pet")
+async def update_pet_map_based_on_objects(req: PlacedObjectsRequest):
+    return await dpc_controller.update_map_placed_objects(
+        req
+    )
