@@ -17,6 +17,7 @@ export default function App() {
   const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
   const [showOverlay, setShowOverlay] = React.useState(false);
   const [overlayLayerId, setOverlayLayerId] = React.useState<QgisLayerId>("pet-version-1");
+  const [exportFormat, setExportFormat] = React.useState<'geojson' | 'json'>('geojson');
   const {
     layers,
     error,
@@ -25,7 +26,8 @@ export default function App() {
     discardChanges,
     hasUnsavedChanges,
     featureInfo,
-    handleMapClick
+    handleMapClick,
+    exportObjects,
   } = useDeckLayers({
     showBuildings,
     showObjects,
@@ -95,6 +97,32 @@ export default function App() {
           >
             Discard Changes
           </button>
+          {/* Import Export buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <select
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value as 'geojson' | 'json')}
+              style={{ padding: '8px 10px' }}
+            >
+              <option value="geojson">GeoJSON</option>
+              <option value="json">Plain JSON</option>
+            </select>
+            
+            <button
+              onClick={() => exportObjects(exportFormat)} 
+              disabled={!hasUnsavedChanges}
+              style={{ padding: '8px', background: '#3F51B5', color: 'white', border: 'none', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
+            >
+              Export Objects 
+            </button>
+            <button
+              // onClick={() => exportObjects(exportFormat)} 
+              disabled={!hasUnsavedChanges}
+              style={{ padding: '8px', background: '#3F51B5', color: 'white', border: 'none', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
+            >
+              Import Objects 
+            </button>
+          </div>
         </div>
       )}
 

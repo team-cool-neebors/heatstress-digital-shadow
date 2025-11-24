@@ -148,6 +148,74 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         setObjectsToSave(userObjects);
     }, [userObjects]);
 
+
+    // Helper function for exportObjects function
+    const triggerDownload = (data: string, filename: string, mimeType: string) => {
+        const blob = new Blob([data], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const exportObjects = useCallback((format: 'geojson' | 'json') => {
+    if (objectsToSave.length === 0) {
+        console.warn("No objects to export.");
+        return;
+    }
+
+    const dateStr = new Date().toISOString().slice(0, 10);
+    let dataStr = '';
+    let fileName = '';
+    let mimeType = '';
+
+    // GeoJSON
+    if (format === 'geojson') {
+        const geoJsonData = {
+        type: "FeatureCollection",
+        features: objectsToSave.map(obj => ({
+            type: "Feature",
+            geometry: {
+            type: "Point",
+            coordinates: obj.position 
+            },
+            properties: {
+            id: obj.id,
+            objectType: obj.objectType,
+            scale: obj.scale,
+            placement_date: new Date(parseInt(obj.id.split('-')[2] || Date.now().toString())).toISOString()
+            }
+        })),
+        };
+        
+        dataStr = JSON.stringify(geoJsonData, null, 2);
+        fileName = `user_objects_${dateStr}.geojson`;
+        mimeType = 'application/geo+json';
+
+    } else {
+        // Plain JSON
+        const simpleData = objectsToSave.map(obj => ({
+        id: obj.id,
+        objectType: obj.objectType,
+        longitude: obj.position[0],
+        latitude: obj.position[1],
+        scale: obj.scale,
+        placement_date: new Date(parseInt(obj.id.split('-')[2] || Date.now().toString())).toISOString()
+        }));
+
+        dataStr = JSON.stringify(simpleData, null, 2);
+        fileName = `user_objects_raw_${dateStr}.json`;
+        mimeType = 'application/json';
+    }
+
+    triggerDownload(dataStr, fileName, mimeType);
+
+    }, [objectsToSave]);
+    
     return {
         userObjectLayer,
         handleInteraction,
@@ -156,5 +224,6 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         error,
         hasUnsavedChanges,
         objectsVersion,
+        exportObjects,
     };
 }
