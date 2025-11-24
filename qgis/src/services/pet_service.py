@@ -370,7 +370,7 @@ class PETService:
             if not layer.isValid():
                 raise Exception(f"Raster layer is invalid: {layer.name()}")
         
-        shadow_maps_folder_path = "/app/data/shadow-maps"
+        shadow_maps_folder_path = "/data/shadow-maps"
         aligned_shadow_map_path = os.path.join(shadow_maps_folder_path, "shadow_map_aligned.tif")
 
         self.raster_service.adjust_raster_pixel_resolution(shadow_map_path, sun_pet_obj, aligned_shadow_map_path)

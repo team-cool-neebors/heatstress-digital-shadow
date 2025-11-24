@@ -8,7 +8,7 @@ shadow_service = ShadowService()
 @router.post("/map")
 def create_hillshade(req: ShadowMapRequest):
     try:
-        output_folder = "/app/data/shadow-maps"
+        output_folder = "/data/shadow-maps"
         lat, lon = 51.498, 3.613
 
         shadow_service.generate_hillshade_maps(

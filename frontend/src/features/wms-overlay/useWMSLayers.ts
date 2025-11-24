@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import type { Layer, PickingInfo } from '@deck.gl/core';
 import { makeWmsLayer } from './lib/wmsLayer';
 import { useQgisFeatureInfo } from "./lib/qgisFeatureInfo";
-import type { QgisLayerIdOrEmpty } from './lib/qgisLayers';
+import type { QgisLayerId } from './lib/qgisLayers';
 
 export const WMS_BOUNDS: [number, number, number, number] = [
     3.609725,     // west
@@ -16,15 +16,14 @@ export const WMS_HEIGHT = 2048;
 
 type UseWMSLayersOpts = {
     showOverlay: boolean;
-    overlayLayerId: QgisLayerIdOrEmpty;
+    overlayLayerId: QgisLayerId;
+    objectsVersion: number;
 };
 
-const WMS_BASE_URL = "/backend/qgis/wms"; 
-
-export function useWMSLayers({ showOverlay, overlayLayerId }: UseWMSLayersOpts) {
+export function useWMSLayers({ showOverlay, overlayLayerId, objectsVersion }: UseWMSLayersOpts) {
+    const WMS_BASE_URL = "/backend/qgis/wms"; 
     const wmsLayer = useMemo<Layer | null>(() => {
         if (!showOverlay) return null;
-        if (overlayLayerId === "") return null;
 
         return makeWmsLayer({
             baseUrl: WMS_BASE_URL,
@@ -34,8 +33,9 @@ export function useWMSLayers({ showOverlay, overlayLayerId }: UseWMSLayersOpts) 
             height: WMS_HEIGHT,
             transparent: true,
             opacity: 1,
+            cacheBuster: objectsVersion,
         });
-    }, [showOverlay, overlayLayerId]);
+    }, [showOverlay, overlayLayerId, objectsVersion]);
 
     const { featureInfo, request, clear } = useQgisFeatureInfo({
         bounds: WMS_BOUNDS,

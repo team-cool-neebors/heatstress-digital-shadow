@@ -1,7 +1,7 @@
-from .burn_request import BurnRequest
+from .placed_objects_request import PlacedObjectsRequest
 from .shadow_map_request import ShadowMapRequest
 
 __all__ = [
-    "BurnRequest",
+    "PlacedObjectsRequest",
     "ShadowMapRequest"
 ]

@@ -1,5 +1,10 @@
 from pydantic import BaseModel
+from enum import Enum
+
+class Geometry(Enum): 
+    Circle = 'circle'
 
 class Point(BaseModel):
     x: float
     y: float
+    geometry: Geometry
