@@ -32,7 +32,7 @@ export default function OverlayMenuItem({
             {checked && (
                 <div className={styles.overlayItemDropdown}>
                     <label className={styles.labelDropdownOverlay}>
-                        Overlay Layer
+                        Overlay layer
                     </label>
 
                     <select

@@ -74,7 +74,7 @@ export default function Menu({
           options={overlayLayerOptions}
         />
         <UploadMenuItem
-          label="Import Your Own Map"
+          label="Import your own map"
           categories={["Wind Map", "PET Map", "Weather Map"]}
           accept=".geojson,.tif,.qgz"
           onUpload={(file, category) => {
