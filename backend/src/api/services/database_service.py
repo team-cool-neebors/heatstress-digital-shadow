@@ -24,7 +24,7 @@ def get_database_connection() -> Generator[sqlite3.Connection, None, None]:
         yield conn
         
     except sqlite3.Error as e:
-        raise DatabaseConnectionError(detail=f"Database connection error: {str(e)}")
+        raise DatabaseConnectionError(detail=str(e))
         
     finally:
         if conn:
@@ -37,7 +37,7 @@ class DatabaseService:
     def __init__(self, conn: sqlite3.Connection):
         self.conn = conn
 
-    def get_measures(self) -> List[Dict[str, Optional[str]]]:
+    def get_measures(self) -> List[Dict[str, Optional[str] | int]]:
         """
         Selects all placeable measures.
         """
@@ -52,7 +52,10 @@ class DatabaseService:
         results: List[Dict[str, Optional[str]]] = []
         
         for row in cursor.fetchall():
-            results.append({"name": row["name"]})
+            results.append({
+                "id": row["id"],
+                "name": row["name"]
+            })
 
         return results
     
@@ -71,7 +74,7 @@ class DatabaseService:
         """
         
         values = [
-            (data.id, data.x, data.y) 
+            (data.measure_id, data.x, data.y) 
             for data in data
         ]
         

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Layer, PickingInfo } from '@deck.gl/core';
-import { makeTreesLayer, type TreeInstance } from './lib/treeLayer';
+import { makeObjectsLayer, type ObjectInstance } from './lib/objectLayer';
 import { LOCAL_STORAGE_KEY, OBJECTS, DEFAULT_OBJECT_TYPE } from '../../map/utils/deckUtils';
 import { lonLatToRd } from '../../map/utils/crs';
 
-export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
+export function useUserObjectsLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
 
-    const [userObjects, setUserObjects] = useState<TreeInstance[]>(() => {
+    const [userObjects, setUserObjects] = useState<ObjectInstance[]>(() => {
         try {
             const storedValue = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (!storedValue) return [];
@@ -18,7 +18,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         }
     });
 
-    const [objectsToSave, setObjectsToSave] = useState<TreeInstance[]>(userObjects);
+    const [objectsToSave, setObjectsToSave] = useState<ObjectInstance[]>(userObjects);
     const [nextClientId, setNextClientId] = useState(0);
     const [objectsVersion, setObjectsVersion] = useState(0);
     const [error, setError] = useState<Error | null>(null);
@@ -33,7 +33,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         if (!isEditingMode) return;
 
         if (info.object) {
-            const clickedObject = info.object as TreeInstance;
+            const clickedObject = info.object as ObjectInstance;
             const clickedLayerId = info.layer?.id;
             const objectIdToRemove = clickedObject.id;
 
@@ -55,7 +55,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         const newId = `CLIENT-${selectedObjectType}-${Date.now()}-${nextClientId}`;
         setNextClientId(prev => prev + 1);
 
-        const newObject: TreeInstance = {
+        const newObject: ObjectInstance = {
             id: newId,
             objectType: selectedObjectType,
             position: [lon, lat, 1],
@@ -73,7 +73,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
 
         const typeConfig = OBJECTS[DEFAULT_OBJECT_TYPE];
 
-        return makeTreesLayer(
+        return makeObjectsLayer(
             'user-objects',
             objectsToSave,
             typeConfig.url,

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import type { Layer } from '@deck.gl/core';
-import { makeTreesLayer, type TreeInstance } from './lib/treeLayer';
+import { makeObjectsLayer, type ObjectInstance } from './lib/objectLayer';
 import { rdToLonLat } from '../../map/utils/crs';
 import { BBOX, OBJECTS } from '../../map/utils/deckUtils';
 
-export function useStaticTreesLayer(showObjects: boolean, selectedObjectType: string) {
+export function useStaticObjectsLayer(showObjects: boolean, selectedObjectType: string) {
   const [objectLayer, setObjectLayer] = useState<Layer | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
@@ -28,7 +28,7 @@ export function useStaticTreesLayer(showObjects: boolean, selectedObjectType: st
         }[];
 
         // Transform the data
-        const data: TreeInstance[] = features.map((feature) => {
+        const data: ObjectInstance[] = features.map((feature) => {
           const [xRD, yRD] = feature.geometry.coordinates;
           const [lon, lat] = rdToLonLat(xRD, yRD);
 
@@ -43,7 +43,7 @@ export function useStaticTreesLayer(showObjects: boolean, selectedObjectType: st
           };
         });
 
-        const layer = makeTreesLayer(
+        const layer = makeObjectsLayer(
           'objects',
           data,
           OBJECTS[selectedObjectType].url

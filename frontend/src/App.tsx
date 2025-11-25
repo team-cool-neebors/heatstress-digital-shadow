@@ -6,6 +6,8 @@ import Menu from "./components/ui/Menu";
 import { useOnClickOutside } from "./components/ui/hooks/useOnClickOutside";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
 import type { PickingInfo } from "@deck.gl/core";
+import Button from "./components/ui/Button";
+import styles from "./styles/ui/Menu.module.css";
 
 
 // TODO: change this to backend API call to fetch available object types when db is added
@@ -84,26 +86,22 @@ export default function App() {
           <select
             value={selectedObjectType}
             onChange={(e) => setSelectedObjectType(e.target.value)}
-            style={{ padding: '8px', marginRight: '10px' }}
+            className={styles.dropdownMenu}
           >
             {OBJECT_TYPES.map(type => (
               <option key={type} value={type}>{type}</option>
             ))}
           </select>
-          <button
+          <Button
+            label="Save Objects"
             onClick={saveObjects}
             disabled={!hasUnsavedChanges}
-            style={{ padding: '8px 15px', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
-          >
-            Save Objects
-          </button>
-          <button
+          />
+          <Button
+            label="Discard Changes"
             onClick={discardChanges}
             disabled={!hasUnsavedChanges}
-            style={{ padding: '8px 15px', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
-          >
-            Discard Changes
-          </button>
+          />
         </div>
       )}
 

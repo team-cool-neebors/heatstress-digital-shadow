@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Response, Cookie, Request, Query
-from typing import Optional
+from typing import Optional, List
 from src.api.controllers import WMSController, DataProcessingController, SessionController, WFSController
 from src.api.models import WFSParams
 from src.api.services import Metadata3DBagService, get_metadata_bag3d_service, DatabaseService, get_database_service
