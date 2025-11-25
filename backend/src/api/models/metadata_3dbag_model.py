@@ -23,6 +23,7 @@ class VboData(BaseModel):
     bag_id: str
     usage_function: Optional[List[str]]
     surface_area_m2: Optional[int]
+    status: str
 
 class AggregatedBagResponse(BaseModel):
     bag_id: str
