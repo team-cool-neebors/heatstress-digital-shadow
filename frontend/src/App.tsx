@@ -31,7 +31,7 @@ export default function App() {
     showObjects,
     isEditingMode,
     selectedObjectType,
-    objPath: 'data/10-72-338-LoD22-3D.obj',
+    objPath: 'data/10-72-338-LoD22-3D_leveled.obj',
     showOverlay,
     overlayLayerId,
   });
