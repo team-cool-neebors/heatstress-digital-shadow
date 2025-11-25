@@ -6,11 +6,20 @@ export interface ObjectConfig {
     }
 }
 
+
 export const parseImportedData = (
     jsonContent: any, 
     availableTypes: ObjectConfig, 
     defaultType: string          
 ) => {
+
+    // Define the unique signature we use to validate a file is our own before we import
+    const APP_SIGNATURE = 'neeghboorhoods';
+
+    // Check for the signature immediately
+    if (jsonContent.__app_signature !== APP_SIGNATURE) {
+        throw new Error("Invalid file signature. Only files exported from this application can be imported.");
+    }
 
     // Create a Set of keys for fast lookup
     const validTypeKeys = Object.keys(availableTypes);

@@ -170,9 +170,12 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
     }
 
     const dateStr = new Date().toISOString().slice(0, 10);
-    let dataStr = '';
     let fileName = '';
     let mimeType = '';
+    let exportData = {};
+
+    // Define the unique signature we use to validate a file is our own before we import
+    const APP_SIGNATURE = 'neeghboorhoods';
 
     // GeoJSON
     if (format === 'geojson') {
@@ -193,7 +196,11 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         })),
         };
         
-        dataStr = JSON.stringify(geoJsonData, null, 2);
+        exportData = {
+            ...geoJsonData,
+            __app_signature: APP_SIGNATURE,
+            __export_date: new Date().toISOString(),
+        };
         fileName = `user_objects_${dateStr}.geojson`;
         mimeType = 'application/geo+json';
 
@@ -208,11 +215,16 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         placement_date: new Date(parseInt(obj.id.split('-')[2] || Date.now().toString())).toISOString()
         }));
 
-        dataStr = JSON.stringify(simpleData, null, 2);
+        exportData = {
+            __app_signature: APP_SIGNATURE,
+            __export_date: new Date().toISOString(),
+            data: simpleData, 
+        };
         fileName = `user_objects_raw_${dateStr}.json`;
         mimeType = 'application/json';
     }
 
+    const dataStr = JSON.stringify(exportData, null, 2)
     triggerDownload(dataStr, fileName, mimeType);
 
     }, [objectsToSave]);
@@ -235,7 +247,13 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
                 DEFAULT_OBJECT_TYPE  
             );
 
+            if (normalizedObjects.length === 0) {
+                // If the file yielded zero objects, throw an error.
+                throw new Error("File contained no valid objects or features to import.");
+            }
+
             setObjectsToSave(normalizedObjects);
+            console.log(`Successfully imported ${normalizedObjects.length} objects.`);
             
         } catch (err) {
             console.error("Import failed", err);
