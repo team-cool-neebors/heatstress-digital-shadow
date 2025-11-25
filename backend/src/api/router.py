@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response, Cookie, Request, Path
+from fastapi import APIRouter, Depends, Response, Cookie, Request, Query
 from typing import Optional
 from src.api.controllers import WMSController, DataProcessingController, SessionController, WFSController
 from src.api.models import WFSParams
@@ -34,19 +34,7 @@ async def get_session(
         response=response,
         session_id=session_id,
     )
-    
-@metadata_3dbag_router.get("/{bag_id}", response_model=AggregatedBagResponse)
-async def read_3dbag(
-    bag_id: str = Path(
-        min_length=16,
-        max_length=16,
-        regex="^\d{16}$", 
-        description="The 16-digit BAG ID"),
 
-    service: Metadata3DBagService = Depends(get_metadata_bag3d_service),
-    ):
-
-    return await service.fetch_and_aggregate(bag_id)
 
 @api_router.get("/qgis/wms")
 async def proxy_qgis_wms(
@@ -66,4 +54,19 @@ async def update_pet_map_based_on_objects(
     return await dpc_controller.update_map_placed_objects(
         req,
         session_id=session_id
+    )
+
+@metadata_3dbag_router.get("/search-pand", response_model=AggregatedBagResponse)
+async def read_3dbag_by_coordinates(
+    x_coord: float = Query(..., description="X coordinate (Rijksdriehoeksstelsel, EPSG:28992)"),
+    y_coord: float = Query(..., description="Y coordinate (Rijksdriehoeksstelsel, EPSG:28992)"),
+
+    service: Metadata3DBagService = Depends(get_metadata_bag3d_service),
+):
+    """
+    Searches for the nearest PAND at the given coordinates and returns aggregated data.
+    """
+    return await service.fetch_and_aggregate(
+        x_coord=x_coord, 
+        y_coord=y_coord
     )
