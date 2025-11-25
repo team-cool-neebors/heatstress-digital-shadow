@@ -15,7 +15,7 @@ def level_obj_per_object(src_path, dst_path, p=PERCENTILE):
     with open(src_path, "r", errors="ignore") as f:
         lines = f.readlines()
 
-    # 1) Read all vertices
+    # Read all vertices
     vertices = []
     for line in lines:
         if line.startswith("v "):
@@ -26,7 +26,7 @@ def level_obj_per_object(src_path, dst_path, p=PERCENTILE):
 
     print(f"Found {len(vertices)} vertices")
 
-    # 2) Collect vertex indices per object
+    # Collect vertex indices per object
     obj_to_indices = {}
     current_obj = None
 
@@ -51,7 +51,7 @@ def level_obj_per_object(src_path, dst_path, p=PERCENTILE):
     used_vertices = set(itertools.chain.from_iterable(obj_to_indices.values()))
     print(f"Unique used vertices: {len(used_vertices)}")
 
-    # 3) Compute baseline z0 per vertex (shared verts use smallest baseline)
+    # Compute baseline z0 per vertex (shared verts use smallest baseline)
     vertex_delta = {idx: 0.0 for idx in used_vertices}
 
     for obj_name, idxs in obj_to_indices.items():
@@ -67,12 +67,12 @@ def level_obj_per_object(src_path, dst_path, p=PERCENTILE):
             else:
                 vertex_delta[idx] = min(vertex_delta[idx], z0)
 
-    # 4) Apply shift
+    # Apply shift
     for idx, z0 in vertex_delta.items():
         v = vertices[idx - 1]
         v[2] = v[2] - z0
 
-    # 5) Write new OBJ
+    # Write new OBJ
     out_lines = []
     v_counter = 0
     for line in lines:
