@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, Path
+from fastapi import APIRouter, Depends, Request, Path, Query
 from src.api.controllers import WFSController, DataProcessingController, WMSController
 from src.api.models import WFSParams
 from src.api.services import Metadata3DBagService, get_metadata_bag3d_service
@@ -25,19 +25,21 @@ async def get_objects_by_type(
         params=params,
     )
 
-@metadata_3dbag_router.get("/{bag_id}", response_model=AggregatedBagResponse)
-# check if building id is 16 length (standard for bag)
-async def read_3dbag(
-    bag_id: str = Path(
-        min_length=16,
-        max_length=16,
-        regex="^\d{16}$", 
-        description="The 16-digit BAG ID"),
-
+@metadata_3dbag_router.get("/by_coords", response_model=AggregatedBagResponse)
+async def read_3dbag_by_coordinates(
+    x_coord: float = Query(..., description="X coordinate (Rijksdriehoeksstelsel, EPSG:28992)"),
+    y_coord: float = Query(..., description="Y coordinate (Rijksdriehoeksstelsel, EPSG:28992)"),
+    
     service: Metadata3DBagService = Depends(get_metadata_bag3d_service),
     ):
+    """
+    Searches for the nearest PAND at the given coordinates and returns aggregated data.
+    """
+    return await service.fetch_and_aggregate(
+        x_coord=x_coord, 
+        y_coord=y_coord
+    )
 
-    return await service.fetch_and_aggregate(bag_id)
 
 @api_router.api_route("/qgis/wms", methods=["GET"])
 async def proxy_qgis_wms(request: Request):
