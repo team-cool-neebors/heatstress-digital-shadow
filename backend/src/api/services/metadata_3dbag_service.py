@@ -20,8 +20,6 @@ class Metadata3DBagService:
         self._api_client_factory = api_client_factory
         self._mapper = data_mapper
     
-    #  Exception Handling
-    
     def _handle_bag_api_exceptions(self, e: Exception, bag_identifier: str):
         """
         Helper to map external BAG API exceptions (httpx errors) 
@@ -73,8 +71,6 @@ class Metadata3DBagService:
                 detail=f"An unexpected error occurred during API call for {bag_identifier}: {e.__class__.__name__}"
             )
     
-    #  Extracted Helper Methods (Private) 
-
     async def _search_pand_and_extract_bag_id(self, api_client, coords: list[float]) -> str:
         """Searches for PAND data by coordinates, handles exceptions, and extracts the BAG ID."""
         identifier = f"Coords: {coords}"
@@ -135,8 +131,6 @@ class Metadata3DBagService:
             return self._mapper.map_vbo_data(raw_vbo_data)
         except MappingError as e:
             raise HTTPException(status_code=500, detail=f"VBO data structuring failed for BAG ID {bag_id}: {str(e)}")
-
-    # Public method to fetch and aggregate
 
     async def fetch_and_aggregate(self, x_coord: float, y_coord: float) -> AggregatedBagResponse:
         """

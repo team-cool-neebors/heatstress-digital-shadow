@@ -25,7 +25,7 @@ async def get_objects_by_type(
         params=params,
     )
 
-@metadata_3dbag_router.get("/by_coords", response_model=AggregatedBagResponse)
+@metadata_3dbag_router.get("/search-pand", response_model=AggregatedBagResponse)
 async def read_3dbag_by_coordinates(
     x_coord: float = Query(..., description="X coordinate (Rijksdriehoeksstelsel, EPSG:28992)"),
     y_coord: float = Query(..., description="Y coordinate (Rijksdriehoeksstelsel, EPSG:28992)"),
