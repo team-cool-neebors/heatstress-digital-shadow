@@ -6,6 +6,7 @@ import Menu from "./ui/Menu";
 import { useOnClickOutside } from "./ui/hooks/useOnClickOutside";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
 import type { PickingInfo } from "@deck.gl/core";
+import { lonLatToRd } from "./map/utils/crs";
 
 // TODO: change this to backend API call to fetch available object types when db is added
 const OBJECT_TYPES = ['tree'];
@@ -37,6 +38,17 @@ export default function App() {
   });
 
   const deckClickHandler = useCallback((info: PickingInfo) => {
+  const [lon, lat] = info.coordinate as [number, number];
+
+  const [xRD, yRD] = lonLatToRd(lon, lat);
+
+  console.log('Clicked building coordinates:', {
+    lon,
+    lat,
+    xRD,
+    yRD,
+  });
+
     const handledByInteraction = onViewStateClick(info);
 
     handleMapClick(info);
