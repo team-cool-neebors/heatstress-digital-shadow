@@ -60,6 +60,7 @@ services:
       - qgis-server-net
     volumes:
       - ./backend:/app
+      - ./data:/data
 
   frontend:
     container_name: frontend
