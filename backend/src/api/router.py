@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, Cookie, Request, Query
 from typing import Optional
 from src.api.controllers import WMSController, DataProcessingController, SessionController, WFSController
 from src.api.models import WFSParams
-from src.api.services import Metadata3DBagService, get_metadata_bag3d_service
+from src.api.services import Metadata3DBagService, get_metadata_bag3d_service, DatabaseService, get_database_service
 from src.api.models import AggregatedBagResponse
 from src.api.requests import PlacedObjectsRequest
 
@@ -12,6 +12,12 @@ session_controller = SessionController()
 wms_controller = WMSController()
 api_router = APIRouter()
 metadata_3dbag_router = APIRouter() 
+
+@api_router.get("/measures")
+def get_measures(
+    database_service: DatabaseService = Depends(get_database_service)
+):
+    return database_service.get_measures()
 
 @api_router.get("/objects/{type}")
 async def get_objects_by_type(
@@ -34,7 +40,6 @@ async def get_session(
         response=response,
         session_id=session_id,
     )
-
 
 @api_router.get("/qgis/wms")
 async def proxy_qgis_wms(
