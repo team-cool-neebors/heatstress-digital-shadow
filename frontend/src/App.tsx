@@ -6,6 +6,7 @@ import Menu from "./ui/Menu";
 import { useOnClickOutside } from "./ui/hooks/useOnClickOutside";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
 import type { PickingInfo } from "@deck.gl/core";
+import { useFileImport } from "./ui/hooks/useFileImport";
 
 // TODO: change this to backend API call to fetch available object types when db is added
 const OBJECT_TYPES = ['tree'];
@@ -28,6 +29,7 @@ export default function App() {
     featureInfo,
     handleMapClick,
     exportObjects,
+    importObjects
   } = useDeckLayers({
     showBuildings,
     showObjects,
@@ -49,6 +51,8 @@ export default function App() {
   const [open, setOpen] = React.useState(false);
   const menuNode = React.useRef<HTMLDivElement>(null);
   useOnClickOutside(menuNode.current, () => setOpen(false));
+
+  const { fileInputRef, handleFileSelect, triggerImport } = useFileImport(importObjects);
 
   return (
     <div style={{ position: "relative", height: "100dvh", width: "100%" }}>
@@ -115,10 +119,17 @@ export default function App() {
             >
               Export Objects 
             </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              accept=".json,.geojson"
+              style={{ display: 'none' }}
+            />
+
             <button
-              // onClick={() => exportObjects(exportFormat)} 
-              disabled={!hasUnsavedChanges}
-              style={{ padding: '8px', background: '#3F51B5', color: 'white', border: 'none', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
+              onClick={triggerImport} 
+              style={{ padding: '8px', background: '#4CAF50', color: 'white', border: 'none', cursor: 'pointer' }}
             >
               Import Objects 
             </button>

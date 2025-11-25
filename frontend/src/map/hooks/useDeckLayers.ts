@@ -6,7 +6,7 @@ import { useBuildingsLayer } from '../../features/buildings-3d/useBuildingsLayer
 import { useStaticTreesLayer } from '../../features/trees/useStaticTreesLayer';
 import { useUserTreesLayer } from '../../features/trees/useUserTreesLayer';
 import { useWMSLayers } from '../../features/wms-overlay/useWMSLayers';
-// import { parseImportedData } from '../../map/utils/importUtils';
+
 
 type UseDeckLayersOpts = {
   objPath?: string;
@@ -51,6 +51,7 @@ export function useDeckLayers({
     hasUnsavedChanges,
     objectsVersion,
     exportObjects,
+    importObjects
   } = useUserTreesLayer(showObjects, isEditingMode, selectedObjectType);
 
   const { wmsLayer, featureInfo, handleMapClick } = useWMSLayers({
@@ -82,5 +83,6 @@ export function useDeckLayers({
     featureInfo,
     handleMapClick,
     exportObjects,
+    importObjects
   };
 }

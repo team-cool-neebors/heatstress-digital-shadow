@@ -3,6 +3,7 @@ import type { Layer, PickingInfo } from '@deck.gl/core';
 import { makeTreesLayer, type TreeInstance } from './lib/treeLayer';
 import { LOCAL_STORAGE_KEY, OBJECTS, DEFAULT_OBJECT_TYPE } from '../../map/utils/deckUtils';
 import { lonLatToRd } from '../../map/utils/crs';
+import { parseImportedData } from '../../map/utils/importUtils';
 
 export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
 
@@ -215,6 +216,33 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
     triggerDownload(dataStr, fileName, mimeType);
 
     }, [objectsToSave]);
+
+    const objectConfig = OBJECTS;
+
+    const importObjects = useCallback((file: File) => {
+    if (!file) return;
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+        try {
+            const result = e.target?.result;
+            if (typeof result !== 'string') return;
+            const parsedJson = JSON.parse(result);
+
+            const normalizedObjects = parseImportedData(
+                parsedJson, 
+                objectConfig,        
+                DEFAULT_OBJECT_TYPE  
+            );
+
+            setObjectsToSave(normalizedObjects);
+            
+        } catch (err) {
+            console.error("Import failed", err);
+        }
+    };
+    reader.readAsText(file);
+}, [objectConfig]);
     
     return {
         userObjectLayer,
@@ -225,5 +253,6 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         hasUnsavedChanges,
         objectsVersion,
         exportObjects,
+        importObjects
     };
 }
