@@ -16,19 +16,19 @@ INSERT INTO measures (
     sort
     )
 VALUES
-('Trees', 'Effect is dependant on tree type, size and the local climate', 1, 0, 1, 1, 0.2, 2.7, 0.7, 2.7, 3.4, 19, '', 'green' ),
-('Grass/Shrubs', 'Effect of a healthy, well-evaporating lawn. Grass also affects surface temperature up to 20°C cooler than concrete.', 1, 1, 1, 1, 0.1, 1.1, 0.9, 1.2, 0.4, 4.9, '', 'green'),
+('Trees', 'Effect is dependant on tree type, size and the local climate', 1, 0, 1, 1, 0.2, 2.7, 0.7, 2.7, 3.4, 19, '/models/tree-pine.glb', 'green' ),
+('Grass/Shrubs', 'Effect of a healthy, well-evaporating lawn. Grass also affects surface temperature up to 20°C cooler than concrete.', 1, 1, 1, 1, 0.1, 1.1, 0.9, 1.2, 0.4, 4.9, '/models/shrub.glb', 'green'),
 ('Grass Concrete Tiles', '', 1, 1, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL, '', 'green'),
 ('Green Facades', 'The smaller the street, the greater the effect on air temperature. Greater effect for facades with more sun exposure.', 1, 1, 0, 1, 0, 1.9, 0.2, 1.5, NULL, NULL, '', 'green'),
 ('Green Roofs (extensive)', 'A green roof covered with sedum provides little cooling at night (compared to a white roof). City-level effect is as if 100% of all roofs in the city were green.', 0, 1, 0, 1, 0.0, 1.8, 0.0, 0.8, NULL, NULL, '', 'green'),
 ('Green Roofs (intensive)', 'City-level effect is as if 100% of all roofs in the city were green.', 1, 1, 1, 0, 0, 1.7, 1.0, 1.6, NULL, NULL, '', 'green'),
 ('Park/Urban Willows/Fingers', 'Effect depends on vegetation type (tree vs grass), tree size, park size, and local climate. PET effect in shade is higher than shown here.', 1, 1, 1, 0, NULL, NULL, 1.1, 2.0, 1.9, 4.2, '', 'green'),
 
-('Ponds', 'Effect depends on temperature difference between water and air and the size of the water body.', 1, 0, 0, 1, 0.5, 1.3, 0.5, 0.7, 0.6, 3.6, '', 'blue'),
+('Ponds', 'Effect depends on temperature difference between water and air and the size of the water body.', 1, 0, 0, 1, 0.5, 1.3, 0.5, 0.7, 0.6, 3.6, '/models/pond.glb', 'blue'),
 ('Small Lakes', 'Higher evaporation increases cooling effect.', 1, 0, 1, 0, 1, 2, 0.5, 1.6, NULL, NULL, '', 'blue'),
 ('Canals / Ditches / Singels', 'Effect depends on temperature difference between water and air and the size of the water body.', 1, 0, 0, 1, NULL, NULL, 0.1, 0.8, 0.2, 2, '', 'blue'),
 ('Rivers / Ventilated Water', 'Effect depends on temperature difference between water and air and the size of the water body.', 1, 0, 1, 0, NULL, NULL, 0.5, 4, 1, 4, '', 'blue'),
-('Fountains', 'Evaporation from fountains provides local cooling.', 1, 0, 0, 1, NULL, NULL, 1, 4.7, 1.0, 5.0, '', 'blue'),
+('Fountains', 'Evaporation from fountains provides local cooling.', 1, 0, 0, 1, NULL, NULL, 1, 4.7, 1.0, 5.0, 'models/fountain.glb', 'blue'),
 ('Misting Systems', 'Evaporation-based cooling, data from Japanese studies.', 1, 0, 0, 1, NULL, NULL, 0.7, 3.0, NULL, NULL, '', 'blue'),
 ('Street Sprinkling', 'Evaporation-based cooling.', 1, 0, 0, 1, NULL, NULL, 0.8, 3.0, NULL, NULL, '', 'blue'),
 ('Polder Roofs', 'Evaporation similar to intensive green roofs.', 1, 0, 1, 0, NULL, NULL, NULL, NULL, NULL, NULL, '', 'blue'),
