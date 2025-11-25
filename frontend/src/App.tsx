@@ -7,6 +7,7 @@ import { useOnClickOutside } from "./ui/hooks/useOnClickOutside";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
 import type { PickingInfo } from "@deck.gl/core";
 import { lonLatToRd } from "./map/utils/crs";
+import { fetchBuildingMetadataByRD } from "./features/buildings-3d/lib/buildingMetadataApi";
 
 // TODO: change this to backend API call to fetch available object types when db is added
 const OBJECT_TYPES = ['tree'];
@@ -37,24 +38,35 @@ export default function App() {
     overlayLayerId,
   });
 
-  const deckClickHandler = useCallback((info: PickingInfo) => {
-  const [lon, lat] = info.coordinate as [number, number];
+  const deckClickHandler = useCallback(
+    (info: PickingInfo) => {
+      // Let the existing interaction logic run first
+      const handledByInteraction = onViewStateClick(info);
+      handleMapClick(info);
 
-  const [xRD, yRD] = lonLatToRd(lon, lat);
+      // If we didn't hit anything useful, stop
+      if (!info.coordinate) {
+        return handledByInteraction;
+      }
 
-  console.log('Clicked building coordinates:', {
-    lon,
-    lat,
-    xRD,
-    yRD,
-  });
 
-    const handledByInteraction = onViewStateClick(info);
+      if (showBuildings && info.layer?.id === "buildings-obj") {
+        const [lon, lat] = info.coordinate as [number, number];
+        const [xRD, yRD] = lonLatToRd(lon, lat);
 
-    handleMapClick(info);
+        fetchBuildingMetadataByRD(xRD, yRD)
+          .then((data) => {
+            console.log("Building metadata from API:", data);
+          })
+          .catch((err) => {
+            console.error("Failed to fetch building metadata:", err);
+          });
+      }
 
-    return handledByInteraction;
-  }, [onViewStateClick, handleMapClick]);
+      return handledByInteraction;
+    },
+    [onViewStateClick, handleMapClick, showBuildings]
+  );
 
   const [open, setOpen] = React.useState(false);
   const menuNode = React.useRef<HTMLDivElement>(null);
