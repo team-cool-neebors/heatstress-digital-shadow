@@ -50,7 +50,7 @@ export default function Menu({
           onChange={onToggleBuildings}
         />
         <MenuItem
-          label="Heat Stress Measures View"
+          label="Objects View"
           checked={showObjects}
           onChange={onToggleObjects}
         >
