@@ -61,7 +61,7 @@ function meshRDToLocalMeters(
     const [lon, lat] = proj4(RD, 'WGS84', [xRD, yRD]) as [number, number];
     const [dx, dy]   = lonLatDeltaToMeters(lon, lat, lon0, lat0);
 
-    const zGrounded = z - 4;
+    const zGrounded = z + 0.2;
     out[i]     = dx;
     out[i + 1] = dy;
     out[i + 2] = zGrounded * heightScale;
