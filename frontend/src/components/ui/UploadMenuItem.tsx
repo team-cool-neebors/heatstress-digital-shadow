@@ -22,12 +22,6 @@ export default function UploadMenuItem({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!selectedCategory) {
-      alert("Please select a category before choosing a file.");
-      e.target.value = "";
-      return;
-    }
-
     const allowedExts = accept.split(",").map(ext => ext.trim().toLowerCase());
     const isValid = allowedExts.some(ext => file.name.toLowerCase().endsWith(ext));
 
@@ -58,7 +52,10 @@ export default function UploadMenuItem({
         <select
           className={styles.menuSelect}
           value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
+          onChange={(e) => {
+            setSelectedCategory(e.target.value);
+            setSelectedFile(null);
+          }}
         >
           <option value="">Select Map</option>
           {categories.map((c) => (
@@ -68,21 +65,23 @@ export default function UploadMenuItem({
           ))}
         </select>
 
-        <input
-          id="fileUpload"
-          type="file"
-          accept={accept}
-          onChange={handleFileChange}
-          className={styles.hiddenFileInput}
-          disabled={!selectedCategory}
-        />
-
         <label
-          htmlFor="fileUpload"
+          htmlFor="{fileInputId}"
           className={`${styles.customFileButton} ${!selectedCategory ? styles.disabledButton : ""}`}
+          onClick={(e) => {
+            if (!selectedCategory) e.preventDefault(); // prevent file dialog
+          }}
         >
           Choose File
         </label>
+        <input
+          id="{fileInputId}"
+          type="file"
+          accept={accept}
+          onChange={handleFileChange}
+          disabled={!selectedCategory} // functional disable
+          style={{ display: "none" }}
+        />
       </div>
 
       {selectedFile && (

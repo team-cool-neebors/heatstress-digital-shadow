@@ -6,8 +6,8 @@
   cursor: pointer;
   transition: background-color 0.2s ease, opacity 0.2s ease;
   font-weight: 500;
-  min-width: 6.3rem;
   height: 2.5rem;
+  width: 6.2rem;
 }
 
 .button:disabled {
@@ -17,12 +17,12 @@
 
 /* Variants */
 .primary {
-  background-color: #355a9f;
+  background-color: #000000;
   color: white;
 }
 
 .primary:hover:not(:disabled) {
-  background-color: #5370a6;
+  background-color: #3e4043;
 }
 
 .secondary {
