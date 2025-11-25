@@ -55,6 +55,7 @@ class Metadata3DBagMapper:
                     "bag_id": vbo_data.get('identificatie'),
                     "usage_function": vbo_data.get('gebruiksdoelen'),
                     "surface_area_m2": vbo_data.get('oppervlakte'),
+                    "status": vbo_data.get('status'),
                 }
                 
                 structured_vbos.append(VboData(**structured_data))
