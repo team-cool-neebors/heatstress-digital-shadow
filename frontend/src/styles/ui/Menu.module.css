@@ -12,6 +12,7 @@
   transition: transform 0.3s ease-in-out;
   z-index: 1000;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  color: black;
 }
 
 .open {
@@ -90,7 +91,19 @@
 
 .dropdownMenu {
   width: 100%;
-  padding: 0.35rem 0.5rem;
-  font-size: 1rem;
+  flex: 1;
+  height: 2.25rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.9rem;
   font-weight: 400;
+  line-height: 1.4;
+  background-color: #fff;
+  color: #0d0c1d;
+  border: 1px solid #ccc;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+  margin-top: 0;
+  font-weight: 500;
 }

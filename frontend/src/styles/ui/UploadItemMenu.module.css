@@ -43,7 +43,7 @@
 
 .menuSelect:focus {
   outline: none;
-  border-color: #343078;
+  border-color: #000000;
 }
 .menuUploadRowHorizontal {
   display: flex;
