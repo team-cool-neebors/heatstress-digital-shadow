@@ -1,3 +1,5 @@
+import type { TreeInstance } from "../../features/trees/lib/treeLayer";
+
 // Defining a generic interface for type definition so it will be compatitable for when we get objects from the db
 export interface ObjectConfig {
     [key: string]: {
@@ -6,9 +8,42 @@ export interface ObjectConfig {
     }
 }
 
+export interface GeoJsonProperties {
+    id?: string;
+    objectType?: string;
+    scale?: number;
+    [key: string]: string | number | undefined; 
+}
+
+export interface GeoJsonFeature {
+    type: "Feature";
+    geometry: {
+        type: "Point";
+        coordinates: [number, number]; 
+    };
+    properties: GeoJsonProperties;
+}
+
+// The expected shape of the file content after JSON.parse()
+export interface ImportContent {
+    __app_signature?: string;
+    type?: string; 
+    features?: GeoJsonFeature[]; 
+    data?: RawImportItem[]; 
+    [key: string]: unknown; 
+}
+
+// The structure of a raw object extracted from the file (Plain JSON or GeoJSON mapped)
+export interface RawImportItem {
+    id?: string;
+    objectType?: string;
+    position?: [number, number]; 
+    scale?: number;
+    [key: string]: unknown; 
+}
 
 export const parseImportedData = (
-    jsonContent: any, 
+    jsonContent: ImportContent, 
     availableTypes: ObjectConfig, 
     defaultType: string          
 ) => {
@@ -35,36 +70,43 @@ export const parseImportedData = (
         return availableTypes[type]?.scale || 1; 
     };
 
-    let rawList: any[] = [];
+    let rawList: RawImportItem[] = [];
 
     // Detect GeoJSON or Plain JSON
     if (jsonContent.type === 'FeatureCollection' && Array.isArray(jsonContent.features)) {
-        rawList = jsonContent.features.map((f: any) => ({
-            id: f.properties.id,
-            objectType: f.properties.objectType,
-            position: f.geometry.coordinates,
-            scale: f.properties.scale
+        rawList = jsonContent.features.map((f: GeoJsonFeature): RawImportItem => ({ 
+            id: f.properties?.id,
+            objectType: f.properties?.objectType,
+            position: f.geometry?.coordinates,
+            scale: f.properties?.scale
         }));
-    } else if (Array.isArray(jsonContent)) {
-        rawList = jsonContent.map((item: any) => ({
+    // Check for Plain JSON payload nested under 'data'
+    } else if (jsonContent.data && Array.isArray(jsonContent.data)) { 
+        rawList = jsonContent.data.map((item: RawImportItem): RawImportItem => ({ 
             id: item.id,
             objectType: item.objectType,
-            position: [item.longitude, item.latitude],
+            position: item.position,
             scale: item.scale
         }));
     } else {
-        throw new Error("Unsupported file format");
+        throw new Error("Unsupported file format or corrupt signed file structure.");
     }
 
     // Normalize and Return
-    return rawList.map(item => {
-        const finalType = sanitizeType(item.objectType);
+   return rawList.map((item: RawImportItem) => {
+    
+        const incomingType = item.objectType ?? defaultType; 
         
+        const finalType = sanitizeType(incomingType); 
+        
+        // Ensure position is valid (fallback to [0, 0] if missing coordinates)
+        const position: [number, number] = (item.position && item.position.length === 2) ? item.position : [0, 0];
+    
         return {
             id: item.id || crypto.randomUUID(),
             objectType: finalType,
-            position: item.position,
+            position: position, // Use the validated position
             scale: getScale(item.scale, finalType),
-        };
+        } as TreeInstance;
     });
 };
