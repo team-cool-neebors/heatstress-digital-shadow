@@ -9,7 +9,7 @@ type MenuUploadItemProps = {
   onUpload: (file: File, category: string) => void;
 };
 
-export default function MenuUploadItem({
+export default function UploadMenuItem({
   label,
   accept = ".geojson,.tif,.qgz",
   categories = ["Wind Map", "PET Map", "Weather Map"],

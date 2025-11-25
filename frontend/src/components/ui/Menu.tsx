@@ -1,6 +1,6 @@
 import styles from "../../styles/ui/Menu.module.css";
-import MenuItem from "./ItemMenu";
-import MenuUploadItem from "./UploadItemMenu";
+import MenuItem from "./MenuItem";
+import UploadMenuItem from "./UploadMenuItem";
 import type { QgisLayerId } from "../../features/wms-overlay/lib/qgisLayers";
 import OverlayMenuItem from "./OverlayMenuItem";
 
@@ -50,22 +50,21 @@ export default function Menu({
           onChange={onToggleBuildings}
         />
         <MenuItem
-          label="Flora View (Trees)"
+          label="Heat Stress Measures View"
           checked={showObjects}
           onChange={onToggleObjects}
-        />
-        {showObjects && (
-          <div className={styles.menuItem}>
-          <label className={styles.menuItemLabel}>
-            <input
-              type="checkbox"
-              checked={isEditingMode}
-              onChange={(e) => onToggleEditingMode(e.target.checked)}
-            />
-            Editing Mode
-          </label>
-          </div>
-        )}
+        >
+          {showObjects && (
+            <label className={styles.menuItemLabel}>
+              <input
+                type="checkbox"
+                checked={isEditingMode}
+                onChange={(e) => onToggleEditingMode(e.target.checked)}
+              />
+              Editing Mode
+            </label>
+          )}
+        </MenuItem>
         <OverlayMenuItem
           label="Map Overlay View"
           checked={showOverlay}
@@ -74,7 +73,7 @@ export default function Menu({
           onChange={onChangeOverlayLayer}
           options={overlayLayerOptions}
         />
-        <MenuUploadItem
+        <UploadMenuItem
           label="Import Your Own Map"
           categories={["Wind Map", "PET Map", "Weather Map"]}
           accept=".geojson,.tif,.qgz"

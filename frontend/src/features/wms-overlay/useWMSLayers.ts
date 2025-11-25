@@ -26,8 +26,6 @@ export function useWMSLayers({ showOverlay, overlayLayerId, objectsVersion }: Us
         if (!showOverlay) return null;
         if (overlayLayerId === "") return null;
 
-        console.log(overlayLayerId)
-
         return makeWmsLayer({
             baseUrl: WMS_BASE_URL,
             layerName: overlayLayerId,

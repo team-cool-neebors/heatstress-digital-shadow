@@ -30,25 +30,16 @@ export default function OverlayMenuItem({
             </label>
 
             {checked && (
-                <div className={styles.menuItemDropdown}>
-                    <label
-                        style={{
-                            display: "block",
-                            fontSize: ".85rem",
-                            color: "#555",
-                            marginBottom: ".25rem",
-                        }}
-                    >
+                <div className={styles.overlayItemDropdown}>
+                    <label className={styles.labelDropdownOverlay}>
                         Overlay Layer
                     </label>
 
                     <select
                         value={value}
                         onChange={(e) => onChange(e.target.value as QgisLayerId | "")}
-                        className={styles.menuSelect}
+                        className={styles.dropdownMenu}
                     >
-                        <option value="">Select Layer</option>
-
                         {options.map((opt) => (
                             <option key={opt.id} value={opt.id}>
                                 {opt.label}

@@ -5,6 +5,7 @@ type MenuItemProps = {
   checked?: boolean;
   onChange?: (checked: boolean) => void;
   toggleable?: boolean;
+  children?: React.ReactNode;
 };
 
 export default function MenuItem({
@@ -12,6 +13,7 @@ export default function MenuItem({
   checked = false,
   onChange,
   toggleable = true,
+  children,
 }: MenuItemProps) {
   return (
     <div className={styles.menuItem}>
@@ -25,6 +27,11 @@ export default function MenuItem({
         )}
         {label}
       </label>
+      {children && (
+        <div className={styles.subItem}>
+          {children}
+        </div>
+      )}
     </div>
   );
 }
