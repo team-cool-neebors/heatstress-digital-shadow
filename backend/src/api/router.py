@@ -4,7 +4,7 @@ from src.api.controllers import WMSController, DataProcessingController, Session
 from src.api.models import WFSParams
 from src.api.services import Metadata3DBagService, get_metadata_bag3d_service, DatabaseService, get_database_service
 from src.api.models import AggregatedBagResponse
-from src.api.requests import PlacedObjectsRequest
+from src.api.requests import PlacedObjectsRequest, MeasureLocationsRequest
 
 wfs_controller = WFSController()
 dpc_controller = DataProcessingController()
@@ -19,6 +19,14 @@ def get_measures(
 ):
     return database_service.get_measures()
 
+@api_router.post("/measures")
+def add_measures(
+    measures: List[MeasureLocationsRequest],
+
+    database_service: DatabaseService = Depends(get_database_service)
+):
+    return database_service.add_measure_locations(measures)
+    
 @api_router.get("/objects/{type}")
 async def get_objects_by_type(
     type: str,
