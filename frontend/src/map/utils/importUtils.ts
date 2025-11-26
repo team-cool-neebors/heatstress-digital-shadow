@@ -1,112 +1,129 @@
-import type { TreeInstance } from "../../features/trees/lib/treeLayer";
+import { useCallback } from 'react';
+import type { TreeInstance } from '../../features/trees/lib/treeLayer';
 
-// Defining a generic interface for type definition so it will be compatitable for when we get objects from the db
+
 export interface ObjectConfig {
-    [key: string]: {
-        url?: string;
-        scale?: number;
-    }
+    [key: string]: { url?: string; scale?: number; }
 }
 
-export interface GeoJsonProperties {
-    id?: string;
-    objectType?: string;
-    scale?: number;
-    [key: string]: string | number | undefined; 
+// Unified file shape
+interface NeighborhoodFile {
+    __app_signature: 'neeghboorhoods';
+    __export_date: string;
+    type?: 'FeatureCollection'; 
+    features?: Array<{          
+        type: 'Feature';
+        geometry: { coordinates: number[] };
+        properties: Partial<TreeInstance>; 
+    }>;
+    data?: TreeInstance[];    
 }
 
-export interface GeoJsonFeature {
-    type: "Feature";
-    geometry: {
-        type: "Point";
-        coordinates: [number, number]; 
-    };
-    properties: GeoJsonProperties;
-}
+const APP_SIGNATURE = 'neeghboorhoods';
+const DEFAULT_OBJECT_TYPE = 'tree_1'; 
 
-// The expected shape of the file content after JSON.parse()
-export interface ImportContent {
-    __app_signature?: string;
-    type?: string; 
-    features?: GeoJsonFeature[]; 
-    data?: RawImportItem[]; 
-    [key: string]: unknown; 
-}
+// Helper: Trigger Download
+const triggerDownload = (dataStr: string, fileName: string, mimeType: string) => {
+    const blob = new Blob([dataStr], { type: mimeType });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(link.href);
+};
 
-// The structure of a raw object extracted from the file (Plain JSON or GeoJSON mapped)
-export interface RawImportItem {
-    id?: string;
-    objectType?: string;
-    position?: [number, number]; 
-    scale?: number;
-    [key: string]: unknown; 
-}
-
-export const parseImportedData = (
-    jsonContent: ImportContent, 
-    availableTypes: ObjectConfig, 
-    defaultType: string          
+//  The Hook 
+export const useObjectIO = (
+    objectsToSave: TreeInstance[], 
+    setObjectsToSave: (objs: TreeInstance[]) => void,
+    objectConfig: ObjectConfig
 ) => {
 
-    // Define the unique signature we use to validate a file is our own before we import
-    const APP_SIGNATURE = 'neeghboorhoods';
+    const importObjects = useCallback(async (file: File) => {
+        if (!file) return;
 
-    // Check for the signature immediately
-    if (jsonContent.__app_signature !== APP_SIGNATURE) {
-        throw new Error("Invalid file signature. Only files exported from this application can be imported.");
-    }
+        try {
+            const text = await file.text();
+            const json = JSON.parse(text) as NeighborhoodFile;
 
-    // Create a Set of keys for fast lookup
-    const validTypeKeys = Object.keys(availableTypes);
+            if (json.__app_signature !== APP_SIGNATURE) throw new Error("Invalid signature");
 
-    // Dynamic Sanitizer
-    const sanitizeType = (type: string): string => {
-        return validTypeKeys.includes(type) ? type : defaultType;
-    };
+            let candidates: Partial<TreeInstance>[] = [];
 
-    // Dynamic Scale Lookup
-    const getScale = (instanceScale: number | undefined, type: string): number => {
-        if (typeof instanceScale === 'number') return instanceScale;
-        return availableTypes[type]?.scale || 1; 
-    };
+            // Normalize
+            if (json.type === 'FeatureCollection' && Array.isArray(json.features)) {
+                candidates = json.features.map(f => ({
+                    ...f.properties,
+                    position: f.geometry.coordinates as [number, number, number]
+                }));
+            } else if (Array.isArray(json.data)) {
+                candidates = json.data;
+            } else {
+                throw new Error("Unknown format");
+            }
 
-    let rawList: RawImportItem[] = [];
+            // Validate
+            const validObjects: TreeInstance[] = candidates.map(item => {
+                const type = (item.objectType && objectConfig[item.objectType]) 
+                    ? item.objectType : DEFAULT_OBJECT_TYPE;
+                
+                return {
+                    id: item.id || crypto.randomUUID(),
+                    objectType: type,
+                    position: (item.position?.length === 3) ? item.position : [0,0,0],
+                    scale: item.scale ?? objectConfig[type]?.scale ?? 1,
+                };
+            });
 
-    // Detect GeoJSON or Plain JSON
-    if (jsonContent.type === 'FeatureCollection' && Array.isArray(jsonContent.features)) {
-        rawList = jsonContent.features.map((f: GeoJsonFeature): RawImportItem => ({ 
-            id: f.properties?.id,
-            objectType: f.properties?.objectType,
-            position: f.geometry?.coordinates,
-            scale: f.properties?.scale
-        }));
-    // Check for Plain JSON payload nested under 'data'
-    } else if (jsonContent.data && Array.isArray(jsonContent.data)) { 
-        rawList = jsonContent.data.map((item: RawImportItem): RawImportItem => ({ 
-            id: item.id,
-            objectType: item.objectType,
-            position: item.position,
-            scale: item.scale
-        }));
-    } else {
-        throw new Error("Unsupported file format or corrupt signed file structure.");
-    }
+            setObjectsToSave(validObjects);
+            console.log(`Imported ${validObjects.length} objects.`);
 
-    // Normalize and Return
-   return rawList.map((item: RawImportItem) => {
-    
-        const incomingType = item.objectType ?? defaultType; 
+        } catch (err) {
+            console.error("Import failed:", err);
+            alert("Failed to import file. See console for details.");
+        }
+    }, [objectConfig, setObjectsToSave]);
+
+
+    // EXPORT LOGIC 
+    const exportObjects = useCallback((format: 'geojson' | 'json') => {
+        if (objectsToSave.length === 0) {
+            console.warn("No objects to export.");
+            return;
+        }
+
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const timestamp = new Date().toISOString();
         
-        const finalType = sanitizeType(incomingType); 
-        
-        // Ensure position is valid (fallback to [0, 0] if missing coordinates)
-        const position: [number, number] = (item.position && item.position.length === 2) ? item.position : [0, 0];
-    
-        return {
-            id: item.id || crypto.randomUUID(),
-            objectType: finalType,
-            position: position, // Use the validated position
-            scale: getScale(item.scale, finalType),
-        } as TreeInstance;
-    });
+        const fileContent: NeighborhoodFile = {
+            __app_signature: APP_SIGNATURE,
+            __export_date: timestamp,
+        };
+
+        let fileName = '';
+        let mimeType = '';
+
+        if (format === 'geojson') {
+            fileContent.type = 'FeatureCollection';
+            fileContent.features = objectsToSave.map(obj => ({
+                type: "Feature",
+                geometry: { type: "Point", coordinates: obj.position },
+                properties: { 
+                    ...obj,
+                    placement_date: new Date(parseInt(obj.id.split('-')[2] || Date.now().toString())).toISOString()
+                } 
+            }));
+            fileName = `neighborhood_${dateStr}.geojson`;
+            mimeType = 'application/geo+json';
+        } else {
+            fileContent.data = objectsToSave;
+            fileName = `neighborhood_raw_${dateStr}.json`;
+            mimeType = 'application/json';
+        }
+
+        triggerDownload(JSON.stringify(fileContent, null, 2), fileName, mimeType);
+
+    }, [objectsToSave]);
+
+    return { importObjects, exportObjects };
 };

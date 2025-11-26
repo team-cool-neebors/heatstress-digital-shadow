@@ -6,7 +6,7 @@ import Menu from "./ui/Menu";
 import { useOnClickOutside } from "./ui/hooks/useOnClickOutside";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
 import type { PickingInfo } from "@deck.gl/core";
-import { useFileImport } from "./ui/hooks/useFileImport";
+import { useFileImport } from "./ui/hooks/useObjectIO";
 
 // TODO: change this to backend API call to fetch available object types when db is added
 const OBJECT_TYPES = ['tree'];
@@ -106,6 +106,7 @@ export default function App() {
             <select
               value={exportFormat}
               onChange={(e) => setExportFormat(e.target.value as 'geojson' | 'json')}
+              title="Select the format you wish to export your changes in"
               style={{ padding: '8px 10px' }}
             >
               <option value="geojson">GeoJSON</option>

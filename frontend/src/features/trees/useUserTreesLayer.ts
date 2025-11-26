@@ -3,7 +3,7 @@ import type { Layer, PickingInfo } from '@deck.gl/core';
 import { makeTreesLayer, type TreeInstance } from './lib/treeLayer';
 import { LOCAL_STORAGE_KEY, OBJECTS, DEFAULT_OBJECT_TYPE } from '../../map/utils/deckUtils';
 import { lonLatToRd } from '../../map/utils/crs';
-import { parseImportedData } from '../../map/utils/importUtils';
+import { useObjectIO } from '../../map/utils/importUtils';
 
 export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
 
@@ -149,118 +149,13 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         setObjectsToSave(userObjects);
     }, [userObjects]);
 
-
-    // Helper function for exportObjects function
-    const triggerDownload = (data: string, filename: string, mimeType: string) => {
-        const blob = new Blob([data], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
-
-    const exportObjects = useCallback((format: 'geojson' | 'json') => {
-    if (objectsToSave.length === 0) {
-        console.warn("No objects to export.");
-        return;
-    }
-
-    const dateStr = new Date().toISOString().slice(0, 10);
-    let fileName = '';
-    let mimeType = '';
-    let exportData = {};
-
-    // Define the unique signature we use to validate a file is our own before we import
-    const APP_SIGNATURE = 'neeghboorhoods';
-
-    // GeoJSON
-    if (format === 'geojson') {
-        const geoJsonData = {
-        type: "FeatureCollection",
-        features: objectsToSave.map(obj => ({
-            type: "Feature",
-            geometry: {
-            type: "Point",
-            coordinates: obj.position 
-            },
-            properties: {
-            id: obj.id,
-            objectType: obj.objectType,
-            scale: obj.scale,
-            placement_date: new Date(parseInt(obj.id.split('-')[2] || Date.now().toString())).toISOString()
-            }
-        })),
-        };
-        
-        exportData = {
-            ...geoJsonData,
-            __app_signature: APP_SIGNATURE,
-            __export_date: new Date().toISOString(),
-        };
-        fileName = `user_objects_${dateStr}.geojson`;
-        mimeType = 'application/geo+json';
-
-    } else {
-        // Plain JSON
-        const simpleData = objectsToSave.map(obj => ({
-        id: obj.id,
-        objectType: obj.objectType,
-        longitude: obj.position[0],
-        latitude: obj.position[1],
-        scale: obj.scale,
-        placement_date: new Date(parseInt(obj.id.split('-')[2] || Date.now().toString())).toISOString()
-        }));
-
-        exportData = {
-            __app_signature: APP_SIGNATURE,
-            __export_date: new Date().toISOString(),
-            data: simpleData, 
-        };
-        fileName = `user_objects_raw_${dateStr}.json`;
-        mimeType = 'application/json';
-    }
-
-    const dataStr = JSON.stringify(exportData, null, 2)
-    triggerDownload(dataStr, fileName, mimeType);
-
-    }, [objectsToSave]);
-
     const objectConfig = OBJECTS;
 
-    const importObjects = useCallback((file: File) => {
-    if (!file) return;
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-        try {
-            const result = e.target?.result;
-            if (typeof result !== 'string') return;
-            const parsedJson = JSON.parse(result);
-
-            const normalizedObjects = parseImportedData(
-                parsedJson, 
-                objectConfig,        
-                DEFAULT_OBJECT_TYPE  
-            );
-
-            if (normalizedObjects.length === 0) {
-                // If the file yielded zero objects, throw an error.
-                throw new Error("File contained no valid objects or features to import.");
-            }
-
-            setObjectsToSave(normalizedObjects);
-            console.log(`Successfully imported ${normalizedObjects.length} objects.`);
-            
-        } catch (err) {
-            console.error("Import failed", err);
-        }
-    };
-    reader.readAsText(file);
-}, [objectConfig]);
+    const { importObjects, exportObjects } = useObjectIO(
+        objectsToSave,
+        setObjectsToSave,
+        objectConfig
+    );
     
     return {
         userObjectLayer,
