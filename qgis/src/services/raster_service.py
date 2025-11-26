@@ -180,7 +180,7 @@ class RasterService:
 
     def fill_nodata_gdal(
         self,
-        input_raster: QgsRasterLayer,
+        input_raster_path: str,
         output_path: str,
         band: int = 1,
         distance: float = 10,
@@ -207,7 +207,7 @@ class RasterService:
         feedback = QgsProcessingFeedback()
 
         params = {
-            'INPUT': input_raster,
+            'INPUT': input_raster_path,
             'BAND': band,
             'DISTANCE': distance,
             'ITERATIONS': iterations,
