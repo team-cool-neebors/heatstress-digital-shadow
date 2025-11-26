@@ -39,16 +39,17 @@ def get_uhi_zone():
     raster_service.clip_raster_by_extent(result, reference, "/data/uhi/shadow-bbox.tif")
 
     raster_service.rasterize_vector_layer(obj, "t_a", "/data/uhi/t_a.tif")
+    raster_service.fill_nodata_gdal("/data/raster/svf-reproject.tif", "/data/raster/svf-reproject-filled.tif")
 
     pet_service.calculate_total_pet_sun(
         "/data/uhi/sun-bbox.tif",
         "/data/raster/br-reproject.tif",
-        "/data/raster/svf-reproject.tif",
+        "/data/raster/svf-reproject-filled.tif",
         "/data/uhi/sun-pet.tif",
     )
     pet_service.calculate_total_pet_shadow(
         "/data/uhi/shadow-bbox.tif",
-        "/data/raster/svf-reproject.tif",
+        "/data/raster/svf-reproject-filled.tif",
         "/data/uhi/t_a.tif",
         "/data/uhi/shadow-pet.tif",
     )
@@ -81,6 +82,7 @@ def burn_point_to_raster(req: PlacedObjectsRequest, session_id: Optional[str] = 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_raster = f"/data/server/sessions/{session_id}/dsm_{timestamp}.tif"
     pet_raster = f"/data/server/sessions/{session_id}/pet_{timestamp}.tif"
+    filled_pet_raster = f"/data/server/sessions/{session_id}/pet_{timestamp}_filled.tif"
     
     raster_service.burn_points_to_raster(input_raster, req.points, output_path=output_raster)
 
@@ -100,7 +102,12 @@ def burn_point_to_raster(req: PlacedObjectsRequest, session_id: Optional[str] = 
         pet_raster,
     )
     
-    update_pet_layer_in_project(f"/data/server/sessions/{session_id}/map.qgz", pet_raster, f"pet_{timestamp}")
+    raster_service.fill_nodata_gdal(
+        pet_raster,
+        filled_pet_raster
+    )
+    
+    update_pet_layer_in_project(f"/data/server/sessions/{session_id}/map.qgz", filled_pet_raster, f"pet_{timestamp}_filled")
 
     return {
         "status": "success",
