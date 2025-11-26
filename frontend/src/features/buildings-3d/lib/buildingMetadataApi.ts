@@ -1,5 +1,10 @@
 const BUILDING_API_URL = "backend/3dbag/search-pand";
 
+export type BagPolygonRD = {
+  type: "Polygon";
+  coordinates: number[][][];
+};
+
 export type BuildingPandData = {
   bag_object_type: "PAND";
   bag_id: string;
@@ -15,6 +20,7 @@ export type BuildingPandData = {
     validity_end_date: string | null;
     inactivity_time: string | null;
   };
+  geometry: BagPolygonRD;
 };
 
 export type BuildingVerblijfsobjectData = {

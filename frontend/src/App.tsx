@@ -6,16 +6,20 @@ import Menu from "./components/ui/Menu";
 import { useOnClickOutside } from "./components/ui/hooks/useOnClickOutside";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
 import type { PickingInfo } from "@deck.gl/core";
-import { lonLatToRd } from "./map/utils/crs";
-import { fetchBuildingMetadataByRD } from "./features/buildings-3d/lib/buildingMetadataApi";
 
+import { useBuildingHighlight } from "./features/buildings-3d/useBuildingHighlight";
 
 // TODO: change this to backend API call to fetch available object types when db is added
-const OBJECT_TYPES = ['tree'];
+const OBJECT_TYPES = ["tree"];
 
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
   const [showObjects, setShowObjects] = React.useState(false);
+  const [isEditingMode, setIsEditingMode] = React.useState(false);
+  const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
+  const [showOverlay, setShowOverlay] = React.useState(false);
+  const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>("");
+
   const handleToggleObjects = (value: boolean) => {
     setShowObjects(value);
 
@@ -23,10 +27,7 @@ export default function App() {
       setIsEditingMode(false);
     }
   };
-  const [isEditingMode, setIsEditingMode] = React.useState(false);
-  const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
-  const [showOverlay, setShowOverlay] = React.useState(false);
-  const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>("");
+
   const {
     layers,
     error,
@@ -35,45 +36,33 @@ export default function App() {
     discardChanges,
     hasUnsavedChanges,
     featureInfo,
-    handleMapClick
+    handleMapClick,
   } = useDeckLayers({
     showBuildings,
     showObjects,
     isEditingMode,
     selectedObjectType,
-    objPath: 'data/10-72-338-LoD22-3D_leveled.obj',
+    objPath: "data/10-72-338-LoD22-3D_leveled.obj",
     showOverlay,
     overlayLayerId,
   });
 
+  const { highlightLayer, handleBuildingClick } = useBuildingHighlight({
+    enabled: showBuildings,
+  });
+
   const deckClickHandler = useCallback(
     (info: PickingInfo) => {
-      // Let the existing interaction logic run first
+      // handle building selection / highlight
+      handleBuildingClick(info);
+
       const handledByInteraction = onViewStateClick(info);
+
       handleMapClick(info);
-
-      // If we didn't hit anything useful, stop
-      if (!info.coordinate) {
-        return handledByInteraction;
-      }
-
-
-      if (showBuildings && info.layer?.id === "buildings-obj") {
-        const [lon, lat] = info.coordinate as [number, number];
-        const [xRD, yRD] = lonLatToRd(lon, lat);
-
-        fetchBuildingMetadataByRD(xRD, yRD)
-          .then((data) => {
-            console.log("Building metadata from API:", data);
-          })
-          .catch((err) => {
-            console.error("Failed to fetch building metadata:", err);
-          });
-      }
 
       return handledByInteraction;
     },
-    [onViewStateClick, handleMapClick, showBuildings]
+    [handleBuildingClick, onViewStateClick, handleMapClick]
   );
 
   const [open, setOpen] = React.useState(false);
@@ -83,7 +72,7 @@ export default function App() {
   return (
     <div style={{ position: "relative", height: "100dvh", width: "100%" }}>
       <DeckMap
-        layers={layers}
+        layers={highlightLayer ? [...layers, highlightLayer] : layers}
         initialViewState={{
           longitude: 3.613,
           latitude: 51.5,
@@ -96,35 +85,39 @@ export default function App() {
       />
 
       {isEditingMode && (
-        <div style={{
-          position: 'absolute',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-          top: 10,
-          right: 10,
-          zIndex: 10
-        }}>
+        <div
+          style={{
+            position: "absolute",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            top: 10,
+            right: 10,
+            zIndex: 10,
+          }}
+        >
           <select
             value={selectedObjectType}
             onChange={(e) => setSelectedObjectType(e.target.value)}
-            style={{ padding: '8px', marginRight: '10px' }}
+            style={{ padding: "8px", marginRight: "10px" }}
           >
-            {OBJECT_TYPES.map(type => (
-              <option key={type} value={type}>{type}</option>
+            {OBJECT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
             ))}
           </select>
           <button
             onClick={saveObjects}
             disabled={!hasUnsavedChanges}
-            style={{ padding: '8px 15px', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
+            style={{ padding: "8px 15px", cursor: hasUnsavedChanges ? "pointer" : "not-allowed" }}
           >
             Save Objects
           </button>
           <button
             onClick={discardChanges}
             disabled={!hasUnsavedChanges}
-            style={{ padding: '8px 15px', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
+            style={{ padding: "8px 15px", cursor: hasUnsavedChanges ? "pointer" : "not-allowed" }}
           >
             Discard Changes
           </button>
@@ -163,7 +156,7 @@ export default function App() {
                 borderRadius: 8,
               }}
             >
-              Failed to load OBJ: {String(error.message || error)}
+              Failed to load OBJ: {String((error as any).message || error)}
             </div>
           )}
         </div>
