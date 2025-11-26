@@ -82,7 +82,7 @@ def burn_point_to_raster(req: PlacedObjectsRequest, session_id: Optional[str] = 
     output_raster = f"/data/server/sessions/{session_id}/dsm_{timestamp}.tif"
     pet_raster = f"/data/server/sessions/{session_id}/pet_{timestamp}.tif"
     
-    raster_service.burn_points_to_raster(input_raster, req.points, output_path=output_raster)
+    raster_service.burn_points_to_raster_pixel_cloud(input_raster, req.points, output_path=output_raster)
 
     output_folder = "/data/shadow-maps"
     lat, lon = 51.498, 3.613
