@@ -55,7 +55,7 @@ function buildGetMapUrl({
 export function makeWmsLayer(opts: MakeOpts): Layer {
   const url = buildGetMapUrl(opts);
   return new BitmapLayer({
-    id: opts.id ?? 'wms-bitmap-4326',
+    id: opts.id,
     image: url,
     bounds: opts.bounds,
     opacity: opts.opacity ?? 1
