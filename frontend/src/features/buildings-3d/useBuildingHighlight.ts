@@ -63,6 +63,13 @@ export function useBuildingHighlight({ enabled }: UseBuildingHighlightOptions) {
         return;
       }
 
+      // Check if there is an object where the user clicks, otherwise dont proceed with api call.
+      if (!info.object) {
+            setHighlight(null);
+            setBuildingInfo(null);
+            return;
+        }
+
       if (!info.coordinate) {
         setHighlight(null);
         setBuildingInfo(null);
