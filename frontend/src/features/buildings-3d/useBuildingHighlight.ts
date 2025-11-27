@@ -1,8 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { PickingInfo } from "@deck.gl/core";
 import { PolygonLayer } from "@deck.gl/layers";
 import { lonLatToRd, rdToLonLat } from "../../map/utils/crs";
-import { fetchBuildingMetadataByRD } from "./lib/buildingMetadataApi";
+import {
+  fetchBuildingMetadataByRD,
+  type BuildingApiResponse,
+} from "./lib/buildingMetadataApi";
 
 type LonLat = [number, number];
 
@@ -37,44 +40,46 @@ function estimateHeightFromArea(areaM2: number): number {
 
   const base = 8;
   const extra = Math.sqrt(areaM2);
-  const height = base + extra * 0.4;
-
-  // no clamping, just the raw heuristic
-  return height;
+  return base + extra * 0.4;
 }
 
 export function useBuildingHighlight({ enabled }: UseBuildingHighlightOptions) {
   const [highlight, setHighlight] = useState<HighlightState | null>(null);
+  const [buildingInfo, setBuildingInfo] =
+    useState<BuildingApiResponse | null>(null);
+
+  useEffect(() => {
+    if (!enabled) {
+      setHighlight(null);
+      setBuildingInfo(null);
+    }
+  }, [enabled]);
 
   const handleBuildingClick = useCallback(
     (info: PickingInfo) => {
-      // if highlighting is disabled, clear and do nothing
       if (!enabled) {
         setHighlight(null);
+        setBuildingInfo(null);
         return;
       }
 
-      // no coordinate (e.g. click outside map) → clear
       if (!info.coordinate) {
         setHighlight(null);
+        setBuildingInfo(null);
         return;
       }
 
-      // if we clicked on something that is NOT the buildings layer → clear
-      if (info.layer?.id !== "buildings-obj") {
-        setHighlight(null);
-        return;
-      }
-
-      // from here on, we know we clicked on a building
       const [lon, lat] = info.coordinate as LonLat;
       const [xRD, yRD] = lonLatToRd(lon, lat);
+
+      setBuildingInfo(null);
 
       void fetchBuildingMetadataByRD(xRD, yRD)
         .then((data) => {
           const geom = data?.pand_data?.geometry;
           if (!geom || geom.type !== "Polygon" || !geom.coordinates?.length) {
             setHighlight(null);
+            setBuildingInfo(null);
             return;
           }
 
@@ -94,11 +99,14 @@ export function useBuildingHighlight({ enabled }: UseBuildingHighlightOptions) {
             polygon: ringLonLat,
             height: estimatedHeight,
           });
+          setBuildingInfo(data);
         })
         .catch((err) => {
           console.error("Failed to fetch building metadata:", err);
+          // On error: hide highlight + card
           setHighlight(null);
-        });
+          setBuildingInfo(null);
+        })
     },
     [enabled]
   );
@@ -129,5 +137,6 @@ export function useBuildingHighlight({ enabled }: UseBuildingHighlightOptions) {
   return {
     highlightLayer,
     handleBuildingClick,
+    buildingInfo,
   };
 }
