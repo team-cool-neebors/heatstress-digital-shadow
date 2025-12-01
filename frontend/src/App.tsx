@@ -6,6 +6,7 @@ import Menu from "./components/ui/Menu";
 import { useOnClickOutside } from "./components/ui/hooks/useOnClickOutside";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
 import type { PickingInfo } from "@deck.gl/core";
+import { useFileImport } from "./components/ui/hooks/useObjectIO";
 
 
 // TODO: change this to backend API call to fetch available object types when db is added
@@ -24,6 +25,7 @@ export default function App() {
   const [isEditingMode, setIsEditingMode] = React.useState(false);
   const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
   const [showOverlay, setShowOverlay] = React.useState(false);
+  const [exportFormat, setExportFormat] = React.useState<'geojson' | 'json'>('geojson');
   const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>("");
   const {
     layers,
@@ -33,7 +35,9 @@ export default function App() {
     discardChanges,
     hasUnsavedChanges,
     featureInfo,
-    handleMapClick
+    handleMapClick,
+    exportObjects,
+    importObjects
   } = useDeckLayers({
     showBuildings,
     showObjects,
@@ -55,6 +59,8 @@ export default function App() {
   const [open, setOpen] = React.useState(false);
   const menuNode = React.useRef<HTMLDivElement>(null);
   useOnClickOutside(menuNode.current, () => setOpen(false));
+
+  const { fileInputRef, handleFileSelect, triggerImport } = useFileImport(importObjects);
 
   return (
     <div style={{ position: "relative", height: "100dvh", width: "100%" }}>
@@ -104,6 +110,40 @@ export default function App() {
           >
             Discard Changes
           </button>
+          {/* Import Export buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <select
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value as 'geojson' | 'json')}
+              title="Select the format you wish to export your changes in"
+              style={{ padding: '8px 10px' }}
+            >
+              <option value="geojson">GeoJSON</option>
+              <option value="json">Plain JSON</option>
+            </select>
+            
+            <button
+              onClick={() => exportObjects(exportFormat)} 
+              disabled={!hasUnsavedChanges}
+              style={{ padding: '8px', background: '#3F51B5', color: 'white', border: 'none', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
+            >
+              Export Objects 
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              accept=".json,.geojson"
+              style={{ display: 'none' }}
+            />
+
+            <button
+              onClick={triggerImport} 
+              style={{ padding: '8px', background: '#4CAF50', color: 'white', border: 'none', cursor: 'pointer' }}
+            >
+              Import Objects 
+            </button>
+          </div>
         </div>
       )}
 

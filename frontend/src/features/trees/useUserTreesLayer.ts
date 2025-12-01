@@ -3,6 +3,7 @@ import type { Layer, PickingInfo } from '@deck.gl/core';
 import { makeTreesLayer, type TreeInstance } from './lib/treeLayer';
 import { LOCAL_STORAGE_KEY, OBJECTS, DEFAULT_OBJECT_TYPE } from '../../map/utils/deckUtils';
 import { lonLatToRd } from '../../map/utils/crs';
+import { useObjectIO } from '../../map/utils/importUtils';
 
 export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
 
@@ -148,6 +149,14 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         setObjectsToSave(userObjects);
     }, [userObjects]);
 
+    const objectConfig = OBJECTS;
+
+    const { importObjects, exportObjects } = useObjectIO(
+        objectsToSave,
+        setObjectsToSave,
+        objectConfig
+    );
+    
     return {
         userObjectLayer,
         handleInteraction,
@@ -156,5 +165,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         error,
         hasUnsavedChanges,
         objectsVersion,
+        exportObjects,
+        importObjects
     };
 }
