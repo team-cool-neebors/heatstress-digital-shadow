@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import type { Layer } from '@deck.gl/core';
 import { makeObjectsLayer, type ObjectInstance } from './lib/objectLayer';
 import { rdToLonLat } from '../../map/utils/crs';
-import { BBOX, OBJECTS } from '../../map/utils/deckUtils';
+import { BBOX } from '../../map/utils/deckUtils';
 
-export function useStaticObjectsLayer(showObjects: boolean, selectedObjectType: string) {
+export function useStaticTreesLayer(showObjects: boolean) {
   const [objectLayer, setObjectLayer] = useState<Layer | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
@@ -46,7 +46,7 @@ export function useStaticObjectsLayer(showObjects: boolean, selectedObjectType: 
         const layer = makeObjectsLayer(
           'objects',
           data,
-          OBJECTS[selectedObjectType].url
+          '/models/tree-pine.glb'
         );
 
         if (!cancelled) setObjectLayer(layer);
@@ -57,7 +57,7 @@ export function useStaticObjectsLayer(showObjects: boolean, selectedObjectType: 
 
     fetchObjectData();
     return () => { cancelled = true; };
-  }, [showObjects, selectedObjectType]);
+  }, [showObjects]);
 
   return { objectLayer, error };
 }

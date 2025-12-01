@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { Layer } from '@deck.gl/core';
 import { makeOsmTileLayer } from '../../features/basemap/lib/osmLayer';
 import { useBuildingsLayer } from '../../features/buildings-3d/useBuildingsLayer';
-import { useStaticObjectsLayer } from '../../features/objects/useStaticObjectsLayer';
+import { useStaticTreesLayer } from '../../features/objects/useStaticTreesLayer';
 import { useUserObjectsLayer } from '../../features/objects/useUserObjectsLayer';
 import { useWMSLayers } from '../../features/wms-overlay/useWMSLayers';
 import type { QgisLayerId } from '../../features/wms-overlay/lib/qgisLayers';
@@ -36,10 +36,7 @@ export function useDeckLayers({
     objPath: objPath,
   });
 
-  const { objectLayer, error: objectError } = useStaticObjectsLayer(
-    showObjects,
-    selectedObjectType
-  );
+  const { objectLayer, error: objectError } = useStaticTreesLayer(showObjects);
 
   const {
     userObjectLayer,
