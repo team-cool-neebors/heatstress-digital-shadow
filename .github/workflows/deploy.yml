@@ -3,11 +3,11 @@ name: Deploy to VM
 on:
   push:
     branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-  workflow_dispatch:
 
     steps:
       - name: Checkout code
@@ -19,7 +19,6 @@ jobs:
           echo "$VM_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null" > ~/.ssh/config
-
         env:
           VM_SSH_KEY: ${{ secrets.VM_SSH_KEY }}
 
