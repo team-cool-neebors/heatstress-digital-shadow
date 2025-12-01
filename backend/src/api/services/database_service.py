@@ -1,9 +1,11 @@
 import sqlite3
 import os
 from fastapi import Depends
-from typing import List, Dict, Optional, Generator
+from typing import List, Dict, Optional, Generator, Union
 from src.api.exceptions import DatabaseFileNotFound, DatabaseConnectionError
 from src.api.requests import MeasureLocationsRequest
+
+Numeric = Union[int, float]
 
 DATABASE_FILE = os.environ.get("DB_FILE_PATH", "/app/db/heatstressmeasures.sqlite")
 
@@ -37,25 +39,31 @@ class DatabaseService:
     def __init__(self, conn: sqlite3.Connection):
         self.conn = conn
 
-    def get_measures(self) -> List[Dict[str, Optional[str] | int]]:
+    def get_measures(self) -> List[Dict[str, Union[str, int, float, List[Numeric], None]]]:
         """
         Selects all placeable measures.
         """
         cursor = self.conn.cursor()
-        query = "SELECT id, name, model FROM measures WHERE model IS NOT NULL"
+        query = "SELECT m.id, m.name, mf.* FROM measures m INNER JOIN model_features mf ON m.model_features_id = mf.id;"
         
         try:
             cursor.execute(query)
         except sqlite3.OperationalError as e:
             raise DatabaseConnectionError(detail=f"SQL Query failed: {str(e)}")
         
-        results: List[Dict[str, Optional[str]]] = []
+        results: List[Dict[str, Union[str, int, float, List[Numeric], None]]] = []
         
         for row in cursor.fetchall():
             results.append({
                 "id": row["id"],
                 "name": row["name"],
-                "model": row["model"],
+                "model": row["model_path"],
+                "scale": row["scale"],
+                "rotation": [
+                    row["rotation_x"],
+                    row["rotation_y"],
+                    row["rotation_z"]
+                ],
             })
 
         return results

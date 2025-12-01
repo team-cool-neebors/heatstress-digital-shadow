@@ -1,10 +1,23 @@
 PRAGMA foreign_keys = ON;
 
+-- Create model_features table
+CREATE TABLE IF NOT EXISTS model_features (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    model_path TEXT,
+    scale REAL,
+    rotation_x REAL,
+    rotation_y REAL,
+    rotation_z REAL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create measures table
 CREATE TABLE IF NOT EXISTS measures (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
     information TEXT,
+    model_features_id INTEGER,
     is_effective_day INTEGER,
     is_effective_night INTEGER,
     is_effective_city INTEGER,
@@ -15,13 +28,11 @@ CREATE TABLE IF NOT EXISTS measures (
     city_air_temperature_effect_max REAL,
     cooling_effect_pet_min REAL,
     cooling_effect_pet_max REAL,
-    model TEXT,
     sort TEXT,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (model_features_id) REFERENCES model_features(id) ON DELETE SET NULL
 );
-
-
 
 -- Create cooling_principles table
 CREATE TABLE IF NOT EXISTS cooling_principles (
@@ -31,7 +42,6 @@ CREATE TABLE IF NOT EXISTS cooling_principles (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-
 -- Create linking table
 CREATE TABLE measures_cooling_principles (
     measures_id INTEGER,
@@ -40,8 +50,6 @@ CREATE TABLE measures_cooling_principles (
     FOREIGN KEY (measures_id) REFERENCES measures(id) ON DELETE CASCADE,
     FOREIGN KEY (cooling_principle_id) REFERENCES cooling_principles(id) ON DELETE CASCADE
 );
-
-
 
 -- Create measures_location table
 CREATE TABLE IF NOT EXISTS measures_location (
@@ -53,6 +61,3 @@ CREATE TABLE IF NOT EXISTS measures_location (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (measures_id) REFERENCES measures(id) ON DELETE CASCADE
 );
-
-
-
