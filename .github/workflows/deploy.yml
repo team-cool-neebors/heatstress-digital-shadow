@@ -2,7 +2,7 @@ name: Deploy to VM
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "setup/automated-deployment"]
   workflow_dispatch:
 
 jobs:
