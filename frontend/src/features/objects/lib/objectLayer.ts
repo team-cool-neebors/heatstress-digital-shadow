@@ -9,6 +9,14 @@ export type ObjectInstance = {
     scale: number;
 };
 
+export interface MeasureType {
+    id: number;
+    name: string;
+    model: string;
+    scale: number;
+    rotation: [number, number, number];
+}
+
 // Common scale multiplier for the model
 const SCENEGRAPH_SIZE_SCALE = 0.5;
 
@@ -29,6 +37,7 @@ export function makeObjectsLayer(
         orientation?: [number, number, number];
     }
 ): Layer {
+    console.log(data);
     return new ScenegraphLayer<ObjectInstance>({
         id: id,
         data,

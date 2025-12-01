@@ -13,6 +13,7 @@ type UseDeckLayersOpts = {
   showObjects: boolean;
   isEditingMode: boolean;
   selectedObjectType: string;
+  setSelectedObjectType: (type: string) => void;
   showOverlay: boolean;
   overlayLayerId: QgisLayerId;
 };
@@ -23,9 +24,11 @@ export function useDeckLayers({
   showObjects,
   isEditingMode,
   selectedObjectType,
+  setSelectedObjectType,
   showOverlay,
   overlayLayerId
 }: UseDeckLayersOpts) {
+
   const osmBase = useMemo<Layer>(() => makeOsmTileLayer(), []);
 
   const {
@@ -39,14 +42,20 @@ export function useDeckLayers({
   const { objectLayer, error: objectError } = useStaticTreesLayer(showObjects);
 
   const {
-    userObjectLayer,
+    userObjectLayers,
     handleInteraction,
     saveObjects,
     discardChanges,
     error: userObjectError,
     hasUnsavedChanges,
-    objectsVersion
-  } = useUserObjectsLayer(showObjects, isEditingMode, selectedObjectType);
+    objectsVersion,
+    objectTypes,
+  } = useUserObjectsLayer(
+    showObjects,
+    isEditingMode,
+    selectedObjectType,
+    setSelectedObjectType,
+  );
 
   const { wmsLayer, featureInfo, handleMapClick } = useWMSLayers({
     showOverlay,
@@ -61,11 +70,11 @@ export function useDeckLayers({
 
     if (buildingsLayer) arr.push(buildingsLayer);
     if (objectLayer) arr.push(objectLayer);
-    if (userObjectLayer) arr.push(userObjectLayer);
+    if (userObjectLayers && Array.isArray(userObjectLayers)) arr.push(...userObjectLayers);
     if (wmsLayer) arr.push(wmsLayer);
 
     return arr;
-  }, [osmBase, buildingsLayer, objectLayer, userObjectLayer, wmsLayer]);
+  }, [osmBase, buildingsLayer, objectLayer, userObjectLayers, wmsLayer]);
 
   return {
     layers,
@@ -75,6 +84,7 @@ export function useDeckLayers({
     discardChanges,
     hasUnsavedChanges,
     featureInfo,
-    handleMapClick
+    handleMapClick,
+    objectTypes,
   };
 }

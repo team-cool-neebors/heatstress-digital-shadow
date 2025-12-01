@@ -2,19 +2,7 @@ import type { Mesh, MeshAttribute } from '@loaders.gl/schema';
 
 export const BBOX = "31593.331,391390.397,32093.331,391890.397";
 export const LOCAL_STORAGE_KEY = 'userPlacedObjects';
-
-export const OBJECTS: Record<string, {
-    url: string,
-    scale: number,
-    rotation: [number, number, number],
-}> = {
-    'tree': {
-        url: '/models/tree-pine.glb',
-        scale: 15,
-        rotation: [0, 0, 90],
-    },
-};
-export const DEFAULT_OBJECT_TYPE = 'tree';
+export const DEFAULT_OBJECT_TYPE = 'Trees';
 
 export function resolveUrl(path?: string): string | undefined {
     if (!path) return undefined;

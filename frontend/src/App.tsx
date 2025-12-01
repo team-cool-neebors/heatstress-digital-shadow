@@ -8,10 +8,7 @@ import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/li
 import type { PickingInfo } from "@deck.gl/core";
 import Button from "./components/ui/Button";
 import styles from "./styles/ui/Menu.module.css";
-
-
-// TODO: change this to backend API call to fetch available object types when db is added
-const OBJECT_TYPES = ['tree'];
+import { DEFAULT_OBJECT_TYPE } from "./map/utils/deckUtils";
 
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
@@ -24,7 +21,7 @@ export default function App() {
     }
   };
   const [isEditingMode, setIsEditingMode] = React.useState(false);
-  const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
+  const [selectedObjectType, setSelectedObjectType] = React.useState(DEFAULT_OBJECT_TYPE);
   const [showOverlay, setShowOverlay] = React.useState(false);
   const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>("");
   const {
@@ -35,12 +32,14 @@ export default function App() {
     discardChanges,
     hasUnsavedChanges,
     featureInfo,
-    handleMapClick
+    handleMapClick,
+    objectTypes,
   } = useDeckLayers({
     showBuildings,
     showObjects,
     isEditingMode,
     selectedObjectType,
+    setSelectedObjectType,
     objPath: 'data/10-72-338-LoD22-3D_leveled.obj',
     showOverlay,
     overlayLayerId,
@@ -88,8 +87,8 @@ export default function App() {
             onChange={(e) => setSelectedObjectType(e.target.value)}
             className={styles.dropdownMenu}
           >
-            {OBJECT_TYPES.map(type => (
-              <option key={type} value={type}>{type}</option>
+            {objectTypes.map(type => (
+              <option key={type.id} value={type.name}>{type.name}</option>
             ))}
           </select>
           <Button

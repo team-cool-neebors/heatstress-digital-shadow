@@ -1,10 +1,46 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Layer, PickingInfo } from '@deck.gl/core';
-import { makeObjectsLayer, type ObjectInstance } from './lib/objectLayer';
-import { LOCAL_STORAGE_KEY, OBJECTS, DEFAULT_OBJECT_TYPE } from '../../map/utils/deckUtils';
+import { makeObjectsLayer, type ObjectInstance, type MeasureType } from './lib/objectLayer';
+import { LOCAL_STORAGE_KEY } from '../../map/utils/deckUtils';
 import { lonLatToRd } from '../../map/utils/crs';
 
-export function useUserObjectsLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
+type LayerMap = Record<string, Layer>;
+
+export function useUserObjectsLayer(
+    showObjects: boolean,
+    isEditingMode: boolean,
+    selectedObjectType: string,
+    setSelectedObjectType: (type: string) => void,
+) {
+
+    const [objectTypes, setObjectTypes] = useState<MeasureType[]>([]);
+
+    useEffect(() => {
+        let cancelled = false;
+        async function fetchTypes() {
+            if (!isEditingMode || objectTypes.length > 0) return;
+
+            try {
+                const response = await fetch('/backend/measures');
+                if (!response.ok) throw new Error(response.statusText);
+                const data: MeasureType[] = await response.json();
+
+                if (!cancelled) {
+                    setObjectTypes(data);
+                    if (data.length > 0) {
+                        setSelectedObjectType(data[0].name);
+                    }
+                }
+                console.log("Fetched measure types:", data);
+            } catch (e) {
+                console.error("Failed to fetch measure types", e);
+            }
+        }
+
+        fetchTypes();
+
+        return () => { cancelled = true; };
+    }, [isEditingMode, objectTypes.length, setSelectedObjectType]);
 
     const [userObjects, setUserObjects] = useState<ObjectInstance[]>(() => {
         try {
@@ -28,6 +64,16 @@ export function useUserObjectsLayer(showObjects: boolean, isEditingMode: boolean
         setObjectsToSave(userObjects);
     }, [userObjects]);
 
+    const objectTypesMap = useMemo(() => {
+        return objectTypes.reduce((acc, type) => {
+            acc[type.name] = type;
+            return acc;
+        }, {} as Record<string, MeasureType>);
+    }, [objectTypes]);
+
+    const getSelectedTypeProperties = useCallback((): MeasureType | undefined => {
+        return objectTypesMap[selectedObjectType];
+    }, [objectTypesMap, selectedObjectType]);
 
     const handleInteraction = useCallback((info: PickingInfo) => {
         if (!isEditingMode) return;
@@ -50,7 +96,9 @@ export function useUserObjectsLayer(showObjects: boolean, isEditingMode: boolean
 
         if (!info.coordinate) return;
         const [lon, lat] = info.coordinate;
-        const typeConfig = OBJECTS[selectedObjectType] || OBJECTS[DEFAULT_OBJECT_TYPE];
+
+        const selectedType = getSelectedTypeProperties();
+        if (!selectedType) return;
 
         const newId = `CLIENT-${selectedObjectType}-${Date.now()}-${nextClientId}`;
         setNextClientId(prev => prev + 1);
@@ -58,8 +106,8 @@ export function useUserObjectsLayer(showObjects: boolean, isEditingMode: boolean
         const newObject: ObjectInstance = {
             id: newId,
             objectType: selectedObjectType,
-            position: [lon, lat, 1],
-            scale: typeConfig.scale,
+            position: [lon, lat, 0],
+            scale: selectedType.scale,
         };
 
         setObjectsToSave(prev => [...prev, newObject]);
@@ -68,21 +116,44 @@ export function useUserObjectsLayer(showObjects: boolean, isEditingMode: boolean
     }, [isEditingMode, selectedObjectType, nextClientId]);
 
 
-    const userObjectLayer = useMemo<Layer | null>(() => {
-        if (!showObjects || objectsToSave.length === 0) return null;
+    const userObjectLayers = useMemo<LayerMap | null>(() => {
+        if (!showObjects || objectsToSave.length === 0 || objectTypes.length === 0) return null;
 
-        const typeConfig = OBJECTS[DEFAULT_OBJECT_TYPE];
-
-        return makeObjectsLayer(
-            'user-objects',
-            objectsToSave,
-            typeConfig.url,
-            {
-                color: [0, 255, 0, 255],
-                orientation: typeConfig.rotation
+        // 1. Group objects by their stored objectType
+        const groupedObjects = objectsToSave.reduce((acc, obj) => {
+            if (!acc[obj.objectType]) {
+                acc[obj.objectType] = [];
             }
-        );
-    }, [objectsToSave, showObjects]);
+            acc[obj.objectType].push(obj);
+            return acc;
+        }, {} as Record<string, ObjectInstance[]>);
+
+        // 2. Create one layer for each group
+        const layers: LayerMap = {};
+
+        for (const typeName in groupedObjects) {
+            const typeProps = objectTypesMap[typeName];
+
+            if (!typeProps) {
+                // Skip objects whose type definition failed to load
+                console.warn(`Missing properties for saved object type: ${typeName}. Skipping layer.`);
+                continue;
+            }
+
+            layers[typeName] = makeObjectsLayer(
+                `user-objects-${typeName}`, // Unique ID for deck.gl
+                groupedObjects[typeName],
+                typeProps.model,
+                {
+                    // Use properties stored on the MeasureType
+                    color: [0, 255, 0, 255],
+                    orientation: typeProps.rotation
+                }
+            );
+        }
+
+        return layers;
+    }, [objectsToSave, showObjects, objectTypes.length, objectTypesMap]);
 
     const hasUnsavedChanges = useMemo(() => {
         // If the references happen to be the same, content is definitely the same
@@ -120,7 +191,7 @@ export function useUserObjectsLayer(showObjects: boolean, isEditingMode: boolean
                 }),
             };
 
-             const response = await fetch('/backend/update-pet', {
+            const response = await fetch('/backend/update-pet', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -149,12 +220,13 @@ export function useUserObjectsLayer(showObjects: boolean, isEditingMode: boolean
     }, [userObjects]);
 
     return {
-        userObjectLayer,
+        userObjectLayers: userObjectLayers ? Object.values(userObjectLayers) : [],
         handleInteraction,
         saveObjects,
         discardChanges,
         error,
         hasUnsavedChanges,
         objectsVersion,
+        objectTypes,
     };
 }
