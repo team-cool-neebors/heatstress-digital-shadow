@@ -27,6 +27,6 @@ jobs:
           ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "
             cd heatstress-digital-shadow &&
             git pull &&
-            docker compose down &&
-            docker compose up -d
+            docker-compose down &&
+            docker-compose up -d
           "
