@@ -1,5 +1,6 @@
 import httpx
 from config import get_settings
+from typing import List, Dict, Any
 
 settings = get_settings()
 
@@ -40,6 +41,53 @@ class Metadata3DBagClient:
     async def get_verblijfsobjecten(self, bag_id: str) -> httpx.Response:
         """Fetches Verblijfsobjecten (VBO) data linked to the PAND."""
         return await self._client.get(f"verblijfsobjecten?pandIdentificatie={bag_id}")
+    
+    async def search_pand_by_coords(
+        self, 
+        coordinates: List[float], 
+        page: int = 1, 
+        page_size: int = 20, 
+        status: str = "Pand in gebruik",
+        bouwjaar_min: int = 0,
+        bouwjaar_max: int = 9999,
+        huidig: bool = True
+    ) -> httpx.Response:
+        """
+        Searches for building (PAND) data spatially using a Point coordinate.
+        
+        Args:
+            coordinates: A list [x, y] of coordinates in EPSG:28992.
+            # (other optional query parameters)
+        """
+        
+        params: Dict[str, Any] = {
+            "huidig": str(huidig).lower(), #expects the True or False to be lowercase
+            "page": page,
+            "pageSize": page_size,
+            "statusPand": status,
+            "bouwjaar[min]": bouwjaar_min,
+            "bouwjaar[max]": bouwjaar_max
+        }
+        
+        payload: Dict[str, Any] = {
+            "type": "Point",
+            "coordinates": coordinates
+        }
+        
+        post_headers = self.HEADERS.copy()
+        post_headers.update({
+            "Content-Type": "application/json", 
+            "Content-Crs": "EPSG:28992"
+        })
+        
+        response = await self._client.post(
+            "panden",
+            json=payload,
+            params=params,
+            headers=post_headers
+        )
+        
+        return response
     
 
 def get_metadata_bag3d_client() -> Metadata3DBagClient:

@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import type { Layer, PickingInfo } from '@deck.gl/core';
 import { makeWmsLayer } from './lib/wmsLayer';
 import { useQgisFeatureInfo } from "./lib/qgisFeatureInfo";
-import type { QgisLayerId } from "./lib/qgisLayers";
+import type { QgisLayerId } from './lib/qgisLayers';
 
 export const WMS_BOUNDS: [number, number, number, number] = [
     3.609725,     // west
@@ -24,8 +24,10 @@ export function useWMSLayers({ showOverlay, overlayLayerId, objectsVersion }: Us
     const WMS_BASE_URL = "/backend/qgis/wms"; 
     const wmsLayer = useMemo<Layer | null>(() => {
         if (!showOverlay) return null;
+        if (overlayLayerId === "") return null;
 
         return makeWmsLayer({
+            id: `wms-${overlayLayerId}-${objectsVersion}`,
             baseUrl: WMS_BASE_URL,
             layerName: overlayLayerId,
             bounds: WMS_BOUNDS,

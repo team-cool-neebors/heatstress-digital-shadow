@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 from typing import Optional, List
 
+class BAGPolygon(BaseModel):
+    type: str  
+    coordinates: List[List[List[float]]]
+
 class RecordMetadata(BaseModel):
     registration_time: Optional[str]
     version: Optional[str]
@@ -17,12 +21,14 @@ class PandData(BaseModel):
     document_date: Optional[str]
     document_number: Optional[str]
     record_metadata: RecordMetadata
+    geometry: BAGPolygon
 
 class VboData(BaseModel):
     bag_object_type: str
     bag_id: str
     usage_function: Optional[List[str]]
     surface_area_m2: Optional[int]
+    status: str
 
 class AggregatedBagResponse(BaseModel):
     bag_id: str
