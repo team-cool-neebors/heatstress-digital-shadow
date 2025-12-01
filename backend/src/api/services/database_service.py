@@ -42,7 +42,7 @@ class DatabaseService:
         Selects all placeable measures.
         """
         cursor = self.conn.cursor()
-        query = "SELECT name FROM measures WHERE model IS NOT NULL"
+        query = "SELECT id, name FROM measures WHERE model IS NOT NULL"
         
         try:
             cursor.execute(query)
@@ -74,7 +74,7 @@ class DatabaseService:
         """
         
         values = [
-            (data.measure_id, data.x, data.y) 
+            (data.measure_id, data.x, data.y)
             for data in data
         ]
         
