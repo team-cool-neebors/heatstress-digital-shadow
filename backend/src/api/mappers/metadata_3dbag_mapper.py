@@ -1,4 +1,4 @@
-from src.api.models import PandData, VboData, RecordMetadata
+from src.api.models import PandData, VboData, RecordMetadata, BAGPolygon
 from src.api.exceptions import MappingError
 from pydantic import ValidationError
 
@@ -20,6 +20,8 @@ class Metadata3DBagMapper:
                     "inactivity_time": occurrence_data.get('tijdstipInactief'),
                 }
             
+            geometry_data = pand_data.get("geometrie")
+            
             structured_data = {
                 "bag_object_type": "PAND",
                 "bag_id": pand_data.get('identificatie'),
@@ -28,7 +30,8 @@ class Metadata3DBagMapper:
                 "is_notified_to_bag": pand_data.get('geconstateerd'),
                 "document_date": pand_data.get('documentdatum'),                    
                 "document_number": pand_data.get('documentnummer'),
-                "record_metadata": RecordMetadata(**structured_recorddata)
+                "record_metadata": RecordMetadata(**structured_recorddata),
+                "geometry": BAGPolygon(**geometry_data) if geometry_data else None
             }
             
             return PandData(**structured_data)
