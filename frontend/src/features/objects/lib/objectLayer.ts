@@ -7,6 +7,8 @@ export type ObjectInstance = {
     objectType: string; // (e.g., 'tree', 'bench')
     position: [number, number, number]; // [longitude, latitude, elevation]
     scale: number;
+    height: number;
+    geometry: string; // e.g., 'circle', 'square'
 };
 
 export interface MeasureType {
@@ -14,6 +16,8 @@ export interface MeasureType {
     name: string;
     model: string;
     scale: number;
+    height: number;
+    geometry: string;
     rotation: [number, number, number];
 }
 

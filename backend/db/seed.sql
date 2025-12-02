@@ -2,15 +2,17 @@
 INSERT INTO model_features (
     model_path,
     scale,
+    height,
+    geometry,
     rotation_x,
     rotation_y,
     rotation_z
     )
 VALUES
-('/models/tree-pine.glb', 15, 0, 0, 90),
-('/models/shrub.glb', 4, 0, 0, 90),
-('/models/pond.glb', 0.1, 0, 0, 90),
-('/models/fountain.glb', 10, 0, 0, 90);
+('/models/tree-pine.glb', 15, 15, 'circle', 0, 0, 90),
+('/models/shrub.glb', 2, 2, 'circle', 0, 0, 90),
+('/models/pond.glb', 5, 2, 'circle', 0, 0, 90),
+('/models/fountain.glb', 13, 7, 'circle', 0, 0, 90);
 
 -- Measures
 INSERT INTO measures (

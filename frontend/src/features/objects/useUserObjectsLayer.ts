@@ -105,6 +105,8 @@ export function useUserObjectsLayer(
             objectType: selectedObjectType,
             position: [lon, lat, 0],
             scale: selectedType.scale,
+            height: selectedType.height,
+            geometry: selectedType.geometry,
         };
 
         setObjectsToSave(prev => [...prev, newObject]);
@@ -117,7 +119,6 @@ export function useUserObjectsLayer(
         getSelectedTypeProperties,
         setObjectsToSave
     ]);
-
 
     const userObjectLayers = useMemo<LayerMap | null>(() => {
         if (!showObjects || objectsToSave.length === 0 || objectTypes.length === 0) return null;
@@ -189,7 +190,8 @@ export function useUserObjectsLayer(
                     return {
                         x,
                         y,
-                        geometry: 'circle', // currently qgis only accepts the geometry as circle, should be changed later
+                        height: obj.height,
+                        geometry: obj.geometry,
                     };
                 }),
             };
