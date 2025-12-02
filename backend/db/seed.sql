@@ -8,7 +8,7 @@ INSERT INTO model_features (
     )
 VALUES
 ('/models/tree-pine.glb', 15, 0, 0, 90),
-('/models/shrub.glb', 8, 0, 0, 90),
+('/models/shrub.glb', 4, 0, 0, 90),
 ('/models/pond.glb', 0.1, 0, 0, 90),
 ('/models/fountain.glb', 10, 0, 0, 90);
 

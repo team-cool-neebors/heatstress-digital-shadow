@@ -15,32 +15,25 @@ export function useUserObjectsLayer(
 
     const [objectTypes, setObjectTypes] = useState<MeasureType[]>([]);
 
-    useEffect(() => {
-        let cancelled = false;
-        async function fetchTypes() {
-            if (!isEditingMode || objectTypes.length > 0) return;
+    async function fetchTypes() {
+        if (!isEditingMode || objectTypes.length > 0) return;
 
-            try {
-                const response = await fetch('/backend/measures');
-                if (!response.ok) throw new Error(response.statusText);
-                const data: MeasureType[] = await response.json();
+        try {
+            const response = await fetch('/backend/measures');
+            if (!response.ok) throw new Error(response.statusText);
+            const data: MeasureType[] = await response.json();
 
-                if (!cancelled) {
-                    setObjectTypes(data);
-                    if (data.length > 0) {
-                        setSelectedObjectType(data[0].name);
-                    }
-                }
-                console.log("Fetched measure types:", data);
-            } catch (e) {
-                console.error("Failed to fetch measure types", e);
+            setObjectTypes(data);
+            if (data.length > 0) {
+                setSelectedObjectType(data[0].name);
             }
+            console.log("Fetched measure types:", data);
+        } catch (e) {
+            console.error("Failed to fetch measure types", e);
         }
+    }
 
-        fetchTypes();
-
-        return () => { cancelled = true; };
-    }, [isEditingMode, objectTypes.length, setSelectedObjectType]);
+    fetchTypes();
 
     const [userObjects, setUserObjects] = useState<ObjectInstance[]>(() => {
         try {
@@ -119,7 +112,6 @@ export function useUserObjectsLayer(
     const userObjectLayers = useMemo<LayerMap | null>(() => {
         if (!showObjects || objectsToSave.length === 0 || objectTypes.length === 0) return null;
 
-        // 1. Group objects by their stored objectType
         const groupedObjects = objectsToSave.reduce((acc, obj) => {
             if (!acc[obj.objectType]) {
                 acc[obj.objectType] = [];
@@ -128,7 +120,6 @@ export function useUserObjectsLayer(
             return acc;
         }, {} as Record<string, ObjectInstance[]>);
 
-        // 2. Create one layer for each group
         const layers: LayerMap = {};
 
         for (const typeName in groupedObjects) {
@@ -141,12 +132,10 @@ export function useUserObjectsLayer(
             }
 
             layers[typeName] = makeObjectsLayer(
-                `user-objects-${typeName}`, // Unique ID for deck.gl
+                `user-objects-${typeName}`,
                 groupedObjects[typeName],
                 typeProps.model,
                 {
-                    // Use properties stored on the MeasureType
-                    color: [0, 255, 0, 255],
                     orientation: typeProps.rotation
                 }
             );
