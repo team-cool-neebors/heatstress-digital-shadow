@@ -7,4 +7,5 @@ class Geometry(Enum):
 class Point(BaseModel):
     x: float
     y: float
+    height: float
     geometry: Geometry

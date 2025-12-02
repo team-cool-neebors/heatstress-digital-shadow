@@ -18,7 +18,6 @@ class RasterService:
         raster: str,
         points: List[Point], 
         crs="EPSG:28992",
-        height=15,
         buffer_distance = 3,
         output_path: str | None = None,
     ) -> str:
@@ -35,7 +34,7 @@ class RasterService:
         for pt in points:
             feat = QgsFeature() # Shape + Attribute
             feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(pt.x, pt.y)))
-            feat.setAttributes([height])
+            feat.setAttributes([pt.height])
             pr.addFeature(feat)
         vl.updateExtents()
 
