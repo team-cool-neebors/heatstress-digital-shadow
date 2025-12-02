@@ -15,7 +15,7 @@ export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
   const [showObjects, setShowObjects] = React.useState(false);
   const [isEditingMode, setIsEditingMode] = React.useState(false);
-  const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
+  const [selectedObjectType, setSelectedObjectType] = React.useState(DEFAULT_OBJECT_TYPE);
   const [showOverlay, setShowOverlay] = React.useState(false);
   const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>("");
   const [isBuildingExpanded, setIsBuildingExpanded] = useState(false);

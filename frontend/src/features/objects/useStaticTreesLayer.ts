@@ -38,8 +38,8 @@ export function useStaticTreesLayer(showObjects: boolean) {
           return {
             id: feature.id,
             objectType: DEFAULT_OBJECT_TYPE,
-            position: [lon, lat, 1],
-            scale: height
+            position: [lon, lat, 0],
+            scale: height,
           };
         });
 
