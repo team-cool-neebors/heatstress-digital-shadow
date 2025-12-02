@@ -37,7 +37,6 @@ export function makeObjectsLayer(
         orientation?: [number, number, number];
     }
 ): Layer {
-    console.log(data);
     return new ScenegraphLayer<ObjectInstance>({
         id: id,
         data,

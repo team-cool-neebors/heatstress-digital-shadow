@@ -15,25 +15,31 @@ export function useUserObjectsLayer(
 
     const [objectTypes, setObjectTypes] = useState<MeasureType[]>([]);
 
-    async function fetchTypes() {
-        if (!isEditingMode || objectTypes.length > 0) return;
+    useEffect(() => {
+        let cancelled = false;
+        async function fetchTypes() {
+            if (!isEditingMode) return;
 
-        try {
-            const response = await fetch('/backend/measures');
-            if (!response.ok) throw new Error(response.statusText);
-            const data: MeasureType[] = await response.json();
+            try {
+                const response = await fetch('/backend/measures');
+                if (!response.ok) throw new Error(response.statusText);
+                const data: MeasureType[] = await response.json();
 
-            setObjectTypes(data);
-            if (data.length > 0) {
-                setSelectedObjectType(data[0].name);
+                if (!cancelled) {
+                    setObjectTypes(data);
+                    if (data.length > 0) {
+                        setSelectedObjectType(data[0].name);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to fetch measure types", e);
             }
-            console.log("Fetched measure types:", data);
-        } catch (e) {
-            console.error("Failed to fetch measure types", e);
         }
-    }
 
-    fetchTypes();
+        fetchTypes();
+
+        return () => { cancelled = true; };
+    }, [isEditingMode, setSelectedObjectType]);
 
     const [userObjects, setUserObjects] = useState<ObjectInstance[]>(() => {
         try {
@@ -57,16 +63,11 @@ export function useUserObjectsLayer(
         setObjectsToSave(userObjects);
     }, [userObjects]);
 
-    const objectTypesMap = useMemo(() => {
-        return objectTypes.reduce((acc, type) => {
-            acc[type.name] = type;
-            return acc;
-        }, {} as Record<string, MeasureType>);
-    }, [objectTypes]);
-
     const getSelectedTypeProperties = useCallback((): MeasureType | undefined => {
-        return objectTypesMap[selectedObjectType];
-    }, [objectTypesMap, selectedObjectType]);
+        if (objectTypes.length === 0) return undefined;
+
+        return objectTypes.find(t => t.name === selectedObjectType);
+    }, [objectTypes, selectedObjectType]);
 
     const handleInteraction = useCallback((info: PickingInfo) => {
         if (!isEditingMode) return;
@@ -76,7 +77,7 @@ export function useUserObjectsLayer(
             const clickedLayerId = info.layer?.id;
             const objectIdToRemove = clickedObject.id;
 
-            if (clickedLayerId === 'user-objects') {
+            if (clickedLayerId?.startsWith('user-objects')) {
                 if (objectIdToRemove && objectIdToRemove.startsWith('CLIENT-')) {
                     setObjectsToSave(prev => prev.filter(t => t.id !== objectIdToRemove));
                     return true;
@@ -91,7 +92,10 @@ export function useUserObjectsLayer(
         const [lon, lat] = info.coordinate;
 
         const selectedType = getSelectedTypeProperties();
-        if (!selectedType) return;
+        if (!selectedType) {
+            console.warn("Cannot place object: Type properties not yet loaded or selected type is invalid.");
+            return;
+        }
 
         const newId = `CLIENT-${selectedObjectType}-${Date.now()}-${nextClientId}`;
         setNextClientId(prev => prev + 1);
@@ -106,7 +110,13 @@ export function useUserObjectsLayer(
         setObjectsToSave(prev => [...prev, newObject]);
 
         return true;
-    }, [isEditingMode, selectedObjectType, nextClientId]);
+    }, [
+        isEditingMode,
+        selectedObjectType,
+        nextClientId,
+        getSelectedTypeProperties,
+        setObjectsToSave
+    ]);
 
 
     const userObjectLayers = useMemo<LayerMap | null>(() => {
@@ -120,13 +130,17 @@ export function useUserObjectsLayer(
             return acc;
         }, {} as Record<string, ObjectInstance[]>);
 
+        const objectTypesMap = objectTypes.reduce((acc, type) => {
+            acc[type.name] = type;
+            return acc;
+        }, {} as Record<string, MeasureType>);
+
         const layers: LayerMap = {};
 
         for (const typeName in groupedObjects) {
-            const typeProps = objectTypesMap[typeName];
+            const type = objectTypesMap[typeName];
 
-            if (!typeProps) {
-                // Skip objects whose type definition failed to load
+            if (!type) {
                 console.warn(`Missing properties for saved object type: ${typeName}. Skipping layer.`);
                 continue;
             }
@@ -134,15 +148,15 @@ export function useUserObjectsLayer(
             layers[typeName] = makeObjectsLayer(
                 `user-objects-${typeName}`,
                 groupedObjects[typeName],
-                typeProps.model,
+                type.model,
                 {
-                    orientation: typeProps.rotation
+                    orientation: type.rotation
                 }
             );
         }
 
         return layers;
-    }, [objectsToSave, showObjects, objectTypes.length, objectTypesMap]);
+    }, [objectsToSave, showObjects, objectTypes.length]);
 
     const hasUnsavedChanges = useMemo(() => {
         // If the references happen to be the same, content is definitely the same

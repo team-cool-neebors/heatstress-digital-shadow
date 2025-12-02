@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Layer } from '@deck.gl/core';
 import { makeObjectsLayer, type ObjectInstance } from './lib/objectLayer';
 import { rdToLonLat } from '../../map/utils/crs';
-import { BBOX } from '../../map/utils/deckUtils';
+import { BBOX, DEFAULT_OBJECT_TYPE } from '../../map/utils/deckUtils';
 
 export function useStaticTreesLayer(showObjects: boolean) {
   const [objectLayer, setObjectLayer] = useState<Layer | null>(null);
@@ -37,7 +37,7 @@ export function useStaticTreesLayer(showObjects: boolean) {
 
           return {
             id: feature.id,
-            objectType: 'tree',
+            objectType: DEFAULT_OBJECT_TYPE,
             position: [lon, lat, 1],
             scale: height
           };
