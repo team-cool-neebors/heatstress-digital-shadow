@@ -15,6 +15,7 @@ type MakeOpts = {
   transparent?: boolean;
   opacity?: number;
   cacheBuster?: number;
+  headers?: Record<string, string>;
 };
 
 function buildGetMapUrl({
@@ -49,16 +50,51 @@ function buildGetMapUrl({
     p.set('_ts', String(cacheBuster));
   }
 
-  return `${baseUrl}${baseUrl.endsWith('?') ? '' : '?'}${p.toString()}`;
+  // return `${baseUrl}${baseUrl.endsWith('?') ? '' : '?'}${p.toString()}`;
+  return `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}${p.toString()}`
 }
 
 export function makeWmsLayer(opts: MakeOpts): Layer {
   const url = buildGetMapUrl(opts);
+
+  /**
+   * Manually fetch the image to ensure:
+   * 1. Only ONE request is sent (bypassing deck.gl's internal double-loader).
+   * 2. 'credentials: include' is set so cookies/session_id are passed to the backend.
+   */
+  const fetchWmsImage = async () => {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        // 'include' sends cookies with the request (Fixes the missing session_id)
+        credentials: 'include',
+        headers: opts.headers || {}
+      });
+
+      if (!response.ok) {
+        throw new Error(`WMS Request failed: ${response.status} ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      // valid ImageBitmap is efficiently rendered by WebGL
+      return await createImageBitmap(blob);
+    } catch (error) {
+      console.error('Error fetching WMS layer:', error);
+      throw error;
+    }
+  };
+
   return new BitmapLayer({
     id: opts.id ?? 'wms-bitmap-4326',
-    image: url,
+    // Passing the Promise to 'image' forces deck.gl to wait for our custom fetch
+    image: fetchWmsImage(),
     bounds: opts.bounds,
-    opacity: opts.opacity ?? 1
+    opacity: opts.opacity ?? 1,
+    textureParameters: {
+      // nearest neighbor is often sharper for map overlays than default linear
+      minFilter: 'nearest',
+      magFilter: 'nearest'
+    }
   });
 }
 
