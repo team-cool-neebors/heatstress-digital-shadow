@@ -41,7 +41,6 @@ export default function Menu({
       className={`${styles.menu} ${open ? styles.open : styles.closed}`}
       aria-hidden={!open}
     >
-      <h2 className={styles.menuTitle}>Map Layers</h2>
       <div className={styles.menuItems}>
         <MenuItem
           label="3D View (Buildings)"
