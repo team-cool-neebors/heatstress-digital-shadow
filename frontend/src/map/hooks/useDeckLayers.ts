@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import type { Layer } from '@deck.gl/core';
 import { makeOsmTileLayer } from '../../features/basemap/lib/osmLayer';
 import { useBuildingsLayer } from '../../features/buildings-3d/useBuildingsLayer';
-import { useStaticTreesLayer } from '../../features/trees/useStaticTreesLayer';
-import { useUserTreesLayer } from '../../features/trees/useUserTreesLayer';
+import { useStaticTreesLayer } from '../../features/objects/useStaticTreesLayer';
+import { useUserObjectsLayer } from '../../features/objects/useUserObjectsLayer';
 import { useWMSLayers } from '../../features/wms-overlay/useWMSLayers';
 import type { QgisLayerId } from '../../features/wms-overlay/lib/qgisLayers';
 
@@ -13,6 +13,7 @@ type UseDeckLayersOpts = {
   showObjects: boolean;
   isEditingMode: boolean;
   selectedObjectType: string;
+  setSelectedObjectType: (type: string) => void;
   showOverlay: boolean;
   overlayLayerId: QgisLayerId;
 };
@@ -23,9 +24,11 @@ export function useDeckLayers({
   showObjects,
   isEditingMode,
   selectedObjectType,
+  setSelectedObjectType,
   showOverlay,
   overlayLayerId
 }: UseDeckLayersOpts) {
+
   const osmBase = useMemo<Layer>(() => makeOsmTileLayer(), []);
 
   const {
@@ -36,20 +39,23 @@ export function useDeckLayers({
     objPath: objPath,
   });
 
-  const { objectLayer, error: objectError } = useStaticTreesLayer(
-    showObjects,
-    selectedObjectType
-  );
+  const { objectLayer, error: objectError } = useStaticTreesLayer(showObjects);
 
   const {
-    userObjectLayer,
+    userObjectLayers,
     handleInteraction,
     saveObjects,
     discardChanges,
     error: userObjectError,
     hasUnsavedChanges,
-    objectsVersion
-  } = useUserTreesLayer(showObjects, isEditingMode, selectedObjectType);
+    objectsVersion,
+    objectTypes,
+  } = useUserObjectsLayer(
+    showObjects,
+    isEditingMode,
+    selectedObjectType,
+    setSelectedObjectType,
+  );
 
   const { wmsLayer, featureInfo, handleMapClick } = useWMSLayers({
     showOverlay,
@@ -64,11 +70,11 @@ export function useDeckLayers({
 
     if (buildingsLayer) arr.push(buildingsLayer);
     if (objectLayer) arr.push(objectLayer);
-    if (userObjectLayer) arr.push(userObjectLayer);
+    if (userObjectLayers && Array.isArray(userObjectLayers)) arr.push(...userObjectLayers);
     if (wmsLayer) arr.push(wmsLayer);
 
     return arr;
-  }, [osmBase, buildingsLayer, objectLayer, userObjectLayer, wmsLayer]);
+  }, [osmBase, buildingsLayer, objectLayer, userObjectLayers, wmsLayer]);
 
   return {
     layers,
@@ -78,6 +84,7 @@ export function useDeckLayers({
     discardChanges,
     hasUnsavedChanges,
     featureInfo,
-    handleMapClick
+    handleMapClick,
+    objectTypes,
   };
 }
