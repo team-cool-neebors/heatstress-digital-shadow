@@ -97,7 +97,7 @@ export default function App() {
             ))}
           </select>
           <button
-            onClick={saveObjects}
+            onClick={() => saveObjects()}
             disabled={!hasUnsavedChanges}
             style={{ padding: '8px 15px', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
           >
@@ -124,8 +124,7 @@ export default function App() {
             
             <button
               onClick={() => exportObjects(exportFormat)} 
-              disabled={!hasUnsavedChanges}
-              style={{ padding: '8px', background: '#3F51B5', color: 'white', border: 'none', cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed' }}
+              style={{ padding: '8px', background: '#3F51B5', color: 'white', border: 'none' }}
             >
               Export Objects 
             </button>

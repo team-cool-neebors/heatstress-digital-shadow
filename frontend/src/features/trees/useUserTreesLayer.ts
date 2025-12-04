@@ -105,10 +105,12 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
     }, [userObjects, objectsToSave]);
 
 
-    const saveObjects = useCallback(async () => {
+    const saveObjects = useCallback(async (objectsOverride?: TreeInstance[]) => {
+        const finalObjects = objectsOverride || objectsToSave;
+
         try {
             const payload = {
-                points: objectsToSave.map(obj => {
+                points: finalObjects.map(obj => {
                     const [lon, lat] = obj.position;
 
                     const [x, y] = lonLatToRd(lon, lat);
@@ -134,8 +136,12 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
             }
 
             await Promise.resolve().then(() => {
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
-                setUserObjects(objectsToSave);
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(finalObjects));
+                setUserObjects(finalObjects);
+                // If we used an override, we must also update the "Draft" state to match
+                if (objectsOverride) {
+                    setObjectsToSave(finalObjects);
+                }
                 setObjectsVersion(v => v + 1);
             });
 
@@ -145,6 +151,41 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         }
     }, [objectsToSave]);
 
+    const handleImportMerge = useCallback((importedObjects: TreeInstance[]) => {
+
+        // Create a lookup map of existing object positions to check for duplicates
+        const existingPositions = new Set(
+            userObjects.map(obj => obj.position.join(','))
+        );
+            
+      const uniqueNewObjects = importedObjects
+        .filter(obj => {
+            const positionKey = obj.position.join(',');
+            // Exclude object if its position already exists in the map
+            return !existingPositions.has(positionKey);
+        })
+        .map(obj => ({
+           // generate IDs for unique items
+            ...obj,
+            id: `CLIENT-${obj.objectType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        }));
+    
+        // Check if any unique objects were found
+        if (uniqueNewObjects.length === 0) {
+            console.warn("Import skipped: All imported objects were duplicates of existing trees.");
+            return; 
+        }
+
+        console.log(`Successfully imported and added ${uniqueNewObjects.length}} new objects`);
+
+        // Merge: Existing Saved Objects + New Imported Objects
+        const combinedList = [...userObjects, ...uniqueNewObjects];
+
+        // Trigger Auto-Save immediately
+        saveObjects(combinedList);
+
+    }, [userObjects, saveObjects]);
+
     const discardChanges = useCallback(() => {
         setObjectsToSave(userObjects);
     }, [userObjects]);
@@ -153,8 +194,8 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
 
     const { importObjects, exportObjects } = useObjectIO(
         objectsToSave,
-        setObjectsToSave,
-        objectConfig
+        objectConfig,
+        handleImportMerge
     );
     
     return {

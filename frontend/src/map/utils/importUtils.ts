@@ -34,9 +34,9 @@ const triggerDownload = (dataStr: string, fileName: string, mimeType: string) =>
 
 //  The Hook 
 export const useObjectIO = (
-    objectsToSave: TreeInstance[], 
-    setObjectsToSave: (objs: TreeInstance[]) => void,
-    objectConfig: ObjectConfig
+    objectsToExport: TreeInstance[],
+    objectConfig: ObjectConfig,
+    onImport?: (newObjects: TreeInstance[]) => void
 ) => {
 
     const importObjects = useCallback(async (file: File) => {
@@ -75,19 +75,21 @@ export const useObjectIO = (
                 };
             });
 
-            setObjectsToSave(validObjects);
-            console.log(`Imported ${validObjects.length} objects.`);
+            if (onImport) {
+                onImport(validObjects); 
+            }
+            console.log(`Parsed ${validObjects.length} objects.`);
 
         } catch (err) {
             console.error("Import failed:", err);
             alert("Failed to import file. See console for details.");
         }
-    }, [objectConfig, setObjectsToSave]);
+    }, [objectConfig, onImport]);
 
 
     // EXPORT LOGIC 
     const exportObjects = useCallback((format: 'geojson' | 'json') => {
-        if (objectsToSave.length === 0) {
+        if (objectsToExport.length === 0) {
             console.warn("No objects to export.");
             return;
         }
@@ -105,7 +107,7 @@ export const useObjectIO = (
 
         if (format === 'geojson') {
             fileContent.type = 'FeatureCollection';
-            fileContent.features = objectsToSave.map(obj => ({
+            fileContent.features = objectsToExport.map(obj => ({
                 type: "Feature",
                 geometry: { type: "Point", coordinates: obj.position },
                 properties: { 
@@ -116,14 +118,14 @@ export const useObjectIO = (
             fileName = `neighborhood_${dateStr}.geojson`;
             mimeType = 'application/geo+json';
         } else {
-            fileContent.data = objectsToSave;
+            fileContent.data = objectsToExport;
             fileName = `neighborhood_raw_${dateStr}.json`;
             mimeType = 'application/json';
         }
 
         triggerDownload(JSON.stringify(fileContent, null, 2), fileName, mimeType);
 
-    }, [objectsToSave]);
+    }, [objectsToExport]);
 
     return { importObjects, exportObjects };
 };
