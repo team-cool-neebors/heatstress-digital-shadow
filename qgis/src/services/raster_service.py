@@ -20,6 +20,7 @@ class RasterService:
         crs="EPSG:28992",
         buffer_distance = 3,
         output_path: str | None = None,
+        height: float | None = None
     ) -> str:
         import processing
 
@@ -34,7 +35,8 @@ class RasterService:
         for pt in points:
             feat = QgsFeature() # Shape + Attribute
             feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(pt.x, pt.y)))
-            feat.setAttributes([pt.height])
+            value = height if height != None else pt.height
+            feat.setAttributes([value])
             pr.addFeature(feat)
         vl.updateExtents()
 
