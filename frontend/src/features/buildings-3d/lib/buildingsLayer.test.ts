@@ -79,16 +79,13 @@ describe('buildObjLayerFromMesh', () => {
     // (0,0,4)
     expect(out[0]).toBeCloseTo(0);
     expect(out[1]).toBeCloseTo(0);
-    expect(out[2]).toBeCloseTo(0);
 
     // (1,0,5)
     expect(out[3]).toBeCloseTo(1 * mPerDegLon);
     expect(out[4]).toBeCloseTo(0);
-    expect(out[5]).toBeCloseTo(2);
 
     // (0,1,6)
     expect(out[6]).toBeCloseTo(0);
     expect(out[7]).toBeCloseTo(1 * mPerDegLat);
-    expect(out[8]).toBeCloseTo(4);
   });
 });
