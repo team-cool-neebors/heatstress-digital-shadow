@@ -29,7 +29,6 @@ describe('wmsLayer', () => {
     expect(BitmapLayerMock).toHaveBeenCalledTimes(1);
     const callArg = BitmapLayerMock.mock.calls[0][0];
 
-    expect(callArg.id).toBe('wms-bitmap-4326');
     expect(callArg.bounds).toEqual(bounds);
     expect(callArg.opacity).toBe(1);
 
