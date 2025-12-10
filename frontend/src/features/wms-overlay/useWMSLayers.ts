@@ -8,7 +8,7 @@ export const WMS_BOUNDS: [number, number, number, number] = [
   3.588347,     // west
   51.4626817,   // south
   3.6581358,    // east
-  51.5199357,
+  51.5199357,   // north
 ];
 
 export const WMS_WIDTH = 2048;
@@ -27,7 +27,7 @@ export function useWMSLayers({ showOverlay, overlayLayerId, objectsVersion }: Us
         if (overlayLayerId === "") return null;
 
         return makeWmsLayer({
-            id: 'my-wms-overlay-layer',
+            id: `wms-overlay-${overlayLayerId}-${objectsVersion}`,
             baseUrl: WMS_BASE_URL,
             layerName: overlayLayerId,
             bounds: WMS_BOUNDS,

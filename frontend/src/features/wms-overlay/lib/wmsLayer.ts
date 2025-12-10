@@ -8,7 +8,9 @@ type MakeOpts = {
   id?: string;
   baseUrl: string;
   layerName: string;
-  bounds?: LonLatBBox; 
+  bounds: LonLatBBox; 
+  width?: number;
+  height?: number;
   minZoom?: number;
   maxZoom?: number;
   style?: string;
@@ -43,11 +45,11 @@ function buildGetMapUrl({
   bounds,
   width = 256,
   height = 256,
-  style = '',
+  style = 'default',
   format = 'image/png',
   transparent = true,
   cacheBuster,
-}: MakeOpts & { width?: number; height?: number; bounds: LonLatBBox }) {
+}: MakeOpts) {
   const [west, south, east, north] = bounds;
   const bboxParam = `${south},${west},${north},${east}`;
 
