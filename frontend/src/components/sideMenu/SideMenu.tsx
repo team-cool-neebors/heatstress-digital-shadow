@@ -14,6 +14,8 @@ const SideMenu: React.FC<Props> = ({ items }) => {
     setActiveItem(prev => (prev === id ? null : id));
   };
 
+  const closeMenu = () => setActiveItem(null);
+
   return (
     <div style={{ display: "flex", height: "100%" }}>
       <SideMenuBar
@@ -21,8 +23,10 @@ const SideMenu: React.FC<Props> = ({ items }) => {
         activeItem={activeItem}
         onSelect={toggleMenu}
       />
+
       <SideMenuPanel
         activeItem={items.find(i => i.id === activeItem)}
+        onClose={closeMenu}
       />
     </div>
   );

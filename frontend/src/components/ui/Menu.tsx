@@ -1,7 +1,5 @@
 import styles from "../../styles/ui/Menu.module.css";
-import MenuItem from "./MenuItem";
 import type { QgisLayerId } from "../../features/wms-overlay/lib/qgisLayers";
-import OverlayMenuItem from "./OverlayMenuItem";
 
 type Props = {
   open: boolean;
@@ -42,35 +40,9 @@ export default function Menu({
       aria-hidden={!open}
     >
       <div className={styles.menuItems}>
-        <MenuItem
-          label="3D View (Buildings)"
-          checked={showBuildings}
-          onChange={onToggleBuildings}
-        />
-        <MenuItem
-          label="Objects View"
-          checked={showObjects}
-          onChange={onToggleObjects}
-        >
-          {showObjects && (
-            <label className={styles.menuItemLabel}>
-              <input
-                type="checkbox"
-                checked={isEditingMode}
-                onChange={(e) => onToggleEditingMode(e.target.checked)}
-              />
-              Editing Mode
-            </label>
-          )}
-        </MenuItem>
-        <OverlayMenuItem
-          label="Map Overlay View"
-          checked={showOverlay}
-          onToggle={onToggleOverlay}
-          value={overlayLayerId}
-          onChange={onChangeOverlayLayer}
-          options={overlayLayerOptions}
-        />
+      
+  
+      
       </div>
     </nav>
   );
