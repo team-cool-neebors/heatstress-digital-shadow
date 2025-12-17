@@ -15,10 +15,9 @@ const SideMenuPanel: React.FC<PanelProps> = ({ activeItem, onClose }) => {
         background: "#fff",
         borderLeft: "1px solid #ccc",
         padding: 20,
-        position: "relative",   // to position the X button
+        position: "relative",  
       }}
     >
-      {/* Close (X) button */}
       <button
         onClick={onClose}
         style={{
@@ -35,8 +34,6 @@ const SideMenuPanel: React.FC<PanelProps> = ({ activeItem, onClose }) => {
       >
         ×
       </button>
-
-      {/* Panel content */}
       {activeItem.panel}
     </div>
   );

@@ -12,12 +12,10 @@ export const TreeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     strokeLinejoin="round"
     {...props}
   >
-    {/* Pine layers */}
     <path d="M12 2L7 9h10L12 2z" />
     <path d="M12 6L6 14h12L12 6z" />
     <path d="M12 11L5 20h14L12 11z" />
 
-    {/* Trunk */}
     <line x1="12" y1="20" x2="12" y2="23" />
   </svg>
 );

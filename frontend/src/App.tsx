@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from "react";
 import DeckMap from "./map/DeckMap";
 import { useDeckLayers } from "./map/hooks/useDeckLayers";
-import { useOnClickOutside } from "./components/ui/hooks/useOnClickOutside";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
 import type { PickingInfo } from "@deck.gl/core";
 import { useBuildingHighlight } from "./features/buildings-3d/useBuildingHighlight";
@@ -12,6 +11,8 @@ import { LayersIcon } from "./components/icons/LayersIcon";
 import { OverlayLayersPanel } from "./components/panels/OverlayLayersPanel";
 import { TreeIcon } from "./components/icons/TreeIcon";
 import { HeatStressMeasuresPanel } from "./components/panels/HeatStressMeasuresPanel";
+import { BuildingIcon } from "./components/icons/BuildingIcon";
+import { BuildingsPanel } from "./components/panels/BuildingsPanel";
 
 // TODO: change this to backend API call to fetch available object types when db is added
 const OBJECT_TYPES = ["tree"];
@@ -43,10 +44,16 @@ const items: SideMenuItem[] = [
     ),
   },
   {
-    id: "heat",
+    id: "heatstressmeasures",
     icon: <TreeIcon />,
     label: "Heatstress measures",
     panel: <HeatStressMeasuresPanel />,
+  },
+  {
+    id: "buildings",
+    icon: <BuildingIcon />,
+    label: "Buildings (3D View)",
+    panel: <BuildingsPanel />,
   },
 ];
 
@@ -107,7 +114,6 @@ const items: SideMenuItem[] = [
 
   const [open, setOpen] = React.useState(false);
   const menuNode = React.useRef<HTMLDivElement>(null);
-  useOnClickOutside(menuNode.current, () => setOpen(false));
 
   return (
     <div style={{ position: "relative", height: "100dvh", width: "100%" }}>
