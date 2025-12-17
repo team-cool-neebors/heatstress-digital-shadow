@@ -19,6 +19,7 @@ export default function ObjectItem({
       onClick={onClick}
       style={{
         height: "96px",
+        width: "9rem",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
