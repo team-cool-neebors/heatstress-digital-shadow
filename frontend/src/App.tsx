@@ -14,57 +14,21 @@ import { HeatStressMeasuresPanel } from "./components/panels/HeatStressMeasuresP
 import { BuildingIcon } from "./components/icons/BuildingIcon";
 import { BuildingsPanel } from "./components/panels/BuildingsPanel";
 
-// TODO: change this to backend API call to fetch available object types when db is added
-const OBJECT_TYPES = ["tree"];
+export type ObjectType = "tree" | "bush" | "pond" | "fountain";
 
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
-  const [showObjects, setShowObjects] = React.useState(false);
-  const [isEditingMode, setIsEditingMode] = React.useState(false);
-  const [selectedObjectType, setSelectedObjectType] = React.useState(OBJECT_TYPES[0]);
- const [showOverlay, setShowOverlay] = useState(true);
-const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>(
-  QGIS_OVERLAY_LAYERS[0].id
-);
   const [isBuildingExpanded, setIsBuildingExpanded] = useState(false);
-
-const items: SideMenuItem[] = [
-  {
-    id: "layers",
-    icon: <LayersIcon />,
-    label: "Layers",
-    panel: (
-      <OverlayLayersPanel
-        value={overlayLayerId}
-        onChange={(id) => {
-          setShowOverlay(true);
-          setOverlayLayerId(id);
-        }}
-      />
-    ),
-  },
-  {
-    id: "heatstressmeasures",
-    icon: <TreeIcon />,
-    label: "Heatstress measures",
-    panel: <HeatStressMeasuresPanel />,
-  },
-  {
-    id: "buildings",
-    icon: <BuildingIcon />,
-    label: "Buildings (3D View)",
-    panel: <BuildingsPanel />,
-  },
-];
-
-
-  const handleToggleObjects = (value: boolean) => {
-    setShowObjects(value);
-
-    if (!value) {
-      setIsEditingMode(false);
-    }
-  };
+  
+  const [showObjects, setShowObjects] = useState(false);
+  const [isEditingMode, setIsEditingMode] = useState(false);
+  const [selectedObjectType, setSelectedObjectType] =
+    useState<ObjectType>("tree"); 
+    
+  const [showOverlay, setShowOverlay] = useState(true);
+    const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>(
+    QGIS_OVERLAY_LAYERS[0].id
+  );
 
   const {
     layers,
@@ -84,6 +48,58 @@ const items: SideMenuItem[] = [
     showOverlay,
     overlayLayerId,
   });
+
+  const handleToggleObjects = (value: boolean) => {
+    setShowObjects(value);
+
+    if (!value) {
+      setIsEditingMode(false);
+    }
+  };
+
+  const items: SideMenuItem[] = [
+    {
+      id: "layers",
+      icon: <LayersIcon />,
+      label: "Layers",
+      panel: (
+        <OverlayLayersPanel
+          value={overlayLayerId}
+          onChange={(id) => {
+            setShowOverlay(true);
+            setOverlayLayerId(id);
+          }}
+        />
+      ),
+    },
+    {
+      id: "heatstressmeasures",
+      icon: <TreeIcon />,
+      label: "Heatstress measures",
+      panel: (
+        <HeatStressMeasuresPanel
+          showObjects={showObjects}
+          onToggleObjects={(v) => {
+            setShowObjects(v);
+            if (!v) {
+              setIsEditingMode(false);
+            }
+          }}
+          selectedObjectType={selectedObjectType}
+          onSelectObjectType={(type) => {
+            setIsEditingMode(true);
+            setSelectedObjectType(type);
+          }}
+        />
+      ),
+    },
+    {
+      id: "buildings",
+      icon: <BuildingIcon />,
+      label: "Buildings (3D View)",
+      panel: <BuildingsPanel />,
+    },
+  ];
 
   const { highlightLayer, handleBuildingClick, buildingInfo } = useBuildingHighlight({
     enabled: showBuildings,
@@ -112,7 +128,6 @@ const items: SideMenuItem[] = [
     [handleBuildingClick, onViewStateClick, handleMapClick]
   );
 
-  const [open, setOpen] = React.useState(false);
   const menuNode = React.useRef<HTMLDivElement>(null);
 
   return (
@@ -129,9 +144,40 @@ const items: SideMenuItem[] = [
         onMapInteraction={deckClickHandler}
         isEditingMode={isEditingMode}
       />
-      <div style={{ position: "absolute", height: "100dvh", width: "100%" }}>
+      {isEditingMode && (
+        <div
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            zIndex: 10,
+            display: "flex",
+            gap: 8,
+          }}
+        >
+          <button
+            onClick={saveObjects}
+            disabled={!hasUnsavedChanges}
+            style={{ padding: "8px 15px" }}
+          >
+            Save Objects
+          </button>
+
+          <button
+            onClick={discardChanges}
+            disabled={!hasUnsavedChanges}
+            style={{ padding: "8px 15px" }}
+          >
+            Discard Changes
+          </button>
+        </div>
+      )}
+   
+   <div ref={menuNode} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+      <div style={{ position: "absolute", height: "100dvh", width: 400, pointerEvents: "auto" }}>
         <SideMenu items={items} />
       </div>
       </div>
+    </div>
   )
 }

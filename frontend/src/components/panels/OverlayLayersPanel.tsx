@@ -1,12 +1,12 @@
 import type { QgisLayerId } from "../../features/wms-overlay/lib/qgisLayers";
 import { QGIS_OVERLAY_LAYERS } from "../../features/wms-overlay/lib/qgisLayers";
 
-type Props = {
+type OverlayProps = {
   value: QgisLayerId | "";
   onChange: (val: QgisLayerId) => void;
 };
 
-export function OverlayLayersPanel({ value, onChange }: Props) {
+export function OverlayLayersPanel({ value, onChange }: OverlayProps) {
   return (
     <div>
       <h3>Overlay Layers</h3>
@@ -28,6 +28,9 @@ export function OverlayLayersPanel({ value, onChange }: Props) {
               name="overlay-layer"
               checked={value === layer.id}
               onChange={() => onChange(layer.id)}
+              style={{
+                cursor: "pointer",
+              }}
             />
             {layer.label}
           </label>
