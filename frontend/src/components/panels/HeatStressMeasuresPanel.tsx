@@ -11,6 +11,9 @@ type HeatStressMeasuresProps = {
   onToggleObjects: (v: boolean) => void;
   selectedObjectType: string | null;
   onSelectObjectType: (type: ObjectType | null) => void;
+  hasUnsavedChanges: boolean;
+  onSave: () => void;
+  onDiscard: () => void;
 };
 
 export function HeatStressMeasuresPanel({
@@ -18,6 +21,9 @@ export function HeatStressMeasuresPanel({
   onToggleObjects,
   selectedObjectType,
   onSelectObjectType,
+  hasUnsavedChanges,
+  onSave,
+  onDiscard,
 }: HeatStressMeasuresProps) {
   const disabled = !showObjects;
   const handleObjectClick = (type: ObjectType) => {
@@ -93,22 +99,28 @@ export function HeatStressMeasuresPanel({
           />
         </div>
       </CheckboxItem>
-
-      {/* <button
-            onClick={saveObjects}
-            disabled={!hasUnsavedChanges}
-            style={{ padding: "8px 15px" }}
-          >
-            Save Objects
-          </button>
-
-          <button
-            onClick={discardChanges}
-            disabled={!hasUnsavedChanges}
-            style={{ padding: "8px 15px" }}
-          >
-            Discard Changes
-          </button> */}
+      <div
+        style={{
+          marginTop: "1rem",
+          display: "flex",
+          gap: 8,
+        }}
+      >
+        <button
+          onClick={onDiscard}
+          disabled={!hasUnsavedChanges}
+          style={{ padding: "8px 15px" }}
+        >
+          Discard
+        </button>
+        <button
+          onClick={onSave}
+          disabled={!hasUnsavedChanges}
+          style={{ padding: "8px 15px" }}
+        >
+          Save
+        </button>
+      </div>
 
       <div style={{
         backgroundColor: "#f1e9e9ff",
@@ -117,7 +129,7 @@ export function HeatStressMeasuresPanel({
       }}>
         <h4>Help</h4>
         <p>Remove placed objects by pressing on them.</p>
-        <p>"Discard changes" will delete all changes not saved.</p>
+        <p>"Discard" will delete all changes not saved.</p>
         <p>"Save" will make the changes definitive and will render the pet map to see the effect??</p>
       </div>
     </>

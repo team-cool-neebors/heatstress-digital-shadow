@@ -87,6 +87,9 @@ export default function App() {
           onToggleObjects={handleToggleObjects}
           selectedObjectType={selectedObjectType}
           onSelectObjectType={handleSelectObjectType}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onSave={saveObjects}
+          onDiscard={discardChanges}
         />
       ),
     },
@@ -141,34 +144,6 @@ export default function App() {
         onMapInteraction={deckClickHandler}
         isEditingMode={isEditingMode}
       />
-      {isEditingMode && (
-        <div
-          style={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            zIndex: 10,
-            display: "flex",
-            gap: 8,
-          }}
-        >
-          <button
-            onClick={saveObjects}
-            disabled={!hasUnsavedChanges}
-            style={{ padding: "8px 15px" }}
-          >
-            Save Objects
-          </button>
-
-          <button
-            onClick={discardChanges}
-            disabled={!hasUnsavedChanges}
-            style={{ padding: "8px 15px" }}
-          >
-            Discard Changes
-          </button>
-        </div>
-      )}
 
       <div ref={menuNode} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
         <div style={{ position: "absolute", height: "100dvh", width: 400, pointerEvents: "auto" }}>
