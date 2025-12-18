@@ -97,7 +97,12 @@ export default function App() {
       id: "buildings",
       icon: <BuildingIcon />,
       label: "Buildings (3D View)",
-      panel: <BuildingsPanel />,
+      panel: (
+        <BuildingsPanel
+          showBuildings={showBuildings}
+          onToggleBuildings={setShowBuildings}
+        />
+      ),
     },
   ];
 
