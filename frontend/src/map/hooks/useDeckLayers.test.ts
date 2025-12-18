@@ -52,7 +52,7 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         overlayLayerId: DEFAULT_LAYER_ID,
         showObjects: false,
         isEditingMode: false,
-        selectedObjectType: 'trees'
+        selectedObjectType: 'tree'
       })
     );
     expect(result.current.layers).toHaveLength(1);
@@ -69,7 +69,7 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         overlayLayerId: DEFAULT_LAYER_ID,
         showObjects: false,
         isEditingMode: false,
-        selectedObjectType: 'trees'
+        selectedObjectType: 'tree'
       })
     );
     expect(result.current.layers).toHaveLength(1);
@@ -93,7 +93,7 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         overlayLayerId: DEFAULT_LAYER_ID,
         showObjects: false,
         isEditingMode: false,
-        selectedObjectType: 'trees'
+        selectedObjectType: 'tree'
       })
     );
 
@@ -139,7 +139,7 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         overlayLayerId: DEFAULT_LAYER_ID,
         showObjects: false,
         isEditingMode: false,
-        selectedObjectType: 'trees'
+        selectedObjectType: 'tree'
       })
     );
 
@@ -164,7 +164,7 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         overlayLayerId: DEFAULT_LAYER_ID,
         showObjects: false,
         isEditingMode: false,
-        selectedObjectType: 'trees'
+        selectedObjectType: 'tree'
       })
     );
 
@@ -201,7 +201,7 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
           overlayLayerId: DEFAULT_LAYER_ID,
           showObjects: false,
           isEditingMode: false,
-          selectedObjectType: 'trees'
+          selectedObjectType: 'tree'
         }
       }
     );
@@ -216,7 +216,7 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         overlayLayerId: DEFAULT_LAYER_ID,
         showObjects: false,
         isEditingMode: false,
-        selectedObjectType: 'trees'
+        selectedObjectType: 'tree'
       })
     );
 

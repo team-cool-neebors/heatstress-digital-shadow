@@ -3,8 +3,9 @@ import type { Layer, PickingInfo } from '@deck.gl/core';
 import { makeTreesLayer, type TreeInstance } from './lib/treeLayer';
 import { LOCAL_STORAGE_KEY, OBJECTS, DEFAULT_OBJECT_TYPE } from '../../map/utils/deckUtils';
 import { lonLatToRd } from '../../map/utils/crs';
+import type { ObjectType } from '../../App';
 
-export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: string) {
+export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: ObjectType | null) {
 
     const [userObjects, setUserObjects] = useState<TreeInstance[]>(() => {
         try {
@@ -30,7 +31,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
 
 
     const handleInteraction = useCallback((info: PickingInfo) => {
-        if (!isEditingMode) return;
+        if (!isEditingMode || !selectedObjectType) return;
 
         if (info.object) {
             const clickedObject = info.object as TreeInstance;

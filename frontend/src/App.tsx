@@ -5,7 +5,6 @@ import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/li
 import type { PickingInfo } from "@deck.gl/core";
 import { useBuildingHighlight } from "./features/buildings-3d/useBuildingHighlight";
 import type { SideMenuItem } from "./components/sideMenu/SideMenuItem";
-
 import SideMenu from "./components/sideMenu/SideMenu";
 import { LayersIcon } from "./components/icons/LayersIcon";
 import { OverlayLayersPanel } from "./components/panels/OverlayLayersPanel";
@@ -19,14 +18,14 @@ export type ObjectType = "tree" | "bush" | "pond" | "fountain";
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
   const [isBuildingExpanded, setIsBuildingExpanded] = useState(false);
-  
+
   const [showObjects, setShowObjects] = useState(false);
   const [isEditingMode, setIsEditingMode] = useState(false);
   const [selectedObjectType, setSelectedObjectType] =
-    useState<ObjectType>("tree"); 
-    
+    useState<ObjectType | null>(null);
+
   const [showOverlay, setShowOverlay] = useState(true);
-    const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>(
+  const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>(
     QGIS_OVERLAY_LAYERS[0].id
   );
 
@@ -53,8 +52,14 @@ export default function App() {
     setShowObjects(value);
 
     if (!value) {
+      setSelectedObjectType(null);
       setIsEditingMode(false);
     }
+  };
+
+  const handleSelectObjectType = (type: ObjectType | null) => {
+    setSelectedObjectType(type);
+    setIsEditingMode(type !== null);
   };
 
   const items: SideMenuItem[] = [
@@ -79,17 +84,9 @@ export default function App() {
       panel: (
         <HeatStressMeasuresPanel
           showObjects={showObjects}
-          onToggleObjects={(v) => {
-            setShowObjects(v);
-            if (!v) {
-              setIsEditingMode(false);
-            }
-          }}
+          onToggleObjects={handleToggleObjects}
           selectedObjectType={selectedObjectType}
-          onSelectObjectType={(type) => {
-            setIsEditingMode(true);
-            setSelectedObjectType(type);
-          }}
+          onSelectObjectType={handleSelectObjectType}
         />
       ),
     },
@@ -172,11 +169,11 @@ export default function App() {
           </button>
         </div>
       )}
-   
-   <div ref={menuNode} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-      <div style={{ position: "absolute", height: "100dvh", width: 400, pointerEvents: "auto" }}>
-        <SideMenu items={items} />
-      </div>
+
+      <div ref={menuNode} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+        <div style={{ position: "absolute", height: "100dvh", width: 400, pointerEvents: "auto" }}>
+          <SideMenu items={items} />
+        </div>
       </div>
     </div>
   )
