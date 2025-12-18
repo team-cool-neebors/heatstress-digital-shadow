@@ -64,9 +64,9 @@ export default function App() {
 
   const items: SideMenuItem[] = [
     {
-      id: "layers",
+      id: "overlayLayers",
       icon: <LayersIcon />,
-      label: "Layers",
+      label: "Overlay Layers",
       panel: (
         <OverlayLayersPanel
           value={overlayLayerId}
@@ -80,7 +80,7 @@ export default function App() {
     {
       id: "heatstressmeasures",
       icon: <TreeIcon />,
-      label: "Heatstress measures",
+      label: "Heat Stress Measures",
       panel: (
         <HeatStressMeasuresPanel
           showObjects={showObjects}
