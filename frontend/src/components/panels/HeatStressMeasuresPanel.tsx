@@ -26,7 +26,7 @@ export function HeatStressMeasuresPanel({
   onDiscard,
 }: HeatStressMeasuresProps) {
   const disabled = !showObjects;
-  const disabledButtons = !hasUnsavedChanges;
+  const disabledButtons = !hasUnsavedChanges|| !showObjects;
   const handleObjectClick = (type: ObjectType) => {
     if (selectedObjectType === type) {
       onSelectObjectType(null);
