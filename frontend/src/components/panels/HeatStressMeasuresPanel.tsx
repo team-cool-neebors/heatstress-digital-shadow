@@ -26,6 +26,7 @@ export function HeatStressMeasuresPanel({
   onDiscard,
 }: HeatStressMeasuresProps) {
   const disabled = !showObjects;
+  const disabledButtons = !hasUnsavedChanges;
   const handleObjectClick = (type: ObjectType) => {
     if (selectedObjectType === type) {
       onSelectObjectType(null);
@@ -108,15 +109,15 @@ export function HeatStressMeasuresPanel({
       >
         <button
           onClick={onDiscard}
-          disabled={!hasUnsavedChanges}
-          style={{ padding: "8px 15px" }}
+          disabled={disabledButtons}
+          style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer"}}
         >
           Discard
         </button>
         <button
           onClick={onSave}
-          disabled={!hasUnsavedChanges}
-          style={{ padding: "8px 15px" }}
+          disabled={disabledButtons}
+          style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer"}}
         >
           Save
         </button>
