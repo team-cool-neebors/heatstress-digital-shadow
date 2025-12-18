@@ -110,14 +110,14 @@ export function HeatStressMeasuresPanel({
         <button
           onClick={onDiscard}
           disabled={disabledButtons}
-          style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer"}}
+          style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer", border: "solid 1px #d1d1d1ff"}}
         >
           Discard
         </button>
         <button
           onClick={onSave}
           disabled={disabledButtons}
-          style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer"}}
+          style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer", border: "solid 1px #d1d1d1ff" }}
         >
           Save
         </button>
