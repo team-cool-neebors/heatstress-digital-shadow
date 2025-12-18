@@ -15,20 +15,26 @@ const SideMenuPanel: React.FC<PanelProps> = ({ activeItem, onClose }) => {
         background: "#fff",
         borderLeft: "1px solid #ccc",
         padding: 20,
-        position: "relative",  
+        marginTop: 0,
+        paddingTop: 0,
+        position: "relative",
       }}
     >
       <button
         onClick={onClose}
         style={{
           position: "absolute",
-          top: 10,
+          top: 5,
           right: 10,
           background: "transparent",
           border: "none",
           fontSize: 20,
           cursor: "pointer",
           width: 50,
+          color: "black",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
         aria-label="Close panel"
       >

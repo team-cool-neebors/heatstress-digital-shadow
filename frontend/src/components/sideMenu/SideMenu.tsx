@@ -17,7 +17,7 @@ const SideMenu: React.FC<Props> = ({ items }) => {
   const closeMenu = () => setActiveItem(null);
 
   return (
-    <div style={{ display: "flex", height: "100%" }}>
+    <div style={{ display: "flex", height: "100%", color: "black" }}>
       <SideMenuBar
         items={items}
         activeItem={activeItem}
