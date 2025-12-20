@@ -2,6 +2,7 @@ import {renderHook, act, waitFor} from '@testing-library/react';
 import type {Layer} from '@deck.gl/core';
 import type {Mesh, MeshAttribute} from '@loaders.gl/schema';
 import type {QgisLayerId} from '../../features/wms-overlay/lib/qgisLayers';
+import type { UseDeckLayersOpts } from './useDeckLayers';
 
 jest.mock('../../features/basemap/lib/osmLayer', () => ({
   makeOsmTileLayer: jest.fn()
@@ -181,18 +182,8 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
     const buildingsLayer: Layer = {id: 'buildings-obj'} as unknown as Layer;
     (buildObjLayerFromMesh as jest.Mock).mockReturnValue(buildingsLayer);
 
-    type Props = {
-      objPath?: string;
-      showBuildings?: boolean;
-      showOverlay: boolean;
-      overlayLayerId: QgisLayerId;
-      showObjects: boolean,
-      isEditingMode: boolean,
-      selectedObjectType: string,
-    };
-
     const {result, rerender} = renderHook(
-      (p: Props) => useDeckLayers(p),
+      (p: UseDeckLayersOpts) => useDeckLayers(p),
       {
         initialProps: {
           objPath: 'data/foo.obj',

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import SideMenuBar from "./SideMenuBar";
 import type { SideMenuItem } from "./SideMenuItem";
 import SideMenuPanel from "./SideMenuPanel";
