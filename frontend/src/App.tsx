@@ -12,10 +12,12 @@ import { TreeIcon } from "./components/icons/TreeIcon";
 import { HeatStressMeasuresPanel } from "./components/panels/HeatStressMeasuresPanel";
 import { BuildingIcon } from "./components/icons/BuildingIcon";
 import { BuildingsPanel } from "./components/panels/BuildingsPanel";
+import { LoadingIndicator } from "./components/loading/LoadingIndicator";
 
 export type ObjectType = "tree" | "bush" | "pond" | "fountain";
 
 export default function App() {
+  const [showLoading, setShowLoading] = useState(false);
   const [showBuildings, setShowBuildings] = React.useState(false);
   const [isBuildingExpanded, setIsBuildingExpanded] = useState(false);
 
@@ -25,6 +27,7 @@ export default function App() {
   const isEditingMode = editingIntent && activeSideMenuId === "heatstressmeasures";
   const [selectedObjectType, setSelectedObjectType] =
     useState<ObjectType | null>(null);
+  const loaderLeft = activeSideMenuId ? "25.5rem" : "4rem";
 
   const [showOverlay, setShowOverlay] = useState(true);
   const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>(
@@ -40,6 +43,7 @@ export default function App() {
     hasUnsavedChanges,
     featureInfo,
     handleMapClick,
+    isProcessing,
   } = useDeckLayers({
     showBuildings,
     showObjects,
@@ -151,6 +155,15 @@ export default function App() {
         onMapInteraction={deckClickHandler}
         isEditingMode={isEditingMode}
       />
+
+      {isProcessing && (
+        <LoadingIndicator
+          label="Processing"
+          backgroundColor="white"
+          textColor="black"
+          left={loaderLeft}
+        />
+      )}
 
       <div ref={menuNode} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
         <div style={{ position: "absolute", height: "100dvh", width: 400, pointerEvents: "auto" }}>

@@ -47,7 +47,8 @@ export function useDeckLayers({
     discardChanges,
     error: userObjectError,
     hasUnsavedChanges,
-    objectsVersion
+    objectsVersion,
+    isProcessing,
   } = useUserTreesLayer(showObjects, isEditingMode, selectedObjectType);
 
   const { wmsLayer, featureInfo, handleMapClick } = useWMSLayers({
@@ -77,6 +78,7 @@ export function useDeckLayers({
     discardChanges,
     hasUnsavedChanges,
     featureInfo,
-    handleMapClick
+    handleMapClick,
+    isProcessing,
   };
 }
