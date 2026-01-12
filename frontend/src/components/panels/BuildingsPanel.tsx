@@ -8,14 +8,14 @@ type BuildingsPanelProps = {
 export function BuildingsPanel({ showBuildings, onToggleBuildings }: BuildingsPanelProps) {
   return (
     <>
-      <div className="panel">
-        <div className="panelHeader">
-          <h3 className="panelTitle">3DBAG Buildings</h3>
+      <div>
+        <div>
+          <h3>3DBAG Buildings</h3>
         </div>
 
-        <div className="panelBody">
+        <div>
           <CheckboxItem
-            label="Display buildings"
+            label="Display Buildings"
             checked={showBuildings}
             onChange={onToggleBuildings}
           />

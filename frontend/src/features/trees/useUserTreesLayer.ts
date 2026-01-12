@@ -6,7 +6,7 @@ import { lonLatToRd } from '../../map/utils/crs';
 import type { ObjectType } from '../../App';
 
 export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, selectedObjectType: ObjectType | null) {
-
+    const [isProcessing, setIsProcessing] = useState(false);
     const [userObjects, setUserObjects] = useState<TreeInstance[]>(() => {
         try {
             const storedValue = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -106,6 +106,8 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
 
 
     const saveObjects = useCallback(async () => {
+        setIsProcessing(true);
+        setError(null);
         try {
             const payload = {
                 points: objectsToSave.map(obj => {
@@ -121,7 +123,7 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
                 }),
             };
 
-             const response = await fetch('/backend/update-pet', {
+            const response = await fetch('/backend/update-pet', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -142,6 +144,8 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         } catch (e) {
             console.error('Error saving objects to local storage:', e);
             setError(e instanceof Error ? e : new Error(String(e)));
+        } finally {
+            setIsProcessing(false);
         }
     }, [objectsToSave]);
 
@@ -157,5 +161,6 @@ export function useUserTreesLayer(showObjects: boolean, isEditingMode: boolean, 
         error,
         hasUnsavedChanges,
         objectsVersion,
+        isProcessing,
     };
 }

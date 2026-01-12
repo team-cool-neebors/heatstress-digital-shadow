@@ -14,17 +14,22 @@ import { BuildingIcon } from "./components/icons/BuildingIcon";
 import { BuildingsPanel } from "./components/panels/BuildingsPanel";
 import { BuildingInfoCard } from "./components/infoCards/BuildingInfoCard";
 import { FeatureInfoCard } from "./components/infoCards/FeatureInfoCard";
+import { LoadingIndicator } from "./components/loading/LoadingIndicator";
 
 export type ObjectType = "tree" | "bush" | "pond" | "fountain";
 
 export default function App() {
+  const [showLoading, setShowLoading] = useState(false);
   const [showBuildings, setShowBuildings] = React.useState(false);
   const [isBuildingExpanded, setIsBuildingExpanded] = useState(false);
 
   const [showObjects, setShowObjects] = useState(false);
-  const [isEditingMode, setIsEditingMode] = useState(false);
+  const [editingIntent, setEditingIntent] = useState(false);
+  const [activeSideMenuId, setActiveSideMenuId] = useState<string | null>(null);
+  const isEditingMode = editingIntent && activeSideMenuId === "heatstressmeasures";
   const [selectedObjectType, setSelectedObjectType] =
     useState<ObjectType | null>(null);
+  const loaderLeft = activeSideMenuId ? "25.5rem" : "4rem";
 
   const [showOverlay, setShowOverlay] = useState(true);
   const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>(
@@ -40,6 +45,7 @@ export default function App() {
     hasUnsavedChanges,
     featureInfo,
     handleMapClick,
+    isProcessing,
   } = useDeckLayers({
     showBuildings,
     showObjects,
@@ -55,13 +61,13 @@ export default function App() {
 
     if (!value) {
       setSelectedObjectType(null);
-      setIsEditingMode(false);
+      setEditingIntent(false);
     }
   };
 
   const handleSelectObjectType = (type: ObjectType | null) => {
     setSelectedObjectType(type);
-    setIsEditingMode(type !== null);
+    setEditingIntent(type !== null);
   };
 
   const items: SideMenuItem[] = [
@@ -152,6 +158,15 @@ export default function App() {
         isEditingMode={isEditingMode}
       />
 
+      {isProcessing && (
+        <LoadingIndicator
+          label="Processing"
+          backgroundColor="white"
+          textColor="black"
+          left={loaderLeft}
+        />
+      )}
+
       {/* TOP RIGHT INFO PANEL */}
       <div style={{
         position: "absolute",
@@ -173,7 +188,10 @@ export default function App() {
 
       <div ref={menuNode} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
         <div style={{ position: "absolute", height: "100dvh", width: 400, pointerEvents: "auto" }}>
-          <SideMenu items={items} />
+          <SideMenu
+            items={items}
+            activeId={activeSideMenuId}
+            onChange={setActiveSideMenuId} />
         </div>
       </div>
     </div>
