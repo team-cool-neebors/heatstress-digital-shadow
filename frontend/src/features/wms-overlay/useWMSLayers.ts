@@ -5,10 +5,10 @@ import { useQgisFeatureInfo } from "./lib/qgisFeatureInfo";
 import type { QgisLayerId } from './lib/qgisLayers';
 
 export const WMS_BOUNDS: [number, number, number, number] = [
-    3.609725,     // west
-    51.4979978,   // south
-    3.6170983,    // east
-    51.5025997    // north
+  3.588347,     // west
+  51.4626817,   // south
+  3.6581358,    // east
+  51.5199357,   // north
 ];
 
 export const WMS_WIDTH = 2048;
@@ -26,11 +26,12 @@ export function useWMSLayers({ showOverlay, overlayLayerId, objectsVersion }: Us
         if (!showOverlay) return null;
 
         return makeWmsLayer({
+            id: `wms-overlay-${overlayLayerId}-${objectsVersion}`,
             baseUrl: WMS_BASE_URL,
             layerName: overlayLayerId,
             bounds: WMS_BOUNDS,
-            width: WMS_WIDTH,
-            height: WMS_HEIGHT,
+            minZoom: 0,
+            maxZoom: 24,
             transparent: true,
             opacity: 1,
             cacheBuster: objectsVersion,
