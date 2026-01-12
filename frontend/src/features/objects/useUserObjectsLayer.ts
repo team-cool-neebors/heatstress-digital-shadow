@@ -106,6 +106,7 @@ export function useUserObjectsLayer(
             position: [lon, lat, 0],
             scale: selectedType.scale,
             height: selectedType.height,
+            radius: selectedType.radius,
             geometry: selectedType.geometry,
         };
 
@@ -187,10 +188,12 @@ export function useUserObjectsLayer(
 
                     const [x, y] = lonLatToRd(lon, lat);
 
+                    console.log(obj.height, obj.radius);
                     return {
                         x,
                         y,
-                        height: obj.height,
+                        height: obj.height ? obj.height : 0.4,
+                        radius: obj.radius ? obj.radius : 5.0,
                         geometry: obj.geometry,
                     };
                 }),

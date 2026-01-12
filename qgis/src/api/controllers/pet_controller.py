@@ -88,7 +88,7 @@ def burn_point_to_raster(req: PlacedObjectsRequest, session_id: Optional[str] = 
     sun_pet_updated = f"/data/server/sessions/{session_id}/sun_pet_{timestamp}.tif"
     
     raster_service.burn_points_to_raster_pixel_cloud(input_raster, req.points, output_path=output_raster)
-    raster_service.burn_points_to_raster(bowen_raster, req.points, output_path=bowen_updated_raster, height=0.4)
+    raster_service.burn_points_to_raster(bowen_raster, req.points, output_path=bowen_updated_raster)
 
     pet_service.calculate_total_pet_sun(
         "/data/uhi/sun-bbox.tif",

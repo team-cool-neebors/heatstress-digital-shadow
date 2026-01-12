@@ -60,6 +60,7 @@ class DatabaseService:
                 "model": row["model_path"],
                 "scale": row["scale"],
                 "height": row["height"],
+                "radius": row["radius"],
                 "geometry": row["geometry"],
                 "rotation": [
                     row["rotation_x"],

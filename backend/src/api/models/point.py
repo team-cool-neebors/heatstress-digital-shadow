@@ -8,4 +8,5 @@ class Point(BaseModel):
     x: float
     y: float
     height: float
+    radius: float
     geometry: Geometry

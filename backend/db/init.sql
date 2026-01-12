@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS model_features (
     model_path TEXT,
     scale REAL,
     height REAL,
+    radius REAL,
     geometry TEXT,
     rotation_x REAL,
     rotation_y REAL,

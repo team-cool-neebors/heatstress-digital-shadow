@@ -22,7 +22,7 @@ class RasterService:
         crs="EPSG:28992",
         buffer_distance = 3,
         output_path: str | None = None,
-        height: float | None = None
+        height: float = 0.4,
     ) -> str:
         import processing
 
@@ -37,7 +37,7 @@ class RasterService:
         for pt in points:
             feat = QgsFeature() # Shape + Attribute
             feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(pt.x, pt.y)))
-            value = height if height != None else pt.height
+            value = pt.height if pt.height != None else height
             feat.setAttributes([value])
             pr.addFeature(feat)
         vl.updateExtents()
@@ -89,6 +89,7 @@ class RasterService:
                 },
                 feedback=QgsProcessingFeedback(),
             )
+
             return raster
 
     def rasterize_vector_layer(
@@ -271,9 +272,10 @@ class RasterService:
         raster: str,
         points: List[Point],
         crs="EPSG:28992",
-        radius=5,
-        density=190,
-        jitter=0.3,
+        height: float = 0.4,
+        radius: float = 5.0,
+        density: int = 250,
+        jitter: float = 0.3,
         output_path: str | None = None,
     ):
         import processing
@@ -286,11 +288,15 @@ class RasterService:
 
         # Add clustered leaf points
         for pt in points:
-            leafs = self._generate_leaf_points(pt.x, pt.y, radius, density, jitter)
+            print(pt.radius)
+            pointRadius = pt.radius if pt.radius != None else radius
+            print(pt.radius, pointRadius)
+            leafs = self._generate_leaf_points(pt.x, pt.y, pointRadius, density, jitter)
             for (px, py) in leafs:
                 feat = QgsFeature()
                 feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(px, py)))
-                feat.setAttributes([pt.height])
+                pointHeight = pt.height if pt.height != None else height
+                feat.setAttributes([pointHeight])
                 pr.addFeature(feat)
 
         vl.updateExtents()
@@ -323,7 +329,9 @@ class RasterService:
             r = radius * math.sqrt(random.random())
             ang = random.random() * 2 * math.pi
 
+            # Apply jitter and coordinates
             px = x + math.cos(ang) * r + random.uniform(-jitter, jitter)
             py = y + math.sin(ang) * r + random.uniform(-jitter, jitter)
+            
             pts.append((px, py))
         return pts
