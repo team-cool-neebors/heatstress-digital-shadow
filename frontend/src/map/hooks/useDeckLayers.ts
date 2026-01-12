@@ -6,13 +6,14 @@ import { useStaticTreesLayer } from '../../features/trees/useStaticTreesLayer';
 import { useUserTreesLayer } from '../../features/trees/useUserTreesLayer';
 import { useWMSLayers } from '../../features/wms-overlay/useWMSLayers';
 import type { QgisLayerId } from '../../features/wms-overlay/lib/qgisLayers';
+import type { ObjectType } from '../../App';
 
-type UseDeckLayersOpts = {
+export type UseDeckLayersOpts = {
   objPath?: string;
   showBuildings: boolean;
   showObjects: boolean;
   isEditingMode: boolean;
-  selectedObjectType: string;
+  selectedObjectType: ObjectType | null;
   showOverlay: boolean;
   overlayLayerId: QgisLayerId;
 };
@@ -37,9 +38,7 @@ export function useDeckLayers({
   });
 
   const { objectLayer, error: objectError } = useStaticTreesLayer(
-    showObjects,
-    selectedObjectType
-  );
+  showObjects);
 
   const {
     userObjectLayer,
@@ -48,7 +47,8 @@ export function useDeckLayers({
     discardChanges,
     error: userObjectError,
     hasUnsavedChanges,
-    objectsVersion
+    objectsVersion,
+    isProcessing,
   } = useUserTreesLayer(showObjects, isEditingMode, selectedObjectType);
 
   const { wmsLayer, featureInfo, handleMapClick } = useWMSLayers({
@@ -78,6 +78,7 @@ export function useDeckLayers({
     discardChanges,
     hasUnsavedChanges,
     featureInfo,
-    handleMapClick
+    handleMapClick,
+    isProcessing,
   };
 }

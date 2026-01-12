@@ -4,19 +4,20 @@ import { makeTreesLayer, type TreeInstance } from './lib/treeLayer';
 import { rdToLonLat } from '../../map/utils/crs';
 import { BBOX, OBJECTS } from '../../map/utils/deckUtils';
 
-export function useStaticTreesLayer(showObjects: boolean, selectedObjectType: string) {
+export function useStaticTreesLayer(showObjects: boolean) {
   const [objectLayer, setObjectLayer] = useState<Layer | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
+    if (!showObjects) {
+      setObjectLayer(null);
+      return;
+    }
+
     async function fetchObjectData() {
       setError(null);
-      if (!showObjects) {
-        setObjectLayer(null);
-        return;
-      }
       try {
         const response = await fetch(`/backend/objects/trees?bbox=${BBOX}`);
         const json = await response.json();
@@ -46,7 +47,7 @@ export function useStaticTreesLayer(showObjects: boolean, selectedObjectType: st
         const layer = makeTreesLayer(
           'objects',
           data,
-          OBJECTS[selectedObjectType].url
+          OBJECTS.tree.url
         );
 
         if (!cancelled) setObjectLayer(layer);
@@ -57,7 +58,7 @@ export function useStaticTreesLayer(showObjects: boolean, selectedObjectType: st
 
     fetchObjectData();
     return () => { cancelled = true; };
-  }, [showObjects, selectedObjectType]);
+  }, [showObjects]);
 
   return { objectLayer, error };
 }
