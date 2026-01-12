@@ -12,6 +12,8 @@ import { TreeIcon } from "./components/icons/TreeIcon";
 import { HeatStressMeasuresPanel } from "./components/panels/HeatStressMeasuresPanel";
 import { BuildingIcon } from "./components/icons/BuildingIcon";
 import { BuildingsPanel } from "./components/panels/BuildingsPanel";
+import { BuildingInfoCard } from "./components/infoCards/BuildingInfoCard";
+import { FeatureInfoCard } from "./components/infoCards/FeatureInfoCard";
 
 export type ObjectType = "tree" | "bush" | "pond" | "fountain";
 
@@ -149,6 +151,25 @@ export default function App() {
         onMapInteraction={deckClickHandler}
         isEditingMode={isEditingMode}
       />
+
+      {/* TOP RIGHT INFO PANEL */}
+      <div style={{
+        position: "absolute",
+        top: 20,
+        right: 20,
+        zIndex: 1000,
+        pointerEvents: "none"
+      }}>
+        {buildingInfo ? (
+          <BuildingInfoCard 
+            buildingInfo={buildingInfo} 
+            activeVbos={activeVbos} 
+            usageFunctions={usageFunctions} 
+          />
+        ) : featureInfo ? (
+          <FeatureInfoCard info={featureInfo} />
+        ) : null}
+      </div>
 
       <div ref={menuNode} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
         <div style={{ position: "absolute", height: "100dvh", width: 400, pointerEvents: "auto" }}>
