@@ -7,7 +7,7 @@ import { useUserObjectsLayer } from '../../features/objects/useUserObjectsLayer'
 import { useWMSLayers } from '../../features/wms-overlay/useWMSLayers';
 import type { QgisLayerId } from '../../features/wms-overlay/lib/qgisLayers';
 
-type UseDeckLayersOpts = {
+export type UseDeckLayersOpts = {
   objPath?: string;
   showBuildings: boolean;
   showObjects: boolean;
@@ -50,6 +50,7 @@ export function useDeckLayers({
     hasUnsavedChanges,
     objectsVersion,
     objectTypes,
+    isProcessing,
   } = useUserObjectsLayer(
     showObjects,
     isEditingMode,
@@ -86,5 +87,6 @@ export function useDeckLayers({
     featureInfo,
     handleMapClick,
     objectTypes,
+    isProcessing,
   };
 }

@@ -1,6 +1,4 @@
-import styles from "../../styles/ui/Menu.module.css";
-
-type MenuItemProps = {
+type CheckboxItemItemProps = {
   label: string;
   checked?: boolean;
   onChange?: (checked: boolean) => void;
@@ -8,27 +6,33 @@ type MenuItemProps = {
   children?: React.ReactNode;
 };
 
-export default function MenuItem({
+export default function CheckboxItem({
   label,
   checked = false,
   onChange,
   toggleable = true,
   children,
-}: MenuItemProps) {
+}: CheckboxItemItemProps) {
   return (
-    <div className={styles.menuItem}>
-      <label className={styles.menuItemLabel}>
+    <div>
+      <label style={{
+          cursor: "pointer",         
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}>
         {toggleable && (
           <input
             type="checkbox"
             checked={checked}
             onChange={(e) => onChange?.(e.target.checked)}
+            style={{ cursor: "pointer" }}
           />
         )}
         {label}
       </label>
       {children && (
-        <div className={styles.subItem}>
+        <div>
           {children}
         </div>
       )}

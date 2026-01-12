@@ -189,12 +189,13 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
 
     type Props = {
       objPath?: string;
-      showBuildings?: boolean;
+      showBuildings: boolean;
       showOverlay: boolean;
       overlayLayerId: QgisLayerId;
       showObjects: boolean,
       isEditingMode: boolean,
       selectedObjectType: string,
+      setSelectedObjectType: (type: string) => void,
     };
 
     const { result, rerender } = renderHook(
@@ -207,7 +208,8 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
           overlayLayerId: DEFAULT_LAYER_ID,
           showObjects: false,
           isEditingMode: false,
-          selectedObjectType: 'trees'
+          selectedObjectType: DEFAULT_OBJECT_TYPE,
+          setSelectedObjectType: () => { },
         }
       }
     );
@@ -222,7 +224,8 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         overlayLayerId: DEFAULT_LAYER_ID,
         showObjects: false,
         isEditingMode: false,
-        selectedObjectType: 'trees'
+        selectedObjectType: DEFAULT_OBJECT_TYPE,
+        setSelectedObjectType: () => { },
       })
     );
 

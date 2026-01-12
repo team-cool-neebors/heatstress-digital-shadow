@@ -11,12 +11,13 @@ export function useStaticTreesLayer(showObjects: boolean) {
   useEffect(() => {
     let cancelled = false;
 
+    if (!showObjects) {
+      setObjectLayer(null);
+      return;
+    }
+
     async function fetchObjectData() {
       setError(null);
-      if (!showObjects) {
-        setObjectLayer(null);
-        return;
-      }
       try {
         const response = await fetch(`/backend/objects/trees?bbox=${BBOX}`);
         const json = await response.json();
@@ -46,7 +47,7 @@ export function useStaticTreesLayer(showObjects: boolean) {
         const layer = makeObjectsLayer(
           'objects',
           data,
-          '/models/tree-pine.glb'
+          OBJECTS.tree.url
         );
 
         if (!cancelled) setObjectLayer(layer);
