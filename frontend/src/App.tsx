@@ -19,7 +19,6 @@ import { LoadingIndicator } from "./components/loading/LoadingIndicator";
 export type ObjectType = "tree" | "bush" | "pond" | "fountain";
 
 export default function App() {
-  const [showLoading, setShowLoading] = useState(false);
   const [showBuildings, setShowBuildings] = React.useState(false);
   const [isBuildingExpanded, setIsBuildingExpanded] = useState(false);
 
