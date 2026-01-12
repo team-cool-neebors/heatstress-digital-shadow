@@ -16,6 +16,7 @@ export interface MeasureType {
     id: number;
     name: string;
     model: string;
+    icon: string;
     scale: number;
     height: number;
     radius: number;

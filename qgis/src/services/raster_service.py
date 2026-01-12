@@ -288,9 +288,7 @@ class RasterService:
 
         # Add clustered leaf points
         for pt in points:
-            print(pt.radius)
             pointRadius = pt.radius if pt.radius != None else radius
-            print(pt.radius, pointRadius)
             leafs = self._generate_leaf_points(pt.x, pt.y, pointRadius, density, jitter)
             for (px, py) in leafs:
                 feat = QgsFeature()

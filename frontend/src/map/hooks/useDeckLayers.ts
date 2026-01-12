@@ -12,7 +12,7 @@ export type UseDeckLayersOpts = {
   showBuildings: boolean;
   showObjects: boolean;
   isEditingMode: boolean;
-  selectedObjectType: string;
+  selectedObjectType: string | null;
   setSelectedObjectType: (type: string) => void;
   showOverlay: boolean;
   overlayLayerId: QgisLayerId;

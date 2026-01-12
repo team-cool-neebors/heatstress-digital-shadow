@@ -4,6 +4,7 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS model_features (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     model_path TEXT,
+    icon_path TEXT,
     scale REAL,
     height REAL,
     radius REAL,

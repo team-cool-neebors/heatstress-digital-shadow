@@ -1,16 +1,13 @@
-import type { ObjectType } from "../../App";
+import type { MeasureType } from "../../features/objects/lib/objectLayer";
 import CheckboxItem from "./items/CheckboxItem";
 import ObjectItem from "./items/ObjectItem";
-import Fountain from "../icons/Fountain.png";
-import Bush from "../icons/Bush.png";
-import Pond from "../icons/Pond.png";
-import Tree from "../icons/Tree.png";
 
 type HeatStressMeasuresProps = {
   showObjects: boolean;
   onToggleObjects: (v: boolean) => void;
+  objectTypes: MeasureType[];
   selectedObjectType: string | null;
-  onSelectObjectType: (type: ObjectType | null) => void;
+  onSelectObjectType: (type: MeasureType | null) => void;
   hasUnsavedChanges: boolean;
   onSave: () => void;
   onDiscard: () => void;
@@ -19,6 +16,7 @@ type HeatStressMeasuresProps = {
 export function HeatStressMeasuresPanel({
   showObjects,
   onToggleObjects,
+  objectTypes,
   selectedObjectType,
   onSelectObjectType,
   hasUnsavedChanges,
@@ -26,9 +24,9 @@ export function HeatStressMeasuresPanel({
   onDiscard,
 }: HeatStressMeasuresProps) {
   const disabled = !showObjects;
-  const disabledButtons = !hasUnsavedChanges|| !showObjects;
-  const handleObjectClick = (type: ObjectType) => {
-    if (selectedObjectType === type) {
+  const disabledButtons = !hasUnsavedChanges || !showObjects;
+  const handleObjectClick = (type: MeasureType) => {
+    if (selectedObjectType === type.name) {
       onSelectObjectType(null);
     } else {
       onSelectObjectType(type);
@@ -51,53 +49,20 @@ export function HeatStressMeasuresPanel({
             opacity: disabled ? 0.5 : 1,
           }}
         >
-          <ObjectItem
-            label="Trees"
-            icon={<img
-              src={Tree}
-              alt="Fountain"
-              style={{ width: 36, height: 36 }}
-            />}
-            disabled={disabled}
-            active={selectedObjectType === "tree"}
-            onClick={() => handleObjectClick("tree")}
-          />
-
-          <ObjectItem
-            label="Bushes"
-            icon={<img
-              src={Bush}
-              alt="Fountain"
-              style={{ width: 36, height: 36 }}
-            />}
-            disabled={disabled}
-            active={selectedObjectType === "bush"}
-            onClick={() => handleObjectClick("bush")}
-          />
-
-          <ObjectItem
-            label="Pond"
-            icon={<img
-              src={Pond}
-              alt="Fountain"
-              style={{ width: 36, height: 36 }}
-            />}
-            disabled={disabled}
-            active={selectedObjectType === "pond"}
-            onClick={() => handleObjectClick("pond")}
-          />
-
-          <ObjectItem
-            label="Fountain"
-            icon={<img
-              src={Fountain}
-              alt="Fountain"
-              style={{ width: 36, height: 36 }}
-            />}
-            disabled={disabled}
-            active={selectedObjectType === "fountain"}
-            onClick={() => handleObjectClick("fountain")}
-          />
+          {objectTypes.map((type) => (
+            <ObjectItem
+              key={type.id}
+              label={type.name}
+              icon={<img
+                src={type.icon}
+                alt={type.name}
+                style={{ width: 36, height: 36 }}
+              />}
+              disabled={disabled}
+              active={selectedObjectType === type.name}
+              onClick={() => handleObjectClick(type)}
+            />
+          ))}
         </div>
       </CheckboxItem>
       <div
@@ -110,7 +75,7 @@ export function HeatStressMeasuresPanel({
         <button
           onClick={onDiscard}
           disabled={disabledButtons}
-          style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer", border: "solid 1px #d1d1d1ff"}}
+          style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer", border: "solid 1px #d1d1d1ff" }}
         >
           Discard
         </button>
@@ -128,10 +93,10 @@ export function HeatStressMeasuresPanel({
         paddingLeft: 10,
         fontStyle: "italic"
       }}>
-        <h4>Help</h4>
+        <h4>Help: About objects</h4>
         <p>Remove placed objects by pressing on them.</p>
-        <p>"Discard" will delete all changes not saved.</p>
-        <p>"Save" will make the changes definitive and will render the pet map to see the effect??</p>
+        <p>"Discard" will delete all not saved changes.</p>
+        <p>"Save" will make the changes definitive and will re-calculate the PET map.</p>
       </div>
     </>
   );

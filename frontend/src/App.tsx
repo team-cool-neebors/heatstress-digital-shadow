@@ -1,12 +1,12 @@
+import type { MeasureType } from "./features/objects/lib/objectLayer";
 import type { PickingInfo } from "@deck.gl/core";
+import type { SideMenuItem } from "./components/sideMenu/SideMenuItem";
 import React, { useCallback, useState } from "react";
 import DeckMap from "./map/DeckMap";
 import { useDeckLayers } from "./map/hooks/useDeckLayers";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
-import { DEFAULT_OBJECT_TYPE } from "./map/utils/deckUtils";
 import { useBuildingHighlight } from "./features/buildings-3d/useBuildingHighlight";
-import type { SideMenuItem } from "./components/sideMenu/SideMenuItem";
-import SideMenu from "./components/sideMenu/SideMenu";
+import { SideMenu } from "./components/sideMenu/SideMenu";
 import { LayersIcon } from "./components/icons/LayersIcon";
 import { OverlayLayersPanel } from "./components/panels/OverlayLayersPanel";
 import { TreeIcon } from "./components/icons/TreeIcon";
@@ -63,9 +63,22 @@ export default function App() {
     }
   };
 
-  const handleSelectObjectType = (type: ObjectType | null) => {
-    setSelectedObjectType(type);
-    setEditingIntent(type !== null);
+  const handleSelectObjectType = (type: MeasureType | null) => {
+    if (!type) {
+      setSelectedObjectType(null);
+      setEditingIntent(false);
+      return;
+    }
+
+    const typeExists = objectTypes.find(t => t.name === type.name) ? true : false;
+
+    if (!typeExists) {
+      console.warn("Selected object type not found.");
+      return;
+    }
+
+    setSelectedObjectType(type.name);
+    setEditingIntent(typeExists);
   };
 
   const items: SideMenuItem[] = [
@@ -91,6 +104,7 @@ export default function App() {
         <HeatStressMeasuresPanel
           showObjects={showObjects}
           onToggleObjects={handleToggleObjects}
+          objectTypes={objectTypes}
           selectedObjectType={selectedObjectType}
           onSelectObjectType={handleSelectObjectType}
           hasUnsavedChanges={hasUnsavedChanges}
@@ -173,10 +187,10 @@ export default function App() {
         pointerEvents: "none"
       }}>
         {buildingInfo ? (
-          <BuildingInfoCard 
-            buildingInfo={buildingInfo} 
-            activeVbos={activeVbos} 
-            usageFunctions={usageFunctions} 
+          <BuildingInfoCard
+            buildingInfo={buildingInfo}
+            activeVbos={activeVbos}
+            usageFunctions={usageFunctions}
           />
         ) : featureInfo ? (
           <FeatureInfoCard info={featureInfo} />

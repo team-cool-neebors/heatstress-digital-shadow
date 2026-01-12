@@ -47,7 +47,7 @@ export function useStaticTreesLayer(showObjects: boolean) {
         const layer = makeObjectsLayer(
           'objects',
           data,
-          OBJECTS.tree.url
+          '/models/tree-pine.glb',
         );
 
         if (!cancelled) setObjectLayer(layer);

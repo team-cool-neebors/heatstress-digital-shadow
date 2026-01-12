@@ -9,7 +9,7 @@ interface Props {
   onChange: (id: string | null) => void;
 }
 
-const SideMenu: React.FC<Props> = ({ items, activeId, onChange }) => {
+export const SideMenu: React.FC<Props> = ({ items, activeId, onChange }) => {
 
   const toggleMenu = (id: string) => {
     onChange(activeId === id ? null : id);
@@ -32,5 +32,3 @@ const SideMenu: React.FC<Props> = ({ items, activeId, onChange }) => {
     </div>
   );
 };
-
-export default SideMenu;

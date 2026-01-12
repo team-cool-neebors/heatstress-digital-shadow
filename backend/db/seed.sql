@@ -1,6 +1,7 @@
 -- Model features
 INSERT INTO model_features (
     model_path,
+    icon_path,
     scale,
     height,
     radius,
@@ -10,10 +11,10 @@ INSERT INTO model_features (
     rotation_z
     )
 VALUES
-('/models/tree-pine.glb', 15, 15, 5, 'circle', 0, 0, 90),
-('/models/shrub.glb', 2, 0, 2, 'circle', 0, 0, 90),
-('/models/pond.glb', 5, 0, 8, 'circle', 0, 0, 90),
-('/models/fountain.glb', 13, 0, 7, 'circle', 0, 0, 90);
+('/models/tree-pine.glb', '/icons/Tree.png', 15, 15, 5, 'circle', 0, 0, 90),
+('/models/shrub.glb', '/icons/Bush.png', 2, 0, 2, 'circle', 0, 0, 90),
+('/models/pond.glb', '/icons/Pond.png', 5, 0, 8, 'circle', 0, 0, 90),
+('/models/fountain.glb', '/icons/Fountain.png', 13, 0, 7, 'circle', 0, 0, 90);
 
 -- Measures
 INSERT INTO measures (

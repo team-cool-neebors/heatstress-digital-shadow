@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Layer, PickingInfo } from '@deck.gl/core';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { makeObjectsLayer, type ObjectInstance, type MeasureType } from './lib/objectLayer';
 import { LOCAL_STORAGE_KEY } from '../../map/utils/deckUtils';
 import { lonLatToRd } from '../../map/utils/crs';
@@ -9,17 +9,16 @@ type LayerMap = Record<string, Layer>;
 export function useUserObjectsLayer(
     showObjects: boolean,
     isEditingMode: boolean,
-    selectedObjectType: string,
+    selectedObjectType: string | null,
     setSelectedObjectType: (type: string) => void,
 ) {
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const [objectTypes, setObjectTypes] = useState<MeasureType[]>([]);
 
     useEffect(() => {
         let cancelled = false;
         async function fetchTypes() {
-            if (!isEditingMode) return;
-
             try {
                 const response = await fetch('/backend/measures');
                 if (!response.ok) throw new Error(response.statusText);
@@ -27,9 +26,6 @@ export function useUserObjectsLayer(
 
                 if (!cancelled) {
                     setObjectTypes(data);
-                    if (data.length > 0) {
-                        setSelectedObjectType(data[0].name);
-                    }
                 }
             } catch (e) {
                 console.error("Failed to fetch measure types", e);
@@ -39,7 +35,7 @@ export function useUserObjectsLayer(
         fetchTypes();
 
         return () => { cancelled = true; };
-    }, [isEditingMode, setSelectedObjectType]);
+    }, [setSelectedObjectType]);
 
     const [userObjects, setUserObjects] = useState<ObjectInstance[]>(() => {
         try {
@@ -102,7 +98,7 @@ export function useUserObjectsLayer(
 
         const newObject: ObjectInstance = {
             id: newId,
-            objectType: selectedObjectType,
+            objectType: selectedObjectType ?? 'object',
             position: [lon, lat, 0],
             scale: selectedType.scale,
             height: selectedType.height,
@@ -181,6 +177,7 @@ export function useUserObjectsLayer(
 
 
     const saveObjects = useCallback(async () => {
+        setIsProcessing(true);
         try {
             const payload = {
                 points: objectsToSave.map(obj => {
@@ -188,7 +185,6 @@ export function useUserObjectsLayer(
 
                     const [x, y] = lonLatToRd(lon, lat);
 
-                    console.log(obj.height, obj.radius);
                     return {
                         x,
                         y,
@@ -220,6 +216,8 @@ export function useUserObjectsLayer(
         } catch (e) {
             console.error('Error saving objects to local storage:', e);
             setError(e instanceof Error ? e : new Error(String(e)));
+        } finally {
+            setIsProcessing(false);
         }
     }, [objectsToSave]);
 
@@ -236,5 +234,6 @@ export function useUserObjectsLayer(
         hasUnsavedChanges,
         objectsVersion,
         objectTypes,
+        isProcessing,
     };
 }
