@@ -20,7 +20,6 @@ export type ObjectType = "tree" | "bush" | "pond" | "fountain";
 
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
-  const [isBuildingExpanded, setIsBuildingExpanded] = useState(false);
 
   const [showObjects, setShowObjects] = useState(false);
   const [editingIntent, setEditingIntent] = useState(false);
@@ -37,7 +36,6 @@ export default function App() {
 
   const {
     layers,
-    error,
     onViewStateClick,
     saveObjects,
     discardChanges,
@@ -129,7 +127,6 @@ export default function App() {
   const deckClickHandler = useCallback(
     (info: PickingInfo) => {
       handleBuildingClick(info);
-      setIsBuildingExpanded(false);
 
       const handledByInteraction = onViewStateClick(info);
 
