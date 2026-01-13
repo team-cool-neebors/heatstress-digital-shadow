@@ -83,8 +83,19 @@ def burn_point_to_raster(req: PlacedObjectsRequest, session_id: Optional[str] = 
     output_raster = f"/data/server/sessions/{session_id}/dsm_{timestamp}.tif"
     pet_raster = f"/data/server/sessions/{session_id}/pet_{timestamp}.tif"
     filled_pet_raster = f"/data/server/sessions/{session_id}/pet_{timestamp}_filled.tif"
+    bowen_raster =  "/data/raster/br-reproject.tif"
+    bowen_updated_raster = f"/data/server/sessions/{session_id}/bowen_{timestamp}.tif"
+    sun_pet_updated = f"/data/server/sessions/{session_id}/sun_pet_{timestamp}.tif"
     
-    raster_service.burn_points_to_raster(input_raster, req.points, output_path=output_raster)
+    raster_service.burn_points_to_raster_pixel_cloud(input_raster, req.points, output_path=output_raster)
+    raster_service.burn_points_to_raster(bowen_raster, req.points, output_path=bowen_updated_raster)
+
+    pet_service.calculate_total_pet_sun(
+        "/data/uhi/sun-bbox.tif",
+        bowen_updated_raster,
+        "/data/raster/svf-reproject-filled.tif",
+        sun_pet_updated,
+    )
 
     output_folder = "/data/shadow-maps"
     lat, lon = 51.498, 3.613
@@ -97,7 +108,7 @@ def burn_point_to_raster(req: PlacedObjectsRequest, session_id: Optional[str] = 
     
     pet_service.calculate_total_pet_map(
         shadow_path,
-        "/data/uhi/sun-pet.tif",
+        sun_pet_updated,
         "/data/uhi/shadow-pet.tif",
         pet_raster,
     )

@@ -2,12 +2,14 @@ import os
 import tempfile
 from qgis.core import (
     QgsVectorLayer, QgsRasterLayer, QgsFeature, QgsGeometry, QgsPointXY,
-    QgsField, QgsProcessingFeedback
+    QgsField, QgsProcessingFeedback, QgsVectorFileWriter
 )
 from qgis.PyQt.QtCore import QVariant
 from typing import List
 from src.api.models import Point
 import shutil
+import math
+import random
 
 class RasterService:
     def load_raster_layer(self, path: str, layer: str) -> QgsRasterLayer:
@@ -18,9 +20,9 @@ class RasterService:
         raster: str,
         points: List[Point], 
         crs="EPSG:28992",
-        height=15,
         buffer_distance = 3,
         output_path: str | None = None,
+        height: float = 0.4,
     ) -> str:
         import processing
 
@@ -35,7 +37,8 @@ class RasterService:
         for pt in points:
             feat = QgsFeature() # Shape + Attribute
             feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(pt.x, pt.y)))
-            feat.setAttributes([height])
+            value = pt.height if pt.height != None else height
+            feat.setAttributes([value])
             pr.addFeature(feat)
         vl.updateExtents()
 
@@ -86,6 +89,7 @@ class RasterService:
                 },
                 feedback=QgsProcessingFeedback(),
             )
+
             return raster
 
     def rasterize_vector_layer(
@@ -262,3 +266,70 @@ class RasterService:
             raise Exception(f"Warped raster was not created at: {resampled_output_path}")
 
         return resampled_output_path
+
+    def burn_points_to_raster_pixel_cloud(
+        self,
+        raster: str,
+        points: List[Point],
+        crs="EPSG:28992",
+        height: float = 0.4,
+        radius: float = 5.0,
+        density: int = 250,
+        jitter: float = 0.3,
+        output_path: str | None = None,
+    ):
+        import processing
+
+        # Memory point layer for cloud
+        vl = QgsVectorLayer(f"Point?crs={crs}", "leaf_clouds", "memory")
+        pr = vl.dataProvider()
+        pr.addAttributes([QgsField("value", QVariant.Double)])
+        vl.updateFields()
+
+        # Add clustered leaf points
+        for pt in points:
+            pointRadius = pt.radius if pt.radius != None else radius
+            leafs = self._generate_leaf_points(pt.x, pt.y, pointRadius, density, jitter)
+            for (px, py) in leafs:
+                feat = QgsFeature()
+                feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(px, py)))
+                pointHeight = pt.height if pt.height != None else height
+                feat.setAttributes([pointHeight])
+                pr.addFeature(feat)
+
+        vl.updateExtents()
+
+        # Save to temporary gpkg
+        tmpdir = tempfile.gettempdir()
+        gpkg_path = os.path.join(tmpdir, "leaf_clouds.gpkg")
+        QgsVectorFileWriter.writeAsVectorFormat(vl, gpkg_path, "utf-8", vl.crs(), "GPKG")
+
+        target = output_path or raster
+        if output_path:
+            shutil.copyfile(raster, output_path)
+
+        processing.run(
+            "gdal:rasterize_over",
+            {
+                "INPUT": gpkg_path,
+                "INPUT_RASTER": target,
+                "FIELD": "value",
+                "ADD": False
+            }
+        )
+
+        return target
+
+    def _generate_leaf_points(self, x, y, radius, density, jitter):
+        pts = []
+        for _ in range(density):
+            # radius distribution
+            r = radius * math.sqrt(random.random())
+            ang = random.random() * 2 * math.pi
+
+            # Apply jitter and coordinates
+            px = x + math.cos(ang) * r + random.uniform(-jitter, jitter)
+            py = y + math.sin(ang) * r + random.uniform(-jitter, jitter)
+            
+            pts.append((px, py))
+        return pts
