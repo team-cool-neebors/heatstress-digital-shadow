@@ -1,6 +1,5 @@
 import styles from "../../styles/ui/Menu.module.css";
 import MenuItem from "./MenuItem";
-import UploadMenuItem from "./UploadMenuItem";
 import type { QgisLayerId } from "../../features/wms-overlay/lib/qgisLayers";
 import OverlayMenuItem from "./OverlayMenuItem";
 
@@ -42,7 +41,6 @@ export default function Menu({
       className={`${styles.menu} ${open ? styles.open : styles.closed}`}
       aria-hidden={!open}
     >
-      <h2 className={styles.menuTitle}>Map Layers</h2>
       <div className={styles.menuItems}>
         <MenuItem
           label="3D View (Buildings)"
@@ -72,14 +70,6 @@ export default function Menu({
           value={overlayLayerId}
           onChange={onChangeOverlayLayer}
           options={overlayLayerOptions}
-        />
-        <UploadMenuItem
-          label="Import your own map"
-          categories={["Wind Map", "PET Map", "Weather Map"]}
-          accept=".geojson,.tif,.qgz"
-          onUpload={(file, category) => {
-            console.log("Uploading:", file.name, "→", category);
-          }}
         />
       </div>
     </nav>
