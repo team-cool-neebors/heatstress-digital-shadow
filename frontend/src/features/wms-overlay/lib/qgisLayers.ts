@@ -1,5 +1,4 @@
 export const QGIS_OVERLAY_LAYERS = [
-  { id: "", label: "Select" }, 
   { id: "pet-version-1", label: "PET" },
   { id: "wind", label: "Wind" },
   { id: "wind-speed-calc", label: "Wind speed (calc)" },
