@@ -1,6 +1,8 @@
 import type { Mesh, MeshAttribute } from '@loaders.gl/schema';
 
 export const BBOX = "31593.331,391390.397,32093.331,391890.397";
+// BBOX for entire Middelburg, in case we need it later:
+// export const BBOX = "30000.0074047316,387498.9925012316,34999.99884920326,393749.9992063424";
 export const LOCAL_STORAGE_KEY = 'userPlacedObjects';
 export const DEFAULT_OBJECT_TYPE = 'Trees';
 
