@@ -31,13 +31,13 @@ export const FeatureInfoCard = ({ info }: FeatureInfoCardProps) => (
     
     <div style={{ 
       color: "#333333", 
-      fontSize: "11px", 
+      fontSize: "13px", 
       borderLeft: "1px solid #ddd", 
       paddingLeft: "16px",
       display: "flex",
       gap: "4px"
     }}>
-      <strong style={{ color: "#000000" }}>Coords:</strong> 
+      <strong style={{ color: "#000000" }}>Lon/lat:</strong> 
       <span>{info.lon.toFixed(4)}, {info.lat.toFixed(4)}</span>
     </div>
   </div>
