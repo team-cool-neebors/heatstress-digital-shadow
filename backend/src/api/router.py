@@ -31,12 +31,10 @@ def add_measures(
 async def get_objects_by_type(
     type: str,
     params: WFSParams = Depends(),
-    session_id: Optional[str] = Cookie(default=None),
 ):
     return await wfs_controller.get_features(
         type=type,
         params=params,
-        session_id=session_id,
     )
 
 @api_router.get("/session/init")
