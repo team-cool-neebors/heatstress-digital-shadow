@@ -37,7 +37,7 @@ export const FeatureInfoCard = ({ info }: FeatureInfoCardProps) => (
       display: "flex",
       gap: "4px"
     }}>
-      <strong style={{ color: "#000000" }}>Lon/lat:</strong> 
+      <strong style={{ color: "#000000" }}>Lon/Lat:</strong> 
       <span>{info.lon.toFixed(4)}, {info.lat.toFixed(4)}</span>
     </div>
   </div>
