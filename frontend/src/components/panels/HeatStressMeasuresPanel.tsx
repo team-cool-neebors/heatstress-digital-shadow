@@ -9,6 +9,7 @@ type HeatStressMeasuresProps = {
   selectedObjectType: string | null;
   onSelectObjectType: (type: MeasureType | null) => void;
   hasUnsavedChanges: boolean;
+  isProcessing: boolean;
   onSave: () => void;
   onDiscard: () => void;
 };
@@ -20,11 +21,12 @@ export function HeatStressMeasuresPanel({
   selectedObjectType,
   onSelectObjectType,
   hasUnsavedChanges,
+  isProcessing,
   onSave,
   onDiscard,
 }: HeatStressMeasuresProps) {
   const disabled = !showObjects;
-  const disabledButtons = !hasUnsavedChanges || !showObjects;
+  const disabledButtons = !hasUnsavedChanges || !showObjects || isProcessing;
   const handleObjectClick = (type: MeasureType) => {
     if (selectedObjectType === type.name) {
       onSelectObjectType(null);

@@ -108,6 +108,7 @@ export default function App() {
           selectedObjectType={selectedObjectType}
           onSelectObjectType={handleSelectObjectType}
           hasUnsavedChanges={hasUnsavedChanges}
+          isProcessing={isProcessing}
           onSave={saveObjects}
           onDiscard={discardChanges}
         />
