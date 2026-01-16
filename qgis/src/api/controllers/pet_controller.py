@@ -1,11 +1,11 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from src.services.pet_service import PETService
 from src.services.raster_service import RasterService
 from src.services.shadow_service import ShadowService
 from src.services.geojson_service import GeoJSONService
 from datetime import datetime, timedelta
 from src.api.requests.placed_objects_request import PlacedObjectsRequest
-from src.utils.update_qgis_project import update_pet_layer_in_project
+from src.utils.update_qgis_project import update_pet_layer_in_project, update_pet_style
 from typing import Optional
 
 router = APIRouter()
@@ -125,4 +125,13 @@ def burn_point_to_raster(req: PlacedObjectsRequest, session_id: Optional[str] = 
         "message": f"Burned {len(req.points)} point(s) into raster.",
         "params": {"points": [p.dict() for p in req.points]},
         "output": pet_raster,
+    }
+    
+@router.post("/update-style")
+def update_style_of_pet_map(style_name: str = Query(...), session_id: Optional[str] = None):
+    update_pet_style(f"/data/server/sessions/{session_id}/map.qgz", style_name)
+    
+    return {
+        "status": "success",
+        "message": f"Changed the map styling to {style_name}",
     }

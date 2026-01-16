@@ -23,3 +23,19 @@ def update_pet_layer_in_project(project_path: str, new_raster_path: str, base_na
 
     if not project.write(project_path):
         raise RuntimeError("Unable to write QGIS project file")
+
+def update_pet_style(project_path: str, style_name: str = 'default', layer_name: str = 'pet-version-1'):
+    project = QgsProject.instance()
+    if not project.read(project_path):
+        raise RuntimeError("Unable to read QGIS project")
+    
+    layer = project.mapLayersByName(layer_name)
+    if not layer:
+        raise RuntimeError(f"Layer '{layer_name}' not found in project")
+    layer = layer[0]
+    
+    layer.loadNamedStyle(f'/data/server/styles/{style_name}.qml')
+    layer.triggerRepaint()
+    
+    if not project.write(project_path):
+        raise RuntimeError("Unable to write QGIS project file")

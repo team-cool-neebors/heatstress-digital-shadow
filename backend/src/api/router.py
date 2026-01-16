@@ -81,3 +81,13 @@ async def read_3dbag_by_coordinates(
         x_coord=x_coord, 
         y_coord=y_coord
     )
+
+@api_router.post("/update-style")
+async def update_pet_style(
+    style_name: str = Query(...),
+    session_id: Optional[str] = Cookie(default=None)
+):
+    return await dpc_controller.update_pet_style(
+        style_name,
+        session_id
+    )
