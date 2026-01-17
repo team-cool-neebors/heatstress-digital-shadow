@@ -12,6 +12,8 @@ const SideMenuPanel: React.FC<PanelProps> = ({ activeItem, onClose }) => {
     <div
       style={{
         width: 300,
+        height: "100%",            
+        overflowY: "auto",         
         background: "#fff",
         borderLeft: "1px solid #ccc",
         padding: 20,

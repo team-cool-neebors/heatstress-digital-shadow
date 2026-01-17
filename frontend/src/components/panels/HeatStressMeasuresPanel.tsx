@@ -1,6 +1,7 @@
 import type { MeasureType } from "../../features/objects/lib/objectLayer";
 import CheckboxItem from "./items/CheckboxItem";
 import ObjectItem from "./items/ObjectItem";
+import { ObjectIOControls } from "./items/ObjectIOControls";
 
 type HeatStressMeasuresProps = {
   showObjects: boolean;
@@ -11,6 +12,8 @@ type HeatStressMeasuresProps = {
   hasUnsavedChanges: boolean;
   onSave: () => void;
   onDiscard: () => void;
+  currentObjects: ObjectInstance[]; 
+  onImportObjects: (objs: ObjectInstance[]) => void;
 };
 
 export function HeatStressMeasuresPanel({
@@ -22,6 +25,8 @@ export function HeatStressMeasuresPanel({
   hasUnsavedChanges,
   onSave,
   onDiscard,
+  currentObjects, 
+  onImportObjects 
 }: HeatStressMeasuresProps) {
   const disabled = !showObjects;
   const disabledButtons = !hasUnsavedChanges || !showObjects;
@@ -80,13 +85,20 @@ export function HeatStressMeasuresPanel({
           Discard
         </button>
         <button
-          onClick={onSave}
+          onClick={() => onSave()}
           disabled={disabledButtons}
           style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer", border: "solid 1px #d1d1d1ff" }}
         >
           Save
         </button>
       </div>
+
+       <ObjectIOControls 
+          objects={currentObjects}
+          objectTypes={objectTypes}
+          onImportFinished={onImportObjects}
+          disabled={disabled}
+      />
 
       <div style={{
         backgroundColor: "#f1e9e9ff",
@@ -97,6 +109,9 @@ export function HeatStressMeasuresPanel({
         <p>Remove placed objects by pressing on them.</p>
         <p>"Discard" will delete all not saved changes.</p>
         <p>"Save" will make the changes definitive and will re-calculate the PET map.</p>
+        <p>"Export" will make allow you to locally save your placed objects in a format of your choosing</p>
+        <p>"Import" will allow you to import those saved objects</p>
+        <p>!Note, import only works with exported files from this application</p>
       </div>
     </>
   );

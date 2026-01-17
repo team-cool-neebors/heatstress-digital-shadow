@@ -176,11 +176,13 @@ export function useUserObjectsLayer(
     }, [userObjects, objectsToSave]);
 
 
-    const saveObjects = useCallback(async () => {
+    const saveObjects = useCallback(async (objectsOverride?: ObjectInstance[]) => {
         setIsProcessing(true);
+        const isOverrideValid = Array.isArray(objectsOverride);
+        const finalObjects = isOverrideValid ? objectsOverride : objectsToSave;
         try {
             const payload = {
-                points: objectsToSave.map(obj => {
+                points: finalObjects.map(obj => {
                     const [lon, lat] = obj.position;
 
                     const [x, y] = lonLatToRd(lon, lat);
@@ -208,8 +210,8 @@ export function useUserObjectsLayer(
             }
 
             await Promise.resolve().then(() => {
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
-                setUserObjects(objectsToSave);
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(finalObjects));
+                setUserObjects(finalObjects);
                 setObjectsVersion(v => v + 1);
             });
 
@@ -220,6 +222,24 @@ export function useUserObjectsLayer(
             setIsProcessing(false);
         }
     }, [objectsToSave]);
+
+    const handleImportMerge = useCallback((importedObjects: ObjectInstance[]) => {
+        const existingPositions = new Set(userObjects.map(obj => obj.position.join(',')));
+        const uniqueNewObjects = importedObjects.filter(obj => {
+            const posKey = obj.position.join(',');
+            return !existingPositions.has(posKey);
+        });
+
+        if (uniqueNewObjects.length === 0) {
+            alert("All imported objects were duplicates.");
+            return;
+        }
+
+        const combinedList = [...userObjects, ...uniqueNewObjects];
+        saveObjects(combinedList);
+        alert(`Imported ${uniqueNewObjects.length} new objects.`);
+    }, [userObjects, saveObjects]);
+
 
     const discardChanges = useCallback(() => {
         setObjectsToSave(userObjects);
@@ -235,5 +255,7 @@ export function useUserObjectsLayer(
         objectsVersion,
         objectTypes,
         isProcessing,
+        objectsToSave,
+        handleImportMerge
     };
 }
