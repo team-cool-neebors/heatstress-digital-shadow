@@ -154,7 +154,7 @@ export function useUserObjectsLayer(
         }
 
         return layers;
-    }, [objectsToSave, showObjects, objectTypes, objectTypes.length]);
+    }, [objectsToSave, showObjects, objectTypes]);
 
     const hasUnsavedChanges = useMemo(() => {
         // If the references happen to be the same, content is definitely the same

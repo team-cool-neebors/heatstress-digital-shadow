@@ -4,6 +4,25 @@ import type { MeasureType, ObjectInstance } from "./objectLayer";
 const APP_SIGNATURE = 'neeghboorhoods';
 const DEFAULT_OBJECT_TYPE = 'object_1'; 
 
+interface GeoJsonFeature {
+    type: 'Feature';
+    geometry: {
+        type: 'Point';
+        coordinates: number[];
+    };
+    properties: Record<string, unknown>; 
+}
+
+interface RawObjectData {
+    id?: string;
+    objectType?: string;
+    position?: number[];
+    scale?: number;
+    height?: number;
+    radius?: number;
+    geometry?: string;
+}
+
 // Export Logic
 export function generateExportString(objects: ObjectInstance[], format: 'geojson' | 'json'): { data: string, filename: string } {
     const dateStr = new Date().toISOString().slice(0, 10);
@@ -39,13 +58,13 @@ export async function parseImportFile(file: File, objectTypes: MeasureType[]): P
     const text = await file.text();
     const json = JSON.parse(text);
 
-    let candidates: any[] = [];
+    let candidates: Partial<ObjectInstance>[] = [];
 
     // Detect format
     if (json.type === 'FeatureCollection' && Array.isArray(json.features)) {
-        candidates = json.features.map((f: any) => ({
-            ...f.properties,
-            position: f.geometry.coordinates
+        candidates = json.features.map((f: GeoJsonFeature) => ({
+            ...(f.properties as RawObjectData), 
+            position: f.geometry.coordinates as [number, number, number]
         }));
     } else if (Array.isArray(json.data)) {
         candidates = json.data;
