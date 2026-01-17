@@ -34,3 +34,25 @@ class DataProcessingController(ABC):
                     status_code=500,
                     content={"detail": response.text}
                 )
+
+    async def update_pet_style(
+        self,
+        style_name: str,
+        session_id: Optional[str] 
+    ):
+        print(style_name)
+        endpoint = f"{self.QGIS_API_BASE_URL}/pet/update-style"
+        async with httpx.AsyncClient(timeout=200.0) as client:
+            try:
+                response = await client.post(endpoint, params={"session_id": session_id, "style_name": style_name})
+                response.raise_for_status()
+
+                return JSONResponse(
+                    status_code=response.status_code,
+                    content=response.json()
+                )
+            except ValueError:
+                return JSONResponse(
+                    status_code=500,
+                    content={"detail": response.text}
+                )
