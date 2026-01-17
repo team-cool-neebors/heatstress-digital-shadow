@@ -37,82 +37,91 @@ export function HeatStressMeasuresPanel({
       onSelectObjectType(type);
     }
   };
-  return (
-    <>
-      <h3>Heat Stress Measures</h3>
-      <CheckboxItem
-        label="Objects View"
-        checked={showObjects}
-        onChange={onToggleObjects}
-      >
+ return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      
+      <div style={{ flex: '0 0 auto' }}>
+        <h3>Heat Stress Measures</h3>
+        <CheckboxItem
+          label="Objects View"
+          checked={showObjects}
+          onChange={onToggleObjects}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "1rem",
+              marginTop: "1rem",
+              opacity: disabled ? 0.5 : 1,
+            }}
+          >
+            {objectTypes.map((type) => (
+              <ObjectItem
+                key={type.id}
+                label={type.name}
+                icon={<img
+                  src={type.icon}
+                  alt={type.name}
+                  style={{ width: 36, height: 36 }}
+                />}
+                disabled={disabled}
+                active={selectedObjectType === type.name}
+                onClick={() => handleObjectClick(type)}
+              />
+            ))}
+          </div>
+        </CheckboxItem>
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "1rem",
             marginTop: "1rem",
-            opacity: disabled ? 0.5 : 1,
+            display: "flex",
+            gap: 8,
           }}
         >
-          {objectTypes.map((type) => (
-            <ObjectItem
-              key={type.id}
-              label={type.name}
-              icon={<img
-                src={type.icon}
-                alt={type.name}
-                style={{ width: 36, height: 36 }}
-              />}
-              disabled={disabled}
-              active={selectedObjectType === type.name}
-              onClick={() => handleObjectClick(type)}
-            />
-          ))}
+          <button
+            onClick={onDiscard}
+            disabled={disabledButtons}
+            style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer", border: "solid 1px #d1d1d1ff" }}
+          >
+            Discard
+          </button>
+          <button
+            onClick={() => onSave()}
+            disabled={disabledButtons}
+            style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer", border: "solid 1px #d1d1d1ff" }}
+          >
+            Save
+          </button>
         </div>
-      </CheckboxItem>
-      <div
-        style={{
-          marginTop: "1rem",
-          display: "flex",
-          gap: 8,
-        }}
-      >
-        <button
-          onClick={onDiscard}
-          disabled={disabledButtons}
-          style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer", border: "solid 1px #d1d1d1ff" }}
-        >
-          Discard
-        </button>
-        <button
-          onClick={() => onSave()}
-          disabled={disabledButtons}
-          style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer", border: "solid 1px #d1d1d1ff" }}
-        >
-          Save
-        </button>
+
+         <ObjectIOControls 
+            objects={currentObjects}
+            objectTypes={objectTypes}
+            onImportFinished={onImportObjects}
+            disabled={disabled}
+        />
       </div>
 
-       <ObjectIOControls 
-          objects={currentObjects}
-          objectTypes={objectTypes}
-          onImportFinished={onImportObjects}
-          disabled={disabled}
-      />
-
       <div style={{
+        marginTop: "1rem",
         backgroundColor: "#f1e9e9ff",
         paddingLeft: 10,
-        fontStyle: "italic"
+        fontStyle: "italic",
+        flex: "1 1 auto",   
+        overflowY: "auto",  
+        minHeight: "0"      
       }}>
-        <h4>Help: About objects</h4>
+        <h4 style={{ margin: "5px 0 5px 0" }}>Help: About objects</h4>
         <p>Remove placed objects by pressing on them.</p>
         <p>"Discard" will delete all not saved changes.</p>
         <p>"Save" will make the changes definitive and will re-calculate the PET map.</p>
-        <p>"Export" will make allow you to locally save your placed objects in a format of your choosing</p>
-        <p>"Import" will allow you to import those saved objects</p>
-        <p>!Note, import only works with exported files from this application</p>
+        <p>"Import" will allow you to import those saved objects.</p>
+        <p>"Export" will allow you to locally save your placed objects in a format of your choosing.</p>
+        <p style={{ margin: "0", fontWeight: "bold" }}>
+          !Note, import only works with exported files from this application.
+        </p>
       </div>
-    </>
+    </div>
   );
 }

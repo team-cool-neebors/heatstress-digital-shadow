@@ -81,9 +81,9 @@ export function ObjectIOControls({ objects = [], objectTypes, onImportFinished, 
 
     const popupStyle: React.CSSProperties = {
         position: 'absolute',
-        bottom: '100%',
+        top: '100%',
         right: 0,
-        marginBottom: '5px',
+        marginTop: '5px',
         backgroundColor: 'white',
         border: '1px solid #ccc',
         borderRadius: '2px',
