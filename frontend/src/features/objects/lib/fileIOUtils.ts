@@ -80,13 +80,24 @@ export async function parseImportFile(file: File, objectTypes: MeasureType[]): P
 
     // Validate & Normalize
     return candidates.map(item => {
-        const type = item.objectType || DEFAULT_OBJECT_TYPE;
-        const configScale = configMap[type]?.scale ?? 1;
-        
+    const type = item.objectType || DEFAULT_OBJECT_TYPE;
+    const configScale = configMap[type]?.scale ?? 1;
+    
+    
+    let validPosition: [number, number, number] = [0, 0, 0];
+    
+        if (item.position && item.position.length >= 2) {
+            validPosition = [
+                item.position[0], 
+                item.position[1], 
+                item.position[2] ?? 0 
+            ];
+        }
+
         return {
             id: item.id || `IMP-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
             objectType: type,
-            position: (item.position?.length === 3) ? item.position : [0, 0, 0],
+            position: validPosition, 
             scale: item.scale ?? configScale,
             height: item.height,
             radius: item.radius,
