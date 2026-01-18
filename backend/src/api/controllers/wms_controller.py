@@ -1,47 +1,28 @@
-from fastapi import Request, Response
-import httpx
-from typing import Optional
+from fastapi import Response
+from src.api.controllers import AbstractServerController
+from src.api.models import WMSParams
+from src.api.requests import WMSRequest
 
-from src.api.exceptions import QgisServerException
-from src.settings import QGIS_WMS_BASE_URL
+class WMSController(AbstractServerController):
+    """
+    Controller speialized for WMS requests (GetMap, GetFeatureInfo, etc.).
+    """
 
-class WMSController:
-    def __init__(self, base_url: str = QGIS_WMS_BASE_URL):
-        self.base_url = base_url
-
-    async def proxy(
+    async def get_wms(
         self,
-        request: Request,
-        session_id: Optional[str] 
+        params: WMSParams,
+        session_id: str = "starting-map"
     ) -> Response:
         """
-        Proxies any WMS request (GetMap, GetFeatureInfo, etc.)
-        to the QGIS server, preserving query parameters.
+        Constructs the necessary WMS ServerRequest based on user input and fetches the data.
         """
-        query_string = request.url.query
+        
+        wms_request = WMSRequest(
+            **params.model_dump(exclude_none=True)   
+        )
 
-        if query_string:
-            upstream_url = f"{self.base_url}/{session_id}/wms?{query_string}"
-        else:
-            upstream_url = self.base_url
-
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                upstream_response = await client.get(upstream_url)
-        except httpx.HTTPError as exc:
-            raise QgisServerException(
-                status_code=502,
-                detail=f"Failed to contact QGIS WMS server: {exc}",
-                log_message=str(exc),
-            )
-
-        headers = {}
-        content_type = upstream_response.headers.get("content-type")
-        if content_type:
-            headers["content-type"] = content_type
-
-        return Response(
-            content=upstream_response.content,
-            status_code=upstream_response.status_code,
-            headers=headers,
+        return await self.get_resource(
+            request_data=wms_request,
+            session_id=session_id,
+            path="wms"
         )
