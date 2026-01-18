@@ -1,18 +1,31 @@
 from typing import Optional
-from pydantic import Field
+from pydantic import Field, model_validator
 from src.api.requests import ServerRequest
 
 class WMSRequest(ServerRequest):
     """
-    Model for WMS requests. Defines WMS-specific fields and sets WMS defaults.
+    Standard WMS Model for server requests. Defines WMS-specific fields and sets WMS defaults.
     """
-    # Override defaults from ServerRequest
     SERVICE: str = "WMS"
-    REQUEST: str = "GetMap"
-    
-    # WMS-specific fields
-    LAYERS: str = Field(..., description="Comma-separated list of layer names.")
-    WIDTH: Optional[int] = Field(None, description="Image width in pixels.")
-    HEIGHT: Optional[int] = Field(None, description="Image height in pixels.")
-    BBOX: Optional[str] = Field(None, description="Bounding box filter.")
-    FORMAT: Optional[str] = Field('image/png', description="Output image format.")
+    VERSION: str = "1.3.0"
+    CRS: str = "EPSG:4326"
+
+    LAYERS: str = Field(..., description="Comma-separated list of layer names to be rendered.")
+    WIDTH: int = 256
+    HEIGHT: int = 256
+    FORMAT: str = "image/png"
+    FEATURE_COUNT: int = 1
+    STYLES: str = "default"
+    TRANSPARENT: bool = True
+    QUERY_LAYERS: Optional[str] = None
+    I: Optional[int] = None
+    J: Optional[int] = None
+    INFO_FORMAT: str = "application/json"
+
+    @model_validator(mode="after")
+    def sync_feature_info(self) -> 'WMSRequest':
+        if self.REQUEST == "GetFeatureInfo":
+            self.QUERY_LAYERS = self.QUERY_LAYERS or self.LAYERS
+            if self.I is None or self.J is None:
+                raise ValueError("I and J are required for GetFeatureInfo")
+        return self

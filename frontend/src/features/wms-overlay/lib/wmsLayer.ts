@@ -54,14 +54,11 @@ function buildGetMapUrl({
   const bboxParam = `${south},${west},${north},${east}`;
 
   const p = new URLSearchParams({
-    SERVICE: 'WMS',
-    VERSION: '1.3.0',
     REQUEST: 'GetMap',
     LAYERS: layerName,
     STYLES: style,
     FORMAT: format,
     TRANSPARENT: transparent ? 'TRUE' : 'FALSE',
-    CRS: 'EPSG:4326',
     BBOX: bboxParam,
     WIDTH: String(width),
     HEIGHT: String(height)
@@ -140,20 +137,16 @@ export function buildGetFeatureInfoUrl({
   const J = Math.round(yFrac * height);
 
   const p = new URLSearchParams({
-    SERVICE: 'WMS',
-    VERSION: '1.3.0',
     REQUEST: 'GetFeatureInfo',
     LAYERS: layerName,
     QUERY_LAYERS: layerName,
     STYLES: style,
-    CRS: 'EPSG:4326',
     BBOX: bboxParam,
     WIDTH: String(width),
     HEIGHT: String(height),
     I: String(I),
     J: String(J),
     INFO_FORMAT: infoFormat,
-    FEATURE_COUNT: '1'
   });
 
   return `${baseUrl}${baseUrl.endsWith('?') ? '' : '?'}${p.toString()}`;

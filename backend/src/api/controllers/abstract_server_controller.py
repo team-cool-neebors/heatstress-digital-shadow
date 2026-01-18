@@ -14,8 +14,6 @@ class AbstractServerController(ABC):
     # Shared Configuration
     QGIS_SERVER_BASE_URL: str = os.getenv('QGIS_SERVER_URL', 'http://nginx/nginx')
     QGIS_TIMEOUT: float = 30.0
-    TARGET_CRS: str = "EPSG:28992"
-    BBOX_REGEX: re.Pattern = re.compile(r"^\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*$")
 
     async def get_resource(self, request_data: ServerRequest, session_id: str, path: str = '') -> Response:
         """

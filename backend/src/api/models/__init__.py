@@ -1,4 +1,5 @@
 from .wfs_params import WFSParams
+from .wms_params import WMSParams
 from .metadata_3dbag_model import (
     BAGPolygon,
     RecordMetadata,
@@ -16,5 +17,6 @@ __all__ = [
     "VboData",
     "AggregatedBagResponse",
     "WFSParams",
+    "WMSParams",
     "Point"
 ]

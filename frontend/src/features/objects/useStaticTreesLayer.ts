@@ -19,7 +19,7 @@ export function useStaticTreesLayer(showObjects: boolean) {
     async function fetchObjectData() {
       setError(null);
       try {
-        const response = await fetch(`/backend/objects/trees?bbox=${BBOX}`);
+        const response = await fetch(`/backend/objects/trees?BBOX=${BBOX}`);
         const json = await response.json();
 
         const features = (json.features || []) as {
