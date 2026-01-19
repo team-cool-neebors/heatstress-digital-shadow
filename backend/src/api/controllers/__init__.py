@@ -3,11 +3,13 @@ from .wfs_controller import WFSController
 from .data_processing_controller import DataProcessingController
 from .session_controller import SessionController
 from .wms_controller import WMSController
+from .legend_controller import LegendController
 
 __all__ = [
     "AbstractServerController",
     "WFSController",
     "DataProcessingController",
     "SessionController",
-    "WMSController"
+    "WMSController",
+    "LegendController"
 ]

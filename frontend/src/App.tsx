@@ -1,7 +1,7 @@
 import type { MeasureType } from "./features/objects/lib/objectLayer";
 import type { PickingInfo } from "@deck.gl/core";
 import type { SideMenuItem } from "./components/sideMenu/SideMenuItem";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import DeckMap from "./map/DeckMap";
 import { useDeckLayers } from "./map/hooks/useDeckLayers";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
@@ -16,6 +16,7 @@ import { BuildingsPanel } from "./components/panels/BuildingsPanel";
 import { BuildingInfoCard } from "./components/infoCards/BuildingInfoCard";
 import { FeatureInfoCard } from "./components/infoCards/FeatureInfoCard";
 import { LoadingIndicator } from "./components/loading/LoadingIndicator";
+import { LegendCard } from "./components/legend/LegendCard";
 
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
@@ -43,6 +44,7 @@ export default function App() {
     handleMapClick,
     objectTypes,
     isProcessing,
+    legend,
   } = useDeckLayers({
     showBuildings,
     showObjects,
@@ -53,6 +55,21 @@ export default function App() {
     showOverlay,
     overlayLayerId,
   });
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasUnsavedChanges) return;
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
 
   const handleToggleObjects = (value: boolean) => {
     setShowObjects(value);
@@ -108,6 +125,7 @@ export default function App() {
           selectedObjectType={selectedObjectType}
           onSelectObjectType={handleSelectObjectType}
           hasUnsavedChanges={hasUnsavedChanges}
+          isProcessing={isProcessing}
           onSave={saveObjects}
           onDiscard={discardChanges}
         />
@@ -184,8 +202,15 @@ export default function App() {
         top: 20,
         right: 20,
         zIndex: 1000,
-        pointerEvents: "none"
+        pointerEvents: "none",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        gap: "12px",
       }}>
+        {legend && showOverlay && overlayLayerId === "pet-version-1" && (
+          <LegendCard legend={legend} title="PET Index Legend" />
+        )}
         {buildingInfo ? (
           <BuildingInfoCard
             buildingInfo={buildingInfo}

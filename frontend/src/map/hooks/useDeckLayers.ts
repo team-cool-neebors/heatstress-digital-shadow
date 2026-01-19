@@ -58,7 +58,14 @@ export function useDeckLayers({
     setSelectedObjectType,
   );
 
-  const { wmsLayer, featureInfo, handleMapClick } = useWMSLayers({
+  const {
+    wmsLayer,
+    featureInfo,
+    legend,
+    isLegendLoading,
+    legendError,
+    handleMapClick,
+  } = useWMSLayers({
     showOverlay,
     overlayLayerId,
     objectsVersion,
@@ -85,6 +92,9 @@ export function useDeckLayers({
     discardChanges,
     hasUnsavedChanges,
     featureInfo,
+    legend,
+    isLegendLoading,
+    legendError,
     handleMapClick,
     objectTypes,
     isProcessing,
