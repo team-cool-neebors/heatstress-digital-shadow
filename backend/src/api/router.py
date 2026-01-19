@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, Response, Cookie, Request, Query, HTTPException
 from typing import Optional, List
-from src.api.controllers import WMSController, DataProcessingController, SessionController, WFSController, LegendController
-from src.api.models import WFSParams
+from src.api.controllers import WMSController, DataProcessingController, SessionController, WFSController
+from src.api.models import WFSParams, WMSParams
 from src.api.services import Metadata3DBagService, get_metadata_bag3d_service, DatabaseService, get_database_service
 from src.api.models import AggregatedBagResponse
 from src.api.requests import PlacedObjectsRequest, MeasureLocationsRequest
 from pathlib import Path
 
 wfs_controller = WFSController()
+wms_controller = WMSController()
 dpc_controller = DataProcessingController()
 session_controller = SessionController()
 wms_controller = WMSController()
@@ -39,6 +40,13 @@ async def get_objects_by_type(
         params=params,
     )
 
+@api_router.get("/qgis/wms")
+async def get_wms(
+    params: WMSParams = Depends(),
+    session_id: Optional[str] = Cookie(default=None)
+):
+    return await wms_controller.get_wms(params, session_id)
+
 @api_router.get("/session/init")
 async def get_session(
     response: Response,
@@ -48,16 +56,6 @@ async def get_session(
         response=response,
         session_id=session_id,
     )
-
-@api_router.get("/qgis/wms")
-async def proxy_qgis_wms(
-    request: Request,
-    session_id: Optional[str] = Cookie(default=None)
-):
-    """
-    Generic WMS proxy. Forwards GetMap / GetFeatureInfo to QGIS WMS.
-    """
-    return await wms_controller.proxy(request, session_id)
 
 @api_router.post("/update-pet")
 async def update_pet_map_based_on_objects(
