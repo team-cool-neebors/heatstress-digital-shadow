@@ -43,7 +43,6 @@ class LegendController(ABC):
                     "value": float(item.attrib["value"]),
                     "label": item.attrib.get("label"),
                     "color": item.attrib.get("color"),
-                    "alpha": int(item.attrib.get("alpha", 255)),
                 }
             )
 
