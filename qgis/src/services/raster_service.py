@@ -23,6 +23,7 @@ class RasterService:
         buffer_distance = 3,
         output_path: str | None = None,
         height: float = 0.4,
+        sameHeight: bool = False
     ) -> str:
         import processing
 
@@ -37,7 +38,11 @@ class RasterService:
         for pt in points:
             feat = QgsFeature() # Shape + Attribute
             feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(pt.x, pt.y)))
-            value = pt.height if pt.height != None else height
+            value = pt.height if pt.height != None and pt.height != 0 else height
+            
+            if sameHeight:
+                value = height
+                
             feat.setAttributes([value])
             pr.addFeature(feat)
         vl.updateExtents()
@@ -53,7 +58,7 @@ class RasterService:
                 "END_CAP_STYLE": 0,
                 "JOIN_STYLE": 0,
                 "MITER_LIMIT": 2,
-                "DISSOLVE": True,  # Merge overlapping buffers
+                "DISSOLVE": False,  # Merge overlapping buffers
                 "OUTPUT": buffer_layer_path,
             },
         )

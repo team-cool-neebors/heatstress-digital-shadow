@@ -18,14 +18,14 @@ geojson_service = GeoJSONService()
 def get_uhi_zone():
     uhi = "/data/json/wind_reduction copy.geojson"
     ref_path = "/data/dsm.TIF"
-    bowen_ratio = "/data/raster/br-reproject.tif"
+    vegetation = "/data/raster/vegetation-reproject.tif"
     svf = "/data/raster/svf-reproject.tif"
 
     reference = raster_service.load_raster_layer(ref_path, "dsm")
     vector = pet_service.load_zonal_layer(uhi)
     
     obj = geojson_service.calculate_wind_speed_1_2(vector) 
-    obj = pet_service.calculate_zonal_uhi(obj, bowen_ratio, svf)
+    obj = pet_service.calculate_zonal_uhi(obj, vegetation, svf)
     obj = pet_service.calculate_t_a_temperature(obj)
     obj = pet_service.calculate_wet_bulb_temp(obj)
 
@@ -88,7 +88,7 @@ def burn_point_to_raster(req: PlacedObjectsRequest, session_id: Optional[str] = 
     sun_pet_updated = f"/data/server/sessions/{session_id}/sun_pet_{timestamp}.tif"
     
     raster_service.burn_points_to_raster_pixel_cloud(input_raster, req.points, output_path=output_raster)
-    raster_service.burn_points_to_raster(bowen_raster, req.points, output_path=bowen_updated_raster)
+    raster_service.burn_points_to_raster(bowen_raster, req.points, output_path=bowen_updated_raster, height=0.4, sameHeight=True)
 
     pet_service.calculate_total_pet_sun(
         "/data/uhi/sun-bbox.tif",
