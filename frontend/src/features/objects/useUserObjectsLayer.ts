@@ -184,9 +184,7 @@ export function useUserObjectsLayer(
             const payload = {
                 points: finalObjects.map(obj => {
                     const [lon, lat] = obj.position;
-
                     const [x, y] = lonLatToRd(lon, lat);
-                    console.log("Saving Point:", { lon, lat, x, y });
 
                     return {
                         x,
