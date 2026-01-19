@@ -116,11 +116,8 @@ export function HeatStressMeasuresPanel({
         <p>Remove placed objects by pressing on them.</p>
         <p>"Discard" will delete all not saved changes.</p>
         <p>"Save" will make the changes definitive and will re-calculate the PET map.</p>
-        <p>"Import" will allow you to import those saved objects.</p>
-        <p>"Export" will allow you to locally save your placed objects in a format of your choosing.</p>
-        <p style={{ margin: "0", fontWeight: "bold" }}>
-          !Note, import only works with exported files from this application.
-        </p>
+        <p>"Import" will allow you to load previously exported files.</p>
+        <p>"Export" will allow you to locally save your placed objects.</p>
       </div>
     </div>
   );

@@ -56,7 +56,24 @@ export function generateExportString(objects: ObjectInstance[], format: 'geojson
 // Import Logic 
 export async function parseImportFile(file: File, objectTypes: MeasureType[]): Promise<ObjectInstance[]> {
     const text = await file.text();
-    const json = JSON.parse(text);
+    let json;
+    
+    try {
+        json = JSON.parse(text);
+    } catch (e) {
+        throw new Error("Invalid JSON file.");
+    }
+
+    if (json.__app_signature !== APP_SIGNATURE) {
+        throw new Error(`Invalid file. Missing signature: ${APP_SIGNATURE}`);
+    }
+
+    const hasGeoJSON = json.type === 'FeatureCollection' && Array.isArray(json.features);
+    const hasRawData = Array.isArray(json.data);
+
+    if (!hasGeoJSON && !hasRawData) {
+        throw new Error("Invalid structure: File must contain 'features' or 'data' array.");
+    }
 
     let candidates: Partial<ObjectInstance>[] = [];
 
