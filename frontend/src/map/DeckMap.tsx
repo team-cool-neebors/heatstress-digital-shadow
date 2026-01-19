@@ -38,6 +38,7 @@ export default function DeckMap({ layers, initialViewState, onMapInteraction, is
           right: 8,
           bottom: 8,
           background: 'rgba(255,255,255,0.8)',
+          color: 'black',
           padding: '2px 6px',
           borderRadius: 6,
           fontSize: 12
