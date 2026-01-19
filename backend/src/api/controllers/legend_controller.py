@@ -1,11 +1,12 @@
 from abc import ABC
-import xml.etree.ElementTree as ET
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 class LegendController(ABC):
     """
     Controller that should handle all legend related functions
     """
+    
     async def get_legend(
         self,
     ):

@@ -1,17 +1,15 @@
-from fastapi import APIRouter, Depends, Response, Cookie, Request, Query, HTTPException
+from fastapi import APIRouter, Depends, Response, Cookie, Query
 from typing import Optional, List
-from src.api.controllers import WMSController, DataProcessingController, SessionController, WFSController
+from src.api.controllers import WMSController, DataProcessingController, SessionController, WFSController, LegendController
 from src.api.models import WFSParams, WMSParams
 from src.api.services import Metadata3DBagService, get_metadata_bag3d_service, DatabaseService, get_database_service
 from src.api.models import AggregatedBagResponse
 from src.api.requests import PlacedObjectsRequest, MeasureLocationsRequest
-from pathlib import Path
 
 wfs_controller = WFSController()
 wms_controller = WMSController()
 dpc_controller = DataProcessingController()
 session_controller = SessionController()
-wms_controller = WMSController()
 legend_controller = LegendController()
 api_router = APIRouter()
 metadata_3dbag_router = APIRouter() 
