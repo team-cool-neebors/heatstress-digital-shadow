@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, Response, Cookie, Request, Query
+from fastapi import APIRouter, Depends, Response, Cookie, Query
 from typing import Optional, List
-from src.api.controllers import WMSController, DataProcessingController, SessionController, WFSController
+from src.api.controllers import WMSController, DataProcessingController, SessionController, WFSController, LegendController
 from src.api.models import WFSParams, WMSParams
 from src.api.services import Metadata3DBagService, get_metadata_bag3d_service, DatabaseService, get_database_service
 from src.api.models import AggregatedBagResponse
@@ -10,6 +10,7 @@ wfs_controller = WFSController()
 wms_controller = WMSController()
 dpc_controller = DataProcessingController()
 session_controller = SessionController()
+legend_controller = LegendController()
 api_router = APIRouter()
 metadata_3dbag_router = APIRouter() 
 
@@ -78,3 +79,7 @@ async def read_3dbag_by_coordinates(
         x_coord=x_coord, 
         y_coord=y_coord
     )
+
+@api_router.get('/legend')
+async def get_map_legend():
+    return await legend_controller.get_legend()

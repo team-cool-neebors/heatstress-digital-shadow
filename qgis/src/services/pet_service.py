@@ -72,7 +72,7 @@ class PETService:
 
         zs_br = QgsZonalStatistics(
             zonal_layer,
-            svf_obj,
+            br_obj,
             attributePrefix='veg_',
             stats=QgsZonalStatistics.Mean
         )
@@ -171,7 +171,7 @@ class PETService:
                 pet_sun_partial = None
             else:
                 pet_sun_partial = (
-                    -13.26 + 1.25 * t_a + 0.011 * q_gl - 3.37 * math.log(u) +
+                    -13.26 + 1.25 * t_a + 0.011 * q_gl - 3.37 * math.log(u) + 0.078 * t_w +
                     0.0055 * q_gl * math.log(u) + 5.56 * math.sin(phi) - 0.0103 * q_gl * math.log(u) * math.sin(phi)
                 )
             feature[field_name] = pet_sun_partial

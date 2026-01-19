@@ -10,7 +10,7 @@ interface FeatureInfoCardProps {
 
 export const FeatureInfoCard = ({ info }: FeatureInfoCardProps) => (
   <div style={{
-    padding: "12px 20px",
+    padding: "12px 16px",
     background: "#ffffff",
     borderRadius: "12px",
     boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
@@ -19,12 +19,13 @@ export const FeatureInfoCard = ({ info }: FeatureInfoCardProps) => (
     color: "#000000",
     pointerEvents: "auto",
     display: "flex",
-    gap: "16px",
-    alignItems: "center"
+    flexDirection: "column",
+    gap: "10px",
+    width: "232px",
   }}>
-    <div style={{ display: "flex", gap: "6px" }}>
+    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
       <strong style={{ color: "#000000" }}>PET Index:</strong> 
-      <span style={{ color: "#000000", fontWeight: 600 }}>
+      <span style={{ color: "#000000", fontWeight: 400 }}>
         {info.band != null ? `${info.band.toFixed(2)}°C` : "n/a"}
       </span>
     </div>
@@ -32,8 +33,8 @@ export const FeatureInfoCard = ({ info }: FeatureInfoCardProps) => (
     <div style={{ 
       color: "#333333", 
       fontSize: "13px", 
-      borderLeft: "1px solid #ddd", 
-      paddingLeft: "16px",
+      borderTop: "1px solid #ddd", 
+      paddingTop: "10px",
       display: "flex",
       gap: "4px"
     }}>

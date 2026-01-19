@@ -16,6 +16,7 @@ import { BuildingsPanel } from "./components/panels/BuildingsPanel";
 import { BuildingInfoCard } from "./components/infoCards/BuildingInfoCard";
 import { FeatureInfoCard } from "./components/infoCards/FeatureInfoCard";
 import { LoadingIndicator } from "./components/loading/LoadingIndicator";
+import { LegendCard } from "./components/legend/LegendCard";
 
 export default function App() {
   const [showBuildings, setShowBuildings] = React.useState(false);
@@ -45,6 +46,7 @@ export default function App() {
     isProcessing,
     objectsToSave,
     handleImport
+    legend,
   } = useDeckLayers({
     showBuildings,
     showObjects,
@@ -206,8 +208,15 @@ export default function App() {
         top: 20,
         right: 20,
         zIndex: 1000,
-        pointerEvents: "none"
+        pointerEvents: "none",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        gap: "12px",
       }}>
+        {legend && showOverlay && overlayLayerId === "pet-version-1" && (
+          <LegendCard legend={legend} title="PET Index Legend" />
+        )}
         {buildingInfo ? (
           <BuildingInfoCard
             buildingInfo={buildingInfo}
