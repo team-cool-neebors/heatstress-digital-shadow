@@ -1,7 +1,7 @@
 import type { MeasureType } from "./features/objects/lib/objectLayer";
 import type { PickingInfo } from "@deck.gl/core";
 import type { SideMenuItem } from "./components/sideMenu/SideMenuItem";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import DeckMap from "./map/DeckMap";
 import { useDeckLayers } from "./map/hooks/useDeckLayers";
 import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
@@ -55,6 +55,21 @@ export default function App() {
     showOverlay,
     overlayLayerId,
   });
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasUnsavedChanges) return;
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
 
   const handleToggleObjects = (value: boolean) => {
     setShowObjects(value);
@@ -110,6 +125,7 @@ export default function App() {
           selectedObjectType={selectedObjectType}
           onSelectObjectType={handleSelectObjectType}
           hasUnsavedChanges={hasUnsavedChanges}
+          isProcessing={isProcessing}
           onSave={saveObjects}
           onDiscard={discardChanges}
           currentObjects={objectsToSave}
