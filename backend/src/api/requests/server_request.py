@@ -1,5 +1,8 @@
-from pydantic import BaseModel, Field
-from typing import Optional, Any, Dict
+import re
+from pydantic import BaseModel, Field, field_validator, ConfigDict
+from typing import Optional
+
+BBOX_REGEX: re.Pattern = re.compile(r"^\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*,\s*[-+]?\d+(\.\d+)?\s*$")
 
 class ServerRequest(BaseModel):
     """
@@ -12,12 +15,19 @@ class ServerRequest(BaseModel):
     VERSION: str = Field('1.1.0', description="OGC Protocol Version.")
     
     # Common Geospatial Parameters
-    SRSNAME: Optional[str] = Field('EPSG:28992', description="Target Spatial Reference System.")
-    OUTPUTFORMAT: Optional[str] = Field(None, description="The desired output format.")
-    
-    # Catch-all for any other custom or specific parameters not explicitly defined
-    __pydantic_extra__: Dict[str, Any] = {}
+    BBOX: Optional[str] = Field(None, description="Bounding box filter (e.g., 'minX,minY,maxX,maxY').")
 
-    class Config:
-        extra = 'allow' # Allows unknown fields to be stored in __pydantic_extra__
-        exclude_none = True # Ensure None values are not included in the output dictionary
+    @field_validator('BBOX')
+    @classmethod
+    def validate_bbox_format(cls, v: Optional[str]) -> Optional[str]:
+        if v and not BBOX_REGEX.match(v):
+            raise ValueError("Invalid BBOX format. Expected 'minX,minY,maxX,maxY'.")
+        return v
+
+    # Allow extra params to be captured in __pydantic_extra__
+    model_config = ConfigDict(
+        extra='allow',
+        exclude_none=True,
+        alias_generator=lambda s: s.upper(), 
+        populate_by_name=True
+    )
