@@ -1,6 +1,6 @@
 from qgis.core import QgsProject, QgsRasterLayer
 
-def update_pet_layer_in_project(project_path: str, new_raster_path: str, base_name:str, style_path: str='/data/server/hittestress.qml'):
+def update_pet_layer_in_project(project_path: str, new_raster_path: str, base_name:str, style_path: str='/data/server/new-default.qml'):
     project = QgsProject.instance()
     
     if not project.read(project_path):
