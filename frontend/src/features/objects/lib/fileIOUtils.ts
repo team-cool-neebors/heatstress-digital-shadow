@@ -60,7 +60,7 @@ export async function parseImportFile(file: File, objectTypes: MeasureType[]): P
     
     try {
         json = JSON.parse(text);
-    } catch (e) {
+    } catch {
         throw new Error("Invalid JSON file.");
     }
 
