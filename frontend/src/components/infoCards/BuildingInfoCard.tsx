@@ -30,30 +30,30 @@ export const BuildingInfoCard = ({
 }: BuildingInfoCardProps) => {
   return (
     <div style={{
-      padding: "16px",
+      padding: "12px",
       background: "#ffffff",
       borderRadius: "12px",
       boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
       border: "1px solid rgba(0,0,0,0.15)",
-      width: "300px",
+      width: "240px",
       pointerEvents: "auto",
       color: "#000000",
     }}>
-      <h3 style={{ margin: "0 0 4px 0", fontSize: "16px", fontWeight: 700, color: "#000000" }}>
+      <h3 style={{ margin: "0 0 4px 0", fontSize: "15px", fontWeight: 700, color: "#000000" }}>
         Building Details
       </h3>
       
-      <code style={{ fontSize: "12px", color: "#333333", display: "block", marginBottom: "12px" }}>
+      <code style={{ fontSize: "11px", color: "#333333", display: "block", marginBottom: "10px" }}>
         ID: {buildingInfo.pand_data?.bag_id ?? buildingInfo.bag_id}
       </code>
       
       <div style={{ 
         display: "grid", 
         gridTemplateColumns: "1fr 1fr", 
-        gap: "12px", 
+        gap: "10px", 
         fontSize: "13px", 
         borderTop: "1px solid #ddd", 
-        paddingTop: "12px",
+        paddingTop: "10px",
         color: "#000000"
       }}>
         <div>
@@ -66,18 +66,18 @@ export const BuildingInfoCard = ({
         </div>
       </div>
 
-      <div style={{ marginTop: "12px", fontSize: "13px", color: "#000000" }}>
+      <div style={{ marginTop: "10px", fontSize: "13px", color: "#000000" }}>
         <label style={{ color: "#444", display: "block", fontSize: "11px", fontWeight: 600 }}>Usage</label>
         <strong style={{ color: "#000000" }}>{usageFunctions.join(", ") || "Unknown"}</strong>
       </div>
 
       {activeVbos.length > 0 && (
-        <div style={{ marginTop: "16px" }}>
+        <div style={{ marginTop: "12px" }}>
           <div style={{ fontSize: "12px", fontWeight: 700, color: "#000000", marginBottom: "8px" }}>
             Active Units
           </div>
           <div style={{ 
-            maxHeight: "200px", 
+            maxHeight: "160px", 
             overflowY: "auto", 
             display: "flex", 
             flexDirection: "column", 

@@ -3,6 +3,7 @@ import type { Layer, PickingInfo } from '@deck.gl/core';
 import { makeWmsLayer } from './lib/wmsLayer';
 import { useQgisFeatureInfo } from "./lib/qgisFeatureInfo";
 import type { QgisLayerId } from './lib/qgisLayers';
+import { useWMSLegend } from './useWMSLegend';
 
 export const WMS_BOUNDS: [number, number, number, number] = [
   3.588347,     // west
@@ -38,6 +39,10 @@ export function useWMSLayers({ showOverlay, overlayLayerId, objectsVersion }: Us
         });
     }, [showOverlay, overlayLayerId, objectsVersion]);
 
+    const { legend, isLoading: isLegendLoading, error: legendError } = useWMSLegend({
+        enabled: true,
+    });
+
     const { featureInfo, request, clear } = useQgisFeatureInfo({
         bounds: WMS_BOUNDS,
         width: WMS_WIDTH,
@@ -63,6 +68,9 @@ export function useWMSLayers({ showOverlay, overlayLayerId, objectsVersion }: Us
     return {
         wmsLayer,
         featureInfo,
+        legend,
+        isLegendLoading,
+        legendError,
         handleMapClick,
     };
 }
