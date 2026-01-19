@@ -11,7 +11,7 @@ type HeatStressMeasuresProps = {
   onSelectObjectType: (type: MeasureType | null) => void;
   hasUnsavedChanges: boolean;
   isProcessing: boolean;
-  onSave: () => void;
+  onSave: (objects: ObjectInstance[]) => void;
   onDiscard: () => void;
   currentObjects: ObjectInstance[]; 
   onImportObjects: (objs: ObjectInstance[]) => void;
@@ -89,7 +89,7 @@ export function HeatStressMeasuresPanel({
             Discard
           </button>
           <button
-            onClick={() => onSave()}
+            onClick={() => onSave(currentObjects)}
             disabled={disabledButtons}
             style={{ padding: "8px 15px", cursor: disabledButtons ? "not-allowed" : "pointer", border: "solid 1px #d1d1d1ff" }}
           >

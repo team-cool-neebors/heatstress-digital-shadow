@@ -55,8 +55,8 @@ export function ObjectIOControls({ objects = [], objectTypes, onImportFinished, 
             const newObjects = await parseImportFile(file, objectTypes);
             onImportFinished(newObjects);
         } catch (err) {
-            console.error(err);
-            alert("Failed to parse file. Please check the format.");
+            const message = err instanceof Error ? err.message : "Failed to parse file.";
+            alert(message);
         } finally {
             e.target.value = ''; 
         }

@@ -176,13 +176,12 @@ export function useUserObjectsLayer(
     }, [userObjects, objectsToSave]);
 
 
-    const saveObjects = useCallback(async (objectsOverride?: ObjectInstance[]) => {
+    const saveObjects = useCallback(async (objectsToSave: ObjectInstance[]) => {
         setIsProcessing(true);
-        const isOverrideValid = Array.isArray(objectsOverride);
-        const finalObjects = isOverrideValid ? objectsOverride : objectsToSave;
+
         try {
             const payload = {
-                points: finalObjects.map(obj => {
+                points: objectsToSave.map(obj => {
                     const [lon, lat] = obj.position;
                     const [x, y] = lonLatToRd(lon, lat);
 
@@ -209,8 +208,8 @@ export function useUserObjectsLayer(
             }
 
             await Promise.resolve().then(() => {
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(finalObjects));
-                setUserObjects(finalObjects);
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(objectsToSave));
+                setUserObjects(objectsToSave);
                 setObjectsVersion(v => v + 1);
             });
 
@@ -220,24 +219,24 @@ export function useUserObjectsLayer(
         } finally {
             setIsProcessing(false);
         }
-    }, [objectsToSave]);
+    }, []);
 
-    const handleImportMerge = useCallback((importedObjects: ObjectInstance[]) => {
-        const existingPositions = new Set(userObjects.map(obj => obj.position.join(',')));
-        const uniqueNewObjects = importedObjects.filter(obj => {
-            const posKey = obj.position.join(',');
-            return !existingPositions.has(posKey);
-        });
 
-        if (uniqueNewObjects.length === 0) {
-            alert("All imported objects were duplicates.");
+    const handleImport = useCallback((importedObjects: ObjectInstance[]) => {
+        if (importedObjects.length === 0) {
+            alert("Imported file contains no objects.");
             return;
         }
 
-        const combinedList = [...userObjects, ...uniqueNewObjects];
-        saveObjects(combinedList);
-        alert(`Imported ${uniqueNewObjects.length} new objects.`);
-    }, [userObjects, saveObjects]);
+        const confirmReplace = window.confirm(
+            `This will replace all current objects with ${importedObjects.length} imported objects. Are you sure?`
+        );
+
+        if (confirmReplace) {
+            saveObjects(importedObjects); 
+            alert(`Successfully imported ${importedObjects.length} objects.`);
+        }
+    }, [saveObjects]);
 
 
     const discardChanges = useCallback(() => {
@@ -255,6 +254,6 @@ export function useUserObjectsLayer(
         objectTypes,
         isProcessing,
         objectsToSave,
-        handleImportMerge
+        handleImport
     };
 }

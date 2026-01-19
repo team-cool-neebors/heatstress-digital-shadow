@@ -52,7 +52,7 @@ export function useDeckLayers({
     objectTypes,
     isProcessing,
     objectsToSave,
-    handleImportMerge
+    handleImport
   } = useUserObjectsLayer(
     showObjects,
     isEditingMode,
@@ -91,6 +91,6 @@ export function useDeckLayers({
     objectTypes,
     isProcessing,
     objectsToSave,     
-    handleImportMerge
+    handleImport
   };
 }

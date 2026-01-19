@@ -44,7 +44,7 @@ export default function App() {
     objectTypes,
     isProcessing,
     objectsToSave,
-    handleImportMerge
+    handleImport
   } = useDeckLayers({
     showBuildings,
     showObjects,
@@ -129,7 +129,7 @@ export default function App() {
           onSave={saveObjects}
           onDiscard={discardChanges}
           currentObjects={objectsToSave}
-          onImportObjects={handleImportMerge}
+          onImportObjects={handleImport}
         />
       ),
     },
