@@ -4,7 +4,7 @@ import type { SideMenuItem } from "./components/sideMenu/SideMenuItem";
 import React, { useCallback, useEffect, useState } from "react";
 import DeckMap from "./map/DeckMap";
 import { useDeckLayers } from "./map/hooks/useDeckLayers";
-import { QGIS_OVERLAY_LAYERS, type QgisLayerId } from "./features/wms-overlay/lib/qgisLayers";
+import { QGIS_OVERLAY_LAYERS, type QgisLayerId, QGIS_MAP_STYLES, type QgisMapStylesId } from "./features/wms-overlay/lib/qgisLayers";
 import { useBuildingHighlight } from "./features/buildings-3d/useBuildingHighlight";
 import { SideMenu } from "./components/sideMenu/SideMenu";
 import { LayersIcon } from "./components/icons/LayersIcon";
@@ -32,6 +32,16 @@ export default function App() {
   const [overlayLayerId, setOverlayLayerId] = useState<QgisLayerId>(
     QGIS_OVERLAY_LAYERS[0].id
   );
+  const [overlayStyleId, setOverlayStyleId] = useState<QgisMapStylesId>(
+    QGIS_MAP_STYLES[0].id
+  );
+  const [showStyleOverlay, setShowStyleOverlay] = useState(true);
+  const isPetOverlay = overlayLayerId === QGIS_OVERLAY_LAYERS[0].id;
+  const showOverlayStyles = isPetOverlay;
+  const showOverlayLayer = showOverlay && !isPetOverlay;
+
+  const [activeOverlaySubpanel, setActiveOverlaySubpanel] =
+  useState<"layers" | "styles">("layers");
 
   const {
     layers,
@@ -39,7 +49,8 @@ export default function App() {
     saveObjects,
     discardChanges,
     hasUnsavedChanges,
-    featureInfo,
+    styleFeatureInfo,
+    overlayFeatureInfo,
     handleMapClick,
     objectTypes,
     isProcessing,
@@ -50,9 +61,14 @@ export default function App() {
     selectedObjectType,
     setSelectedObjectType,
     objPath: 'data/10-72-338-LoD22-3D_leveled.obj',
-    showOverlay,
+    showOverlay: showOverlayLayer,
     overlayLayerId,
+    overlayStyleId,
+    showStyleOverlay: showOverlayStyles && showStyleOverlay,
   });
+
+  const activeFeatureInfo =
+  isPetOverlay ? styleFeatureInfo : overlayFeatureInfo;
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -102,13 +118,30 @@ export default function App() {
       icon: <LayersIcon />,
       label: "Overlay Layers",
       panel: (
-        <OverlayLayersPanel
-          value={overlayLayerId}
-          onChange={(id) => {
-            setShowOverlay(true);
-            setOverlayLayerId(id);
-          }}
-        />
+        <div>
+          <OverlayLayersPanel
+            overlayLayerId={overlayLayerId}
+            onOverlayLayerChange={(id) => {
+              setShowOverlay(true);
+              setOverlayLayerId(id);
+              if (id === QGIS_OVERLAY_LAYERS[0].id) {
+                setShowStyleOverlay(true);
+                setActiveOverlaySubpanel("styles");
+              } else {
+                setShowStyleOverlay(false);
+                setActiveOverlaySubpanel("layers");
+              }
+            }}
+            overlayStyleId={overlayStyleId}
+            onOverlayStyleChange={(id) => {
+              setShowOverlay(true);
+              setOverlayStyleId(id);
+              setShowStyleOverlay(true);
+              setActiveOverlaySubpanel("styles");
+            }}
+            showStyles={showOverlayStyles}
+          />
+        </div>
       ),
     },
     {
@@ -208,8 +241,8 @@ export default function App() {
             activeVbos={activeVbos}
             usageFunctions={usageFunctions}
           />
-        ) : featureInfo ? (
-          <FeatureInfoCard info={featureInfo} />
+        ) : activeFeatureInfo ? (
+          <FeatureInfoCard info={activeFeatureInfo} />
         ) : null}
       </div>
 

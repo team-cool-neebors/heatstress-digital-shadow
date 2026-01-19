@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
-import type { Layer } from '@deck.gl/core';
+import type { Layer, PickingInfo } from '@deck.gl/core';
 import { makeOsmTileLayer } from '../../features/basemap/lib/osmLayer';
 import { useBuildingsLayer } from '../../features/buildings-3d/useBuildingsLayer';
 import { useStaticTreesLayer } from '../../features/objects/useStaticTreesLayer';
 import { useUserObjectsLayer } from '../../features/objects/useUserObjectsLayer';
 import { useWMSLayers } from '../../features/wms-overlay/useWMSLayers';
-import type { QgisLayerId } from '../../features/wms-overlay/lib/qgisLayers';
+import type { QgisLayerId, QgisMapStylesId } from '../../features/wms-overlay/lib/qgisLayers';
+import { useWMSStyles } from '../../features/wms-overlay/useWMSStyles';
 
 export type UseDeckLayersOpts = {
   objPath?: string;
@@ -16,6 +17,8 @@ export type UseDeckLayersOpts = {
   setSelectedObjectType: (type: string) => void;
   showOverlay: boolean;
   overlayLayerId: QgisLayerId;
+  overlayStyleId: QgisMapStylesId;
+  showStyleOverlay: boolean;
 };
 
 export function useDeckLayers({
@@ -26,7 +29,9 @@ export function useDeckLayers({
   selectedObjectType,
   setSelectedObjectType,
   showOverlay,
-  overlayLayerId
+  overlayLayerId,
+  overlayStyleId,
+  showStyleOverlay,
 }: UseDeckLayersOpts) {
 
   const osmBase = useMemo<Layer>(() => makeOsmTileLayer(), []);
@@ -58,9 +63,23 @@ export function useDeckLayers({
     setSelectedObjectType,
   );
 
-  const { wmsLayer, featureInfo, handleMapClick } = useWMSLayers({
+  const {
+    wmsLayer,
+    featureInfo: overlayFeatureInfo,
+    handleMapClick: handleOverlayMapClick,
+  } = useWMSLayers({
     showOverlay,
     overlayLayerId,
+    objectsVersion,
+  });
+
+  const {
+    wmsStyleLayer,
+    featureInfo: styleFeatureInfo,
+    handleMapClick: handleStyleMapClick,
+  } = useWMSStyles({
+    showOverlay: showStyleOverlay,
+    overlayStyleId,
     objectsVersion,
   });
 
@@ -73,9 +92,15 @@ export function useDeckLayers({
     if (objectLayer) arr.push(objectLayer);
     if (userObjectLayers && Array.isArray(userObjectLayers)) arr.push(...userObjectLayers);
     if (wmsLayer) arr.push(wmsLayer);
+    if (wmsStyleLayer) arr.push(wmsStyleLayer);
 
     return arr;
-  }, [osmBase, buildingsLayer, objectLayer, userObjectLayers, wmsLayer]);
+  }, [osmBase, buildingsLayer, objectLayer, userObjectLayers, wmsLayer, wmsStyleLayer]);
+
+  const handleMapClick = (info: PickingInfo) => {
+    handleOverlayMapClick(info);
+    handleStyleMapClick(info);
+  };
 
   return {
     layers,
@@ -84,7 +109,8 @@ export function useDeckLayers({
     saveObjects,
     discardChanges,
     hasUnsavedChanges,
-    featureInfo,
+    overlayFeatureInfo,
+    styleFeatureInfo,
     handleMapClick,
     objectTypes,
     isProcessing,

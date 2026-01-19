@@ -9,3 +9,10 @@ export const QGIS_OVERLAY_LAYERS = [
 ] as const;
 
 export type QgisLayerId = (typeof QGIS_OVERLAY_LAYERS)[number]["id"];
+
+export const QGIS_MAP_STYLES = [
+  { id: "default", label: "Default" },
+  { id: "official", label: "Official" },
+] as const;
+
+export type QgisMapStylesId = (typeof QGIS_MAP_STYLES)[number]["id"];

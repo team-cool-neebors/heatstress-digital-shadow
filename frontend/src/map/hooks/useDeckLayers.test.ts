@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { Layer } from '@deck.gl/core';
 import type { Mesh, MeshAttribute } from '@loaders.gl/schema';
-import type { QgisLayerId } from '../../features/wms-overlay/lib/qgisLayers';
+import type { QgisLayerId, QgisMapStylesId } from '../../features/wms-overlay/lib/qgisLayers';
 
 jest.mock('../../features/basemap/lib/osmLayer', () => ({
   makeOsmTileLayer: jest.fn()
@@ -37,6 +37,7 @@ function meshWithPositions(arr: number[]): Mesh {
 const osmLayerMock: Layer = { id: 'raster-tiles' } as unknown as Layer;
 
 const DEFAULT_LAYER_ID: QgisLayerId = 'pet-version-1';
+const DEFAULT_STYLE_ID: QgisMapStylesId = 'default';
 
 describe('useDeckLayers (Option A: objPath inside hook)', () => {
   beforeEach(() => {
@@ -51,6 +52,8 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         showBuildings: false,
         showOverlay: false,
         overlayLayerId: DEFAULT_LAYER_ID,
+        overlayStyleId: DEFAULT_STYLE_ID,
+        showStyleOverlay: false,
         showObjects: false,
         isEditingMode: false,
         selectedObjectType: DEFAULT_OBJECT_TYPE,
@@ -69,6 +72,8 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         showBuildings: true,
         showOverlay: false,
         overlayLayerId: DEFAULT_LAYER_ID,
+        overlayStyleId: DEFAULT_STYLE_ID,
+        showStyleOverlay: false,
         showObjects: false,
         isEditingMode: false,
         selectedObjectType: DEFAULT_OBJECT_TYPE,
@@ -94,6 +99,8 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         showBuildings: true,
         showOverlay: false,
         overlayLayerId: DEFAULT_LAYER_ID,
+        overlayStyleId: DEFAULT_STYLE_ID,
+        showStyleOverlay: false,
         showObjects: false,
         isEditingMode: false,
         selectedObjectType: DEFAULT_OBJECT_TYPE,
@@ -141,6 +148,8 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         showBuildings: true,
         showOverlay: false,
         overlayLayerId: DEFAULT_LAYER_ID,
+        overlayStyleId: DEFAULT_STYLE_ID,
+        showStyleOverlay: false,
         showObjects: false,
         isEditingMode: false,
         selectedObjectType: DEFAULT_OBJECT_TYPE,
@@ -167,6 +176,8 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         showBuildings: true,
         showOverlay: false,
         overlayLayerId: DEFAULT_LAYER_ID,
+        overlayStyleId: DEFAULT_STYLE_ID,
+        showStyleOverlay: false,
         showObjects: false,
         isEditingMode: false,
         selectedObjectType: DEFAULT_OBJECT_TYPE,
@@ -192,6 +203,8 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
       showBuildings: boolean;
       showOverlay: boolean;
       overlayLayerId: QgisLayerId;
+      overlayStyleId: QgisMapStylesId;
+      showStyleOverlay: boolean;
       showObjects: boolean,
       isEditingMode: boolean,
       selectedObjectType: string,
@@ -206,6 +219,8 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
           showBuildings: true,
           showOverlay: true,
           overlayLayerId: DEFAULT_LAYER_ID,
+          overlayStyleId: DEFAULT_STYLE_ID,
+          showStyleOverlay: false,
           showObjects: false,
           isEditingMode: false,
           selectedObjectType: DEFAULT_OBJECT_TYPE,
@@ -222,6 +237,8 @@ describe('useDeckLayers (Option A: objPath inside hook)', () => {
         showBuildings: false,
         showOverlay: false,
         overlayLayerId: DEFAULT_LAYER_ID,
+        overlayStyleId: DEFAULT_STYLE_ID,
+        showStyleOverlay: false,
         showObjects: false,
         isEditingMode: false,
         selectedObjectType: DEFAULT_OBJECT_TYPE,
