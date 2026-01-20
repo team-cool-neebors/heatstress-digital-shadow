@@ -1,8 +1,8 @@
 import type { MeasureType, ObjectInstance } from "./objectLayer";
 
 // Config
-const APP_SIGNATURE = 'neeghboorhoods';
-const DEFAULT_OBJECT_TYPE = 'object_1'; 
+const APP_SIGNATURE = 'neeghborhoods';
+const DEFAULT_OBJECT_TYPE = 'object_1';
 
 interface GeoJsonFeature {
     type: 'Feature';
@@ -10,7 +10,7 @@ interface GeoJsonFeature {
         type: 'Point';
         coordinates: number[];
     };
-    properties: Record<string, unknown>; 
+    properties: Record<string, unknown>;
 }
 
 interface RawObjectData {
@@ -26,7 +26,7 @@ interface RawObjectData {
 // Export Logic
 export function generateExportString(objects: ObjectInstance[], format: 'geojson' | 'json'): { data: string, filename: string } {
     const dateStr = new Date().toISOString().slice(0, 10);
-    
+
     if (format === 'geojson') {
         const geojson = {
             type: 'FeatureCollection',
@@ -37,18 +37,18 @@ export function generateExportString(objects: ObjectInstance[], format: 'geojson
                 properties: { ...obj }
             }))
         };
-        return { 
-            data: JSON.stringify(geojson, null, 2), 
-            filename: `neighborhood_${dateStr}.geojson` 
+        return {
+            data: JSON.stringify(geojson, null, 2),
+            filename: `neighborhood_${dateStr}.geojson`
         };
     } else {
         const raw = {
             __app_signature: APP_SIGNATURE,
             data: objects
         };
-        return { 
-            data: JSON.stringify(raw, null, 2), 
-            filename: `neighborhood_raw_${dateStr}.json` 
+        return {
+            data: JSON.stringify(raw, null, 2),
+            filename: `neighborhood_raw_${dateStr}.json`
         };
     }
 }
@@ -57,7 +57,7 @@ export function generateExportString(objects: ObjectInstance[], format: 'geojson
 export async function parseImportFile(file: File, objectTypes: MeasureType[]): Promise<ObjectInstance[]> {
     const text = await file.text();
     let json;
-    
+
     try {
         json = JSON.parse(text);
     } catch {
@@ -80,7 +80,7 @@ export async function parseImportFile(file: File, objectTypes: MeasureType[]): P
     // Detect format
     if (json.type === 'FeatureCollection' && Array.isArray(json.features)) {
         candidates = json.features.map((f: GeoJsonFeature) => ({
-            ...(f.properties as RawObjectData), 
+            ...(f.properties as RawObjectData),
             position: f.geometry.coordinates as [number, number, number]
         }));
     } else if (Array.isArray(json.data)) {
@@ -97,24 +97,24 @@ export async function parseImportFile(file: File, objectTypes: MeasureType[]): P
 
     // Validate & Normalize
     return candidates.map(item => {
-    const type = item.objectType || DEFAULT_OBJECT_TYPE;
-    const configScale = configMap[type]?.scale ?? 1;
-    
-    
-    let validPosition: [number, number, number] = [0, 0, 0];
-    
+        const type = item.objectType || DEFAULT_OBJECT_TYPE;
+        const configScale = configMap[type]?.scale ?? 1;
+
+
+        let validPosition: [number, number, number] = [0, 0, 0];
+
         if (item.position && item.position.length >= 2) {
             validPosition = [
-                item.position[0], 
-                item.position[1], 
-                item.position[2] ?? 0 
+                item.position[0],
+                item.position[1],
+                item.position[2] ?? 0
             ];
         }
 
         return {
-            id: item.id || `IMP-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+            id: item.id || `IMP-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
             objectType: type,
-            position: validPosition, 
+            position: validPosition,
             scale: item.scale ?? configScale,
             height: item.height,
             radius: item.radius,

@@ -41,12 +41,12 @@ export default function App() {
     discardChanges,
     hasUnsavedChanges,
     featureInfo,
+    legend,
     handleMapClick,
     objectTypes,
     isProcessing,
     objectsToSave,
     handleImport
-    legend,
   } = useDeckLayers({
     showBuildings,
     showObjects,

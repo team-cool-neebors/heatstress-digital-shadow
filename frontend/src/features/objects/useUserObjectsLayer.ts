@@ -229,12 +229,11 @@ export function useUserObjectsLayer(
         }
 
         const confirmReplace = window.confirm(
-            `This will replace all current objects with ${importedObjects.length} imported objects. Are you sure?`
+            `This action will replace all current objects with ${importedObjects.length} imported objects and re-calculate PET map. Are you sure?`
         );
 
         if (confirmReplace) {
-            saveObjects(importedObjects); 
-            alert(`Successfully imported ${importedObjects.length} objects.`);
+            saveObjects(importedObjects);
         }
     }, [saveObjects]);
 

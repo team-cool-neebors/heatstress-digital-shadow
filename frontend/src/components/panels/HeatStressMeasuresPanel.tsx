@@ -1,4 +1,4 @@
-import type { MeasureType } from "../../features/objects/lib/objectLayer";
+import type { MeasureType, ObjectInstance } from "../../features/objects/lib/objectLayer";
 import CheckboxItem from "./items/CheckboxItem";
 import ObjectItem from "./items/ObjectItem";
 import { ObjectIOControls } from "./items/ObjectIOControls";
@@ -13,7 +13,7 @@ type HeatStressMeasuresProps = {
   isProcessing: boolean;
   onSave: (objects: ObjectInstance[]) => void;
   onDiscard: () => void;
-  currentObjects: ObjectInstance[]; 
+  currentObjects: ObjectInstance[];
   onImportObjects: (objs: ObjectInstance[]) => void;
 };
 
@@ -27,8 +27,8 @@ export function HeatStressMeasuresPanel({
   isProcessing,
   onSave,
   onDiscard,
-  currentObjects, 
-  onImportObjects 
+  currentObjects,
+  onImportObjects
 }: HeatStressMeasuresProps) {
   const disabled = !showObjects;
   const disabledButtons = !hasUnsavedChanges || !showObjects || isProcessing;
@@ -39,9 +39,9 @@ export function HeatStressMeasuresPanel({
       onSelectObjectType(type);
     }
   };
- return (
+  return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      
+
       <div style={{ flex: '0 0 auto' }}>
         <h3>Heat Stress Measures</h3>
         <CheckboxItem
@@ -97,25 +97,26 @@ export function HeatStressMeasuresPanel({
           </button>
         </div>
 
-         <ObjectIOControls 
-            objects={currentObjects}
-            objectTypes={objectTypes}
-            onImportFinished={onImportObjects}
-            disabled={disabled}
+        <ObjectIOControls
+          objects={currentObjects}
+          objectTypes={objectTypes}
+          onImportFinished={onImportObjects}
+          disabled={disabled}
         />
       </div>
 
       <div style={{
-        marginTop: "1rem",
         backgroundColor: "#f1e9e9ff",
+        marginTop: "1rem",
         paddingLeft: 10,
         fontStyle: "italic",
-        flex: "1 1 auto",   
-        overflowY: "auto",  
-        minHeight: "0"      
+        flex: "1 1 auto",
+        overflowY: "auto",
+        minHeight: "0",
       }}>
-        <h4 style={{ margin: "5px 0 5px 0" }}>Help: About objects</h4>
-        <p>Remove placed objects by pressing on them.</p>
+        <span style={{ fontWeight: "bold" }}>Help: About objects</span>
+        <p>Remove objects by selecting a type and pressing on them on the map.</p>
+        <p>You can only remove objects that were previously placed by you.</p>
         <p>"Discard" will delete all not saved changes.</p>
         <p>"Save" will make the changes definitive and will re-calculate the PET map.</p>
         <p>"Import" will allow you to load previously exported files.</p>

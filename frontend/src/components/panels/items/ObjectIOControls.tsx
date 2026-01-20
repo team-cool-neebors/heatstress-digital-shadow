@@ -31,14 +31,14 @@ export function ObjectIOControls({ objects = [], objectTypes, onImportFinished, 
 
     const handleExport = (format: 'geojson' | 'json') => {
         setShowExportMenu(false);
-        
+
         if (objects.length === 0) {
             alert("No objects to export.");
             return;
         }
 
         const { data, filename } = generateExportString(objects, format);
-        
+
         const blob = new Blob([data], { type: 'application/json' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
@@ -58,25 +58,25 @@ export function ObjectIOControls({ objects = [], objectTypes, onImportFinished, 
             const message = err instanceof Error ? err.message : "Failed to parse file.";
             alert(message);
         } finally {
-            e.target.value = ''; 
+            e.target.value = '';
         }
     };
 
     // STYLE
     const btnStyle: React.CSSProperties = {
-        padding: "8px 15px", 
-        border: "solid 1px #d1d1d1ff", 
+        padding: "8px 15px",
+        border: "solid 1px #d1d1d1ff",
         cursor: disabled ? "not-allowed" : "pointer",
-        flex: 1, 
+        flex: 1,
     };
 
     const containerStyle: React.CSSProperties = {
-        display: 'flex', 
+        display: 'flex',
         gap: 8,
-        marginTop: "1rem", 
-        borderTop: '1px solid #e0e0e0', 
+        marginTop: '1rem',
+        borderTop: '1px solid #e0e0e0',
         paddingTop: "1rem",
-        position: 'relative' 
+        position: 'relative'
     };
 
     const popupStyle: React.CSSProperties = {
@@ -95,35 +95,38 @@ export function ObjectIOControls({ objects = [], objectTypes, onImportFinished, 
         minWidth: '140px'
     };
 
-    const menuItemStyle = {
+    const menuItemStyle: React.CSSProperties = {
         padding: '10px',
         border: 'none',
         background: 'transparent',
         textAlign: 'left' as const,
         cursor: 'pointer',
-        fontSize: '13px'
+        fontSize: '13px',
+        width: '100%',
+        boxSizing: 'border-box',
+        borderRadius: '0',
     };
 
     return (
         <div style={containerStyle}>
             {/* IMPORT BUTTON */}
-            <button 
+            <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()} 
-                disabled={disabled} 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={disabled}
                 style={btnStyle}
             >
                 Import
             </button>
 
             {/* EXPORT BUTTON */}
-            <button 
+            <button
                 type="button"
                 onClick={(e) => {
                     e.stopPropagation();
                     if (!disabled) setShowExportMenu(!showExportMenu);
-                }} 
-                disabled={disabled} 
+                }}
+                disabled={disabled}
                 style={btnStyle}
             >
                 Export ▾
@@ -132,16 +135,16 @@ export function ObjectIOControls({ objects = [], objectTypes, onImportFinished, 
             {/* POPUP MENU */}
             {showExportMenu && (
                 <div style={popupStyle} ref={menuRef}>
-                    <button 
+                    <button
                         type="button"
-                        style={{...menuItemStyle, borderBottom: '1px solid #eee'}}
+                        style={{ ...menuItemStyle, borderBottom: '1px solid #eee' }}
                         onClick={() => handleExport('geojson')}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                         Export GeoJSON
                     </button>
-                    <button 
+                    <button
                         type="button"
                         style={menuItemStyle}
                         onClick={() => handleExport('json')}
@@ -154,10 +157,10 @@ export function ObjectIOControls({ objects = [], objectTypes, onImportFinished, 
             )}
 
             {/* HIDDEN INPUT */}
-            <input 
-                type="file" 
-                ref={fileInputRef} 
-                style={{ display: 'none' }} 
+            <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
                 accept=".json,.geojson"
                 onChange={handleFileSelect}
             />

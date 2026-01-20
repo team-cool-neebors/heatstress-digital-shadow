@@ -100,7 +100,7 @@ export function useDeckLayers({
     handleMapClick,
     objectTypes,
     isProcessing,
-    objectsToSave,     
+    objectsToSave,
     handleImport
   };
 }
