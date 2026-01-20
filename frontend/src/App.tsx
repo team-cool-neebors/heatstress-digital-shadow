@@ -41,10 +41,12 @@ export default function App() {
     discardChanges,
     hasUnsavedChanges,
     featureInfo,
+    legend,
     handleMapClick,
     objectTypes,
     isProcessing,
-    legend,
+    objectsToSave,
+    handleImport
   } = useDeckLayers({
     showBuildings,
     showObjects,
@@ -128,6 +130,8 @@ export default function App() {
           isProcessing={isProcessing}
           onSave={saveObjects}
           onDiscard={discardChanges}
+          currentObjects={objectsToSave}
+          onImportObjects={handleImport}
         />
       ),
     },
@@ -174,6 +178,8 @@ export default function App() {
 
   return (
     <div style={{ position: "relative", height: "100dvh", width: "100%" }}>
+ 
+      
       <DeckMap
         layers={highlightLayer ? [...layers, highlightLayer] : layers}
         initialViewState={{

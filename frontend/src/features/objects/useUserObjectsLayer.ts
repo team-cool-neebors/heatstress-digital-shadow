@@ -154,7 +154,7 @@ export function useUserObjectsLayer(
         }
 
         return layers;
-    }, [objectsToSave, showObjects, objectTypes, objectTypes.length]);
+    }, [objectsToSave, showObjects, objectTypes]);
 
     const hasUnsavedChanges = useMemo(() => {
         // If the references happen to be the same, content is definitely the same
@@ -176,13 +176,13 @@ export function useUserObjectsLayer(
     }, [userObjects, objectsToSave]);
 
 
-    const saveObjects = useCallback(async () => {
+    const saveObjects = useCallback(async (objectsToSave: ObjectInstance[]) => {
         setIsProcessing(true);
+
         try {
             const payload = {
                 points: objectsToSave.map(obj => {
                     const [lon, lat] = obj.position;
-
                     const [x, y] = lonLatToRd(lon, lat);
 
                     return {
@@ -219,7 +219,24 @@ export function useUserObjectsLayer(
         } finally {
             setIsProcessing(false);
         }
-    }, [objectsToSave]);
+    }, []);
+
+
+    const handleImport = useCallback((importedObjects: ObjectInstance[]) => {
+        if (importedObjects.length === 0) {
+            alert("Imported file contains no objects.");
+            return;
+        }
+
+        const confirmReplace = window.confirm(
+            `This action will replace all current objects with ${importedObjects.length} imported objects and re-calculate PET map. Are you sure?`
+        );
+
+        if (confirmReplace) {
+            saveObjects(importedObjects);
+        }
+    }, [saveObjects]);
+
 
     const discardChanges = useCallback(() => {
         setObjectsToSave(userObjects);
@@ -235,5 +252,7 @@ export function useUserObjectsLayer(
         objectsVersion,
         objectTypes,
         isProcessing,
+        objectsToSave,
+        handleImport
     };
 }

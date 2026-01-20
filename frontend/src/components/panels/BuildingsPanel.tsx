@@ -23,11 +23,12 @@ export function BuildingsPanel({ showBuildings, onToggleBuildings }: BuildingsPa
       </div>
 
       <div style={{
+        marginTop: "1rem",
         backgroundColor: "#f1e9e9ff",
         paddingLeft: 10,
         fontStyle: "italic"
       }}>
-        <h4>Help: About buildings</h4>
+        <span style={{ fontWeight: "bold" }}>Help: About buildings</span>
           <p>
             When buildings are enabled, you can click on a building on the map
             to see information about it.
